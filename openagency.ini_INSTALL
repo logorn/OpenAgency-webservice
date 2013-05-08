@@ -83,7 +83,9 @@ agency_credentials = some_user/some_pwd@some.server.dbc.dk
 ; Rights for service operations:
 ; remoteAccess: 550:
 ; getCulrProfile: 551
-; getCulrProfile: 552: createProviderId and deleteProviderId
+; getCulrProfile: 552: requesterIp in request is checked against ip_list below. If rights 552 is found,
+;                      settings for CreateProviderId and DeleteProviderId is fetched from the culr profile
+;                      (Only trusted clients are allowed to use the two operations)
 ; all other: 500
 aaa_ip_rights[dbc][ip_list] = 172.16.0.0-172.31.255.255;193.111.162.0-193.111.162.255
 aaa_ip_rights[dbc][ressource]['netpunkt.dk'] = 500,550,551,552
