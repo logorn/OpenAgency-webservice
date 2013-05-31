@@ -309,6 +309,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:requester"/>
 				<xs:element ref="oa:materialType"/>
 				<xs:element ref="oa:willSend"/>
+				<xs:element ref="oa:willSendOwn"/>
 				<xs:element ref="oa:autPeriod" minOccurs="0"/>
 				<xs:element ref="oa:autId" minOccurs="0"/>
 				<xs:element ref="oa:autChoice" minOccurs="0"/>
@@ -849,6 +850,7 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="userStatusUrl" type="xs:string"/>
 	<xs:element name="willReceive" type="xs:string"/>
 	<xs:element name="willSend" type="xs:string"/>
+	<xs:element name="willSendOwn" type="xs:string"/>
 	<xs:attribute name="language" type="oa:languageType"/>
 	<xs:complexType name="ors">
 		<xs:sequence>

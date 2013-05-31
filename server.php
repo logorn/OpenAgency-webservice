@@ -145,15 +145,8 @@ class openAgency extends webServiceServer {
               $ar->requester->_value = $agency;
               $ar->materialType->_value = $param->materialType->_value;
               if ($vf_row = $oci->fetch_into_assoc()) {
-                if ($vf_row['STATUS'] == 'T') {
-                  $ar->willSend->_value = 'TEST';
-                }
-                elseif ($vf_row['STATUS'] == 'J') {
-                  $ar->willSend->_value = 'YES';
-                }
-                else {
-                  $ar->willSend->_value = 'NO';
-                }
+                $ar->willSend->_value = $this->parse_will_send($vf_row['STATUS']);
+                $ar->willSendOwn->_value = $this->parse_will_send($vf_row['STATUS_EGET']);
                 $ar->autPeriod->_value = $vf_row['PERIODE'];
                 $ar->autId->_value = $vf_row['ID_NR'];
                 $ar->autChoice->_value = $vf_row['VALG'];
@@ -1921,6 +1914,17 @@ class openAgency extends webServiceServer {
     return $ret;
   }
 
+
+  /** \brief parse status and status_eget from vip_fjernlaan 
+   *
+   */
+  private function parse_will_send($status) {
+    switch ($status) {
+      case 'T': return('TEST');
+      case 'J': return('YES');
+      default: return('NO');
+    }
+  }
 
   /** \brief Fill pickupAgency with info from oracle
    *
