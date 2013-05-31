@@ -849,8 +849,15 @@ You should have received a copy of the GNU Affero General Public License along w
 	</xs:element>
 	<xs:element name="userStatusUrl" type="xs:string"/>
 	<xs:element name="willReceive" type="xs:string"/>
-	<xs:element name="willSend" type="xs:string"/>
-	<xs:element name="willSendOwn" type="xs:string"/>
+	<xs:element name="willSend" type="oa:willSendType"/>
+	<xs:element name="willSendOwn" type="oa:willSendType"/>
+	<xs:simpleType name="willSendType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NO"/>
+			<xs:enumeration value="TEST"/>
+			<xs:enumeration value="YES"/>
+		</xs:restriction>
+	</xs:simpleType>
 	<xs:attribute name="language" type="oa:languageType"/>
 	<xs:complexType name="ors">
 		<xs:sequence>
