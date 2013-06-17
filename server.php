@@ -1187,8 +1187,8 @@ class openAgency extends webServiceServer {
       $order_by = 'v.bib_nr';
     }
 
-    $sql ='SELECT v.bib_nr, v.navn, v.type, v.tlf_nr, v.email, v.badr, v.bpostnr, 
-                  v.bcity, v.isil, v.bib_vsn, v.url_homepage, v.url_payment, v.delete_mark,
+    $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+                  v.bpostnr, v.bcity, v.isil, v.bib_vsn, v.url_homepage, v.url_payment, v.delete_mark,
                   vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                   vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                   txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
@@ -1517,8 +1517,8 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_n', $n);
               $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
             }
-            $sql ='SELECT v.bib_nr, v.navn, v.type, v.tlf_nr, v.email, v.badr, v.bpostnr, 
-                          v.bcity, v.isil, v.bib_vsn, v.url_homepage, v.url_payment, v.delete_mark,
+            $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+                          v.bpostnr, v.bcity, v.isil, v.bib_vsn, v.url_homepage, v.url_payment, v.delete_mark,
                           vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                           txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                           bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
@@ -1938,7 +1938,22 @@ class openAgency extends webServiceServer {
       $pickupAgency->branchId->_value = $row['BIB_NR'];
       $pickupAgency->branchType->_value = $row['TYPE'];
       $pickupAgency->branchPhone->_value = $row['TLF_NR'];
-      $pickupAgency->branchName->_value = $row['NAVN'];
+      if (empty($pickupAgency->branchName)) {
+        if ($row['NAVN']) {
+          $pickupAgency->branchName[] = $this->value_and_language($row['NAVN'], 'dan');
+        }
+        if ($row['NAVN_E']) {
+          $pickupAgency->branchName[] = $this->value_and_language($row['NAVN_E'], 'eng');
+        }
+      }
+      if (empty($pickupAgency->branchShortName)) {
+        if ($row['NAVN_K']) {
+          $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_K'], 'dan');
+        }
+        if ($row['NAVN_K_E']) {
+          $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_K_E'], 'eng');
+        }
+      }
       $pickupAgency->branchEmail->_value = $row['EMAIL'];
       $pickupAgency->branchIsAgency->_value = ($row['FILIAL_VSN'] == 'J' ? 1 : 0);
       if ($row['BADR']) $pickupAgency->postalAddress->_value = $row['BADR'];
