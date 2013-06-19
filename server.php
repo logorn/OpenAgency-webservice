@@ -416,6 +416,9 @@ class openAgency extends webServiceServer {
             $res->culrProfile[]->_value = $cp;
             unset($cp);
           }
+          if (empty($res)) {
+            $res->error->_value = 'profile_not_found';
+          }
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
