@@ -8,7 +8,7 @@
 ;service_http_error = HTTP/1.0 503 Service Unavailable
 
 ;version
-version = 2.6
+version = 2.7
 
 ; set only_https to accept https call only
 ;only_https = 1
@@ -178,7 +178,7 @@ action[pickupAgencyList][] = callback
 action[pickupAgencyList][] = outputType
 
 action[openSearchProfile][] = agencyId
-action[openSearchProfile][] = profile
+action[openSearchProfile][] = profileName
 action[openSearchProfile][] = profileVersion
 action[openSearchProfile][] = callback
 action[openSearchProfile][] = outputType

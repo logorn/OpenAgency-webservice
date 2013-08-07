@@ -487,6 +487,8 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="DeletePatronId" type="xs:boolean"/>
 	<xs:element name="DeleteProviderId" type="xs:boolean"/>
 	<xs:element name="dropOffAgency" type="xs:string"/>
+	<xs:element name="dropOffBranch" type="xs:string"/>
+	<xs:element name="dropOffName" type="xs:string"/>
 	<xs:element name="email" type="xs:string"/>
 	<xs:element name="encrypt" type="xs:string"/>
 	<xs:element name="encryption">
@@ -575,6 +577,7 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="junction" type="xs:string"/>
 	<xs:element name="key" type="xs:string"/>
 	<xs:element name="kvik" type="xs:string"/>
+	<xs:element name="lastUpdated" type="xs:date"/>
 	<xs:element name="library">
 		<xs:complexType>
 			<xs:sequence>
@@ -671,9 +674,13 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:agencyName"/>
 				<xs:element ref="oa:agencyId"/>
 				<xs:element ref="oa:agencyType"/>
+				<xs:element ref="oa:agencyEmail" minOccurs="0"/>
+				<xs:element ref="oa:agencyPhone" minOccurs="0"/>
+				<xs:element ref="oa:agencyFax" minOccurs="0"/>
 				<xs:element ref="oa:branchId"/>
 				<xs:element ref="oa:branchType"/>
 				<xs:element ref="oa:branchName"/>
+				<xs:element ref="oa:branchShortName" minOccurs="0" maxOccurs="2"/>
 				<xs:element ref="oa:branchPhone"/>
 				<xs:element ref="oa:branchEmail"/>
 				<xs:element ref="oa:branchIsAgency"/>
@@ -700,6 +707,9 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:ncipCancelOrder" minOccurs="0"/>
 				<xs:element ref="oa:ncipUpdateOrder" minOccurs="0"/>
 				<xs:element ref="oa:branchDomains" minOccurs="0"/>
+				<xs:element ref="oa:dropOffBranch" minOccurs="0"/>
+				<xs:element ref="oa:dropOffName" minOccurs="0"/>
+				<xs:element ref="oa:lastUpdated" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
