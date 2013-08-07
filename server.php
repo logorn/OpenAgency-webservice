@@ -1947,7 +1947,6 @@ class openAgency extends webServiceServer {
       if (isset($row['VSN_FAX_NR'])) $pickupAgency->agencyFax->_value = $row['VSN_FAX_NR'];
       $pickupAgency->branchId->_value = $row['BIB_NR'];
       $pickupAgency->branchType->_value = $row['TYPE'];
-      $pickupAgency->branchPhone->_value = $row['TLF_NR'];
       if (empty($pickupAgency->branchName)) {
         if ($row['NAVN']) {
           $pickupAgency->branchName[] = $this->value_and_language($row['NAVN'], 'dan');
@@ -1964,6 +1963,7 @@ class openAgency extends webServiceServer {
           $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_K_E'], 'eng');
         }
       }
+      $pickupAgency->branchPhone->_value = $row['TLF_NR'];
       $pickupAgency->branchEmail->_value = $row['EMAIL'];
       $pickupAgency->branchIsAgency->_value = ($row['FILIAL_VSN'] == 'J' ? 1 : 0);
       if ($row['BADR']) $pickupAgency->postalAddress->_value = $row['BADR'];
