@@ -1192,7 +1192,11 @@ class openAgency extends webServiceServer {
 
     $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                   v.bpostnr, v.bcity, v.isil, v.bib_vsn, v.url_homepage, v.url_payment, v.delete_mark,
+                  v.afsaetningsbibliotek, v.afsaetningsnavn_k, 
+                  TO_CHAR(v.dato, \'YYYY-MM-DD\'), TO_CHAR(v.bs_dato, \'YYYY-MM-DD\'),
                   vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
+                  vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
+                  TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato,
                   vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                   txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                   bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
@@ -1529,7 +1533,7 @@ class openAgency extends webServiceServer {
                           kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn
                   FROM vip v, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
                        vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
-                  WHERE v.bib_vsn IN (SELECT vsn.bib_nr
+                  WHERE v.bib_vsn IN (SELECT UNIQUE vsn.bib_nr
                                         FROM vip_vsn vsn, vip v, vip_sup vs
                                         WHERE ' . $filter_delete_vsn . '
                                                v.bib_vsn = vsn.bib_nr
@@ -1938,6 +1942,9 @@ class openAgency extends webServiceServer {
       if (isset($row['VSN_NAVN'])) $pickupAgency->agencyName->_value = $row['VSN_NAVN'];
       if (isset($row['VSN_BIB_NR'])) $pickupAgency->agencyId->_value = $row['VSN_BIB_NR'];
       if (isset($row['VSN_BIB_TYPE'])) $pickupAgency->agencyType->_value = $row['VSN_BIB_TYPE'];
+      if (isset($row['VSN_EMAIL'])) $pickupAgency->agencyEmail->_value = $row['VSN_EMAIL'];
+      if (isset($row['VSN_TLF_NR'])) $pickupAgency->agencyPhone->_value = $row['VSN_TLF_NR'];
+      if (isset($row['VSN_FAX_NR'])) $pickupAgency->agencyFax->_value = $row['VSN_FAX_NR'];
       $pickupAgency->branchId->_value = $row['BIB_NR'];
       $pickupAgency->branchType->_value = $row['TYPE'];
       $pickupAgency->branchPhone->_value = $row['TLF_NR'];
@@ -2014,6 +2021,12 @@ class openAgency extends webServiceServer {
         $pickupAgency->branchDomains->_value->domain[]->_value = $ip;
       }
     }
+    if ($row['AFSAETNINGSBIBLIOTEK'])
+      $pickupAgency->dropoffBranch->_value = $row['AFSAETNINGSBIBLIOTEK'];
+    if ($row['AFSAETNINGSNAVN_K'])
+      $pickupAgency->dropoffName->_value = $row['AFSAETNINGSNAVN_K'];
+    if ($last_date = max($row['DATO'], $row['BS_DATO'], $row['VSN_DATO']))
+      $pickupAgency->lastUpdated->_value = $last_date;
 
     return;
   }
