@@ -1119,7 +1119,13 @@ class openAgency extends webServiceServer {
       }
   // anyField
       if ($val = $param->anyField->_value) {
-        $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_any))' .
+        $bib_nr = $this->strip_agency($param->anyField->_value);
+        if (is_numeric($bib_nr) && (strlen($bib_nr) == 6)) {
+          $oci->bind('bind_bib_nr', $bib_nr);
+          $bibnr_sql = '(v.bib_nr = :bind_bib_nr) OR ';
+        }
+        $sqls[] = '(' . $bibnr_sql . 
+                  'regexp_like(upper(v.navn), upper(:bind_any))' .
                   ' OR regexp_like(upper(v.badr), upper(:bind_any))' .
                   ' OR regexp_like(upper(v.bpostnr), upper(:bind_any))' .
                   ' OR regexp_like(upper(v.bcity), upper(:bind_any))' .
@@ -1959,8 +1965,8 @@ class openAgency extends webServiceServer {
         if ($row['NAVN_K']) {
           $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_K'], 'dan');
         }
-        if ($row['NAVN_K_E']) {
-          $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_K_E'], 'eng');
+        if ($row['NAVN_E_K']) {
+          $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_E_K'], 'eng');
         }
       }
       $pickupAgency->branchPhone->_value = $row['TLF_NR'];
