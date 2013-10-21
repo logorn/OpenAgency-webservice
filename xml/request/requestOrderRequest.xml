@@ -1,7 +1,18 @@
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:open="http://oss.dbc.dk/ns/openagency">
+   <soapenv:Header/>
    <soapenv:Body>
-	<open:requestOrderRequest>
-         <open:agencyId>710100</open:agencyId>
+      <open:requestOrderRequest>
+         <!--Optional:-->
+         <open:authentication>
+            <open:groupIdAut>?</open:groupIdAut>
+            <open:passwordAut>?</open:passwordAut>
+            <open:userIdAut>?</open:userIdAut>
+         </open:authentication>
+         <open:agencyId>?</open:agencyId>
+         <!--Optional:-->
+         <open:callback>?</open:callback>
+         <!--Optional:-->
+         <open:outputType>?</open:outputType>
       </open:requestOrderRequest>
    </soapenv:Body>
 </soapenv:Envelope>
