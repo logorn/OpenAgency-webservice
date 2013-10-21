@@ -1,7 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://oss.dbc.dk/ns/openagency"><SOAP-ENV:Body>
-<ns1:serviceRequest>
- <ns1:agencyId>DK-810010</ns1:agencyId>
- <ns1:service>information</ns1:service>
-</ns1:serviceRequest>
-</SOAP-ENV:Body></SOAP-ENV:Envelope>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:open="http://oss.dbc.dk/ns/openagency">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <open:serviceRequest>
+         <!--Optional:-->
+         <open:authentication>
+            <open:groupIdAut>?</open:groupIdAut>
+            <open:passwordAut>?</open:passwordAut>
+            <open:userIdAut>?</open:userIdAut>
+         </open:authentication>
+         <open:agencyId>?</open:agencyId>
+         <open:service>?</open:service>
+         <!--Optional:-->
+         <open:callback>?</open:callback>
+         <!--Optional:-->
+         <open:outputType>?</open:outputType>
+      </open:serviceRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
