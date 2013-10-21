@@ -1,8 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://oss.dbc.dk/ns/openagency"><SOAP-ENV:Body>
-<ns1:openSearchProfileRequest>
-  <ns1:agencyId>716700</ns1:agencyId>
-  <ns1:profileName>Lorem ipsum</ns1:profileName>
-  <ns1:profileVersion>2</ns1:profileVersion>
-</ns1:openSearchProfileRequest>
-</SOAP-ENV:Body></SOAP-ENV:Envelope>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:open="http://oss.dbc.dk/ns/openagency">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <open:openSearchProfileRequest>
+         <!--Optional:-->
+         <open:authentication>
+            <open:groupIdAut>?</open:groupIdAut>
+            <open:passwordAut>?</open:passwordAut>
+            <open:userIdAut>?</open:userIdAut>
+         </open:authentication>
+         <open:agencyId>?</open:agencyId>
+         <!--Optional:-->
+         <open:profileName>?</open:profileName>
+         <open:profileVersion>?</open:profileVersion>
+         <!--Optional:-->
+         <open:callback>?</open:callback>
+         <!--Optional:-->
+         <open:outputType>?</open:outputType>
+      </open:openSearchProfileRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
