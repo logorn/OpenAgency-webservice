@@ -434,6 +434,80 @@ class openAgency extends webServiceServer {
   }
 
 
+  /** \brief getSaouLicenseInfo
+   *
+   * Request:
+   * - agencyId
+   * Response:
+   * - saouLicenseInfo (see xsd for parameters)
+   * or
+   * - error
+   */
+  public function getSaouLicenseInfo($param) {
+    if (!$this->aaa->has_right('netpunkt.dk', 500))
+      $res->error->_value = 'authentication_error';
+    else {
+      $agency = $this->strip_agency($param->agencyId->_value);
+      $cache_key = 'OA_getSLI' . $this->version . $agency;
+      if ($ret = $this->cache->get($cache_key)) {
+        verbose::log(STAT, 'Cache hit');
+        return $ret;
+      }
+      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+      $oci->set_charset('UTF8');
+      try {
+        $oci->connect();
+      }
+      catch (ociException $e) {
+        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+        $res->error->_value = 'service_unavailable';
+      }
+      if (empty($res->error)) {
+        try {
+          if ($agency) {
+            $oci->bind('bind_agency', $agency);
+            $where = 'ud.bib_nr = :bind_agency AND ';
+          }
+          $fb_licens = 'fb_licens';
+          $oci->bind('bind_fb_licens', $fb_licens);
+          $oci->set_query('SELECT ud.bib_nr, domain, proxyurl 
+                           FROM user_domains ud, licensguide lg
+                           WHERE ' . $where . '
+                                 origin_source = :bind_fb_licens
+                             AND ud.bib_nr = lg.bib_nr (+)
+                           ORDER BY bib_nr');
+          $last_bib = '';
+          while ($sl_row = $oci->fetch_into_assoc()) {
+            if ($last_lib != $sl_row['BIB_NR']) {
+              if ($last_lib) {
+                $res->libraryLicenseInfo[]->_value = $sl;
+                unset($sl);
+              }
+              $last_lib = $sl_row['BIB_NR'];
+              $sl->agencyId->_value = $sl_row['BIB_NR'];
+              if ($sl_row['PROXYURL']) {
+                $sl->proxyUrl->_value = $sl_row['PROXYURL'];
+              }
+            }
+            $sl->ipAddress[]->_value = $sl_row['DOMAIN'];
+          }
+          if ($sl) {
+            $res->libraryLicenseInfo[]->_value = $sl;
+          }
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+      }
+    }
+    //var_dump($res); var_dump($param); die();
+    $ret->getSaouLicenseInfoResponse->_value = $res;
+    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+    if (empty($res->error)) $this->cache->set($cache_key, $ret);
+    return $ret;
+  }
+
   /** \brief service
    *
    * Request:
