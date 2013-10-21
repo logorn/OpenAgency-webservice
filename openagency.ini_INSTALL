@@ -29,6 +29,7 @@ soapAction[encryption] = encryptionRequest
 soapAction[endUserOrderPolicy] = endUserOrderPolicyRequest
 soapAction[findLibrary] = findLibraryRequest
 soapAction[getCulrProfile] = getCulrProfileRequest
+soapAction[getSaouLicenseInfo] = getSaouLicenseInfoRequest
 soapAction[nameList] = nameListRequest
 soapAction[pickupAgencyList] = pickupAgencyListRequest
 soapAction[openSearchProfile] = openSearchProfileRequest
@@ -161,6 +162,10 @@ action[getCulrProfile][] = profileName
 action[getCulrProfile][] = requesterIp
 action[getCulrProfile][] = callback
 action[getCulrProfile][] = outputType
+
+action[getSaouLicenseInfo][] = agencyId
+action[getSaouLicenseInfo][] = callback
+action[getSaouLicenseInfo][] = outputType
 
 action[nameList][] = libraryType
 action[nameList][] = callback
