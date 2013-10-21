@@ -1,0 +1,19 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:open="http://oss.dbc.dk/ns/openagency">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <open:getSaouLicenseInfoRequest>
+         <!--Optional:-->
+         <open:authentication>
+            <open:groupIdAut>?</open:groupIdAut>
+            <open:passwordAut>?</open:passwordAut>
+            <open:userIdAut>?</open:userIdAut>
+         </open:authentication>
+         <!--Optional:-->
+         <open:agencyId>?</open:agencyId>
+         <!--Optional:-->
+         <open:callback>?</open:callback>
+         <!--Optional:-->
+         <open:outputType>?</open:outputType>
+      </open:getSaouLicenseInfoRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
