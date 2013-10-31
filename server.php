@@ -61,7 +61,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_aut_' . $this->version . $agency . $param->autService->_value . $param->materialType->_value;
+      $cache_key = 'OA_aut_' . $this->config->get_inifile_hash() . $agency . $param->autService->_value . $param->materialType->_value;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -216,7 +216,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
-      $cache_key = 'OA_enc_' . $this->version . $param->email->_value;
+      $cache_key = 'OA_enc_' . $this->config->get_inifile_hash() . $param->email->_value;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -280,7 +280,7 @@ class openAgency extends webServiceServer {
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
       $mat_type = strtolower($param->orderMaterialType->_value);
-      $cache_key = 'OA_endUOP_' . $this->version . $agency . $param->orderMaterialType->_value . $param->ownedByAgency->_value;
+      $cache_key = 'OA_endUOP_' . $this->config->get_inifile_hash() . $agency . $param->orderMaterialType->_value . $param->ownedByAgency->_value;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -364,7 +364,7 @@ class openAgency extends webServiceServer {
       $agency = $this->strip_agency($param->agencyId->_value);
       $profile_name = $param->profileName->_value;
       $trusted_ip = $this->trusted_culr_ip($param->authentication->_value, $param->requesterIp->_value);
-      $cache_key = 'OA_getCP' . $this->version . $agency . $profile_name;
+      $cache_key = 'OA_getCP' . $this->config->get_inifile_hash() . $agency . $profile_name;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -448,7 +448,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_getSLI' . $this->version . $agency;
+      $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -539,7 +539,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_ser_' . $this->version . $agency . $param->service->_value;
+      $cache_key = 'OA_ser_' . $this->config->get_inifile_hash() . $agency . $param->service->_value;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1135,7 +1135,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $cache_key = 'OA_FinL_' . 
-                   $this->version . 
+                   $this->config->get_inifile_hash() . 
                    $this->stringiefy($param->agencyId) . '_' . 
                    $this->stringiefy($param->agencyname) . '_' . 
                    $this->stringiefy($param->agencyAddress) . '_' . 
@@ -1340,7 +1340,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       //var_dump($this->aaa->get_rights()); die();
-      $cache_key = 'OA_namL_' . $this->version . $param->libraryType->_value;
+      $cache_key = 'OA_namL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1469,7 +1469,7 @@ class openAgency extends webServiceServer {
         }
       }
       $cache_key = 'OA_picAL_' . 
-                   $this->version . 
+                   $this->config->get_inifile_hash() . 
                    (is_array($ora_par['agencyId']) ? implode('', $ora_par['agencyId']) : '') . 
                    (is_array($ora_par['agencyName']) ? implode('', $ora_par['agencyName']) : '') . 
                    (is_array($ora_par['agencyAddress']) ? implode('', $ora_par['agencyAddress']) : '') . 
@@ -1715,7 +1715,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_opeSP_' . $this->version . $agency . $param->profileName->_value . $param->profileVersion->_value;
+      $cache_key = 'OA_opeSP_' . $this->config->get_inifile_hash() . $agency . $param->profileName->_value . $param->profileVersion->_value;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1860,7 +1860,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_remA_' . $this->version . $agency;
+      $cache_key = 'OA_remA_' . $this->config->get_inifile_hash() . $agency;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1959,7 +1959,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_reqO_' . $this->version . $agency;
+      $cache_key = 'OA_reqO_' . $this->config->get_inifile_hash() . $agency;
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;

@@ -8,9 +8,7 @@
 ;service_http_error = HTTP/1.0 503 Service Unavailable
 
 ;version
-; Note that the version is used as part of the cache key, so do not run 2 versions of the service with identical 
-; version name, unless you specificly want them to share cache
-version = 2.7
+version = 2.8
 
 ; set only_https to accept https call only
 ;only_https = 1
