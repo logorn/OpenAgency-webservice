@@ -582,8 +582,8 @@ class openAgency extends webServiceServer {
           $oa_row = $oci->fetch_into_assoc();
           $this->sanitize_array($oa_row);
           if ($param->service->_value == 'userOrderParameters') {
-            if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['BIB_VSN']) {
-              $oci->bind('bind_bib_nr', $oa_row['BIB_VSN']);
+            if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
+              $oci->bind('bind_bib_nr', $oa_row['KMD_NR']);
             }
             else {
               $oci->bind('bind_bib_nr', $agency);
@@ -1271,7 +1271,7 @@ class openAgency extends webServiceServer {
     }
 
     $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                  v.bpostnr, v.bcity, v.isil, v.bib_vsn, v.url_homepage, v.url_payment, v.delete_mark,
+                  v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
                   v.afsaetningsbibliotek, v.afsaetningsnavn_k, 
                   TO_CHAR(v.dato, \'YYYY-MM-DD\'), TO_CHAR(v.bs_dato, \'YYYY-MM-DD\'),
                   vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
@@ -1286,7 +1286,7 @@ class openAgency extends webServiceServer {
                vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
           WHERE 
             ' . $filter_sql . '
-            AND v.bib_vsn = vsn.bib_nr (+)
+            AND v.kmd_nr = vsn.bib_nr (+)
             AND v.bib_nr = vb.bib_nr (+)
             AND v.bib_nr = sup.bib_nr (+)
             AND v.bib_nr = txt.bib_nr (+)
@@ -1558,7 +1558,7 @@ class openAgency extends webServiceServer {
                             FROM vip_vsn vsn, vip v, vip_sup vs
                             WHERE ' . $filter_delete_vsn . $filter_bib_type . '
                               AND v.bib_nr = vs.bib_nr (+)
-                              AND v.bib_vsn = vsn.bib_nr
+                              AND v.kmd_nr = vsn.bib_nr
                             ORDER BY vsn.bib_nr';
             $oci->set_query($sql);
             while ($row = $oci->fetch_into_assoc()) {
@@ -1605,7 +1605,7 @@ class openAgency extends webServiceServer {
               $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
             }
             $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                          v.bpostnr, v.bcity, v.isil, v.bib_vsn, v.url_homepage, v.url_payment, v.delete_mark,
+                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
                           vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                           txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                           bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
@@ -1613,10 +1613,10 @@ class openAgency extends webServiceServer {
                           kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn
                   FROM vip v, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
                        vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
-                  WHERE v.bib_vsn IN (SELECT UNIQUE vsn.bib_nr
+                  WHERE v.kmd_nr IN (SELECT UNIQUE vsn.bib_nr
                                         FROM vip_vsn vsn, vip v, vip_sup vs
                                         WHERE ' . $filter_delete_vsn . '
-                                               v.bib_vsn = vsn.bib_nr
+                                               v.kmd_nr = vsn.bib_nr
                                           AND ' . $filter_bib_type . ' )
                     ' . $filter_delete . '
                     ' . $filter_filial . '
@@ -1626,14 +1626,14 @@ class openAgency extends webServiceServer {
                     AND v.bib_nr = eng.bib_nr (+)
                     AND v.bib_nr = bestil.bib_nr (+)
                     AND v.bib_nr = kat.bib_nr (+)
-                  ORDER BY v.bib_vsn, v.bib_nr';
+                  ORDER BY v.kmd_nr, v.bib_nr';
             $oci->set_query($sql);
             while ($row = $oci->fetch_into_assoc()) {
               if ($ora_par['agencyId']) {
                 $a_key = array_search($row['BIB_NR'], $ora_par['agencyId']);
                 if (is_int($a_key)) unset($ora_par['agencyId'][$a_key]);
               }
-              $this_vsn = $row['BIB_VSN'];
+              $this_vsn = $row['KMD_NR'];
               if ($library && $library->agencyId->_value <> $this_vsn) {
                 $library->pickupAgency[]->_value = $pickupAgency;
                 unset($pickupAgency);
@@ -1978,7 +1978,7 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_agency', $agency);
           $oci->set_query('SELECT vilse 
                           FROM vip, laaneveje
-                          WHERE (vip.bib_vsn = bibliotek OR vip.bib_nr = bibliotek)
+                          WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
                             AND vip.bib_nr = :bind_agency
                           ORDER BY prionr DESC');
           $prio = array();
