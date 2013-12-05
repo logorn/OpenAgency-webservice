@@ -581,6 +581,38 @@ class openAgency extends webServiceServer {
                           AND v.bib_nr = :bind_bib_nr');
           $oa_row = $oci->fetch_into_assoc();
           $this->sanitize_array($oa_row);
+          if ($param->service->_value == 'information') {
+            $consortia = array();
+            if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
+              $help = $oa_row['KMD_NR'];
+            }
+            else {
+              $help = $agency;
+            }
+            $oci->bind('bind_bib_nr', $help);
+            $oci->set_query('SELECT *
+                             FROM vip_viderestil
+                            WHERE bib_nr = :bind_bib_nr');
+            while ($row = $oci->fetch_into_assoc()) {
+              $vv_row[$row['BIB_NR_VIDERESTIL']] = $row;
+            }
+            if ($vv_row) {
+              $oci->bind('bind_bib_nr', $help);
+              $oci->set_query('SELECT vilse 
+                                FROM vip, laaneveje
+                                WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
+                                  AND vip.bib_nr = :bind_bib_nr
+                                ORDER BY prionr DESC');
+              while ($lv_row = $oci->fetch_into_assoc()) {
+                if ($p = $vv_row[$lv_row['VILSE']])
+                $consortia[] = $p;
+              }
+              if (count($vv_row) <> count($consortia)) {
+                verbose::log(ERROR, 'OpenAgency('.__LINE__.'):: agency ' . $agency . 
+                                    ' has libraries in VIP_VIDERESTIL not found in LAANEVEJE');
+              }
+            }
+          }
           if ($param->service->_value == 'userOrderParameters') {
             if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
               $oci->bind('bind_bib_nr', $oa_row['KMD_NR']);
@@ -634,6 +666,10 @@ class openAgency extends webServiceServer {
               if (is_null($inf->sender->_value = $this->normalize_agency($oa_row['CHANGE_REQUESTER'])))
                 $inf->sender->_value = $this->normalize_agency($oa_row['V.BIB_NR']);
               $inf->replyToEmail->_value = $oa_row['VD.SVAR_EMAIL'];
+              foreach ($consortia as $c_key => &$c) {
+                $inf->consortia[$c_key]->_value->agencyId->_value = $c['BIB_NR_VIDERESTIL'];
+                $inf->consortia[$c_key]->_value->lookupUrl->_value = $c['URL_VIDERESTIL'];
+              }
               //print_r($oa_row); var_dump($res->information->_value); die();
               break;
             case 'orsAnswer':
@@ -2102,9 +2138,9 @@ class openAgency extends webServiceServer {
       }
     }
     if ($row['AFSAETNINGSBIBLIOTEK'])
-      $pickupAgency->dropoffBranch->_value = $row['AFSAETNINGSBIBLIOTEK'];
+      $pickupAgency->dropOffBranch->_value = $row['AFSAETNINGSBIBLIOTEK'];
     if ($row['AFSAETNINGSNAVN_K'])
-      $pickupAgency->dropoffName->_value = $row['AFSAETNINGSNAVN_K'];
+      $pickupAgency->dropOffName->_value = $row['AFSAETNINGSNAVN_K'];
     if ($last_date = max($row['DATO'], $row['BS_DATO'], $row['VSN_DATO']))
       $pickupAgency->lastUpdated->_value = $last_date;
 
