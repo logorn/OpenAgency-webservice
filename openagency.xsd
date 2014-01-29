@@ -636,6 +636,15 @@ You should have received a copy of the GNU Affero General Public License along w
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="saouLicenseInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="oa:agencyId"/>
+				<xs:element ref="oa:proxyUrl" minOccurs="0"/>
+				<xs:element ref="oa:ipAddress" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="libraryStatus" type="oa:libraryStatusType"/>
 	<xs:element name="librarydkSupportEmail" type="xs:string"/>
 	<xs:element name="librarydkSupportPhone" type="xs:string"/>
@@ -814,7 +823,7 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="saouLicenseInfo">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="oa:libraryLicenseInfo" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="oa:saouLicenseInfo" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

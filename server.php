@@ -480,7 +480,7 @@ class openAgency extends webServiceServer {
           while ($sl_row = $oci->fetch_into_assoc()) {
             if ($last_lib != $sl_row['BIB_NR']) {
               if ($last_lib) {
-                $res->libraryLicenseInfo[]->_value = $sl;
+                $res->saouLicenseInfo[]->_value = $sl;
                 unset($sl);
               }
               $last_lib = $sl_row['BIB_NR'];
@@ -492,7 +492,7 @@ class openAgency extends webServiceServer {
             $sl->ipAddress[]->_value = $sl_row['DOMAIN'];
           }
           if ($sl) {
-            $res->libraryLicenseInfo[]->_value = $sl;
+            $res->saouLicenseInfo[]->_value = $sl;
           }
         }
         catch (ociException $e) {
