@@ -820,13 +820,6 @@ You should have received a copy of the GNU Affero General Public License along w
 	</xs:element>
 	<xs:element name="service" type="oa:serviceType"/>
 	<xs:element name="serviceDeclarationUrl" type="xs:string"/>
-	<xs:element name="saouLicenseInfo">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="oa:saouLicenseInfo" minOccurs="0" maxOccurs="unbounded"/>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="sort" type="oa:sortType"/>
 	<xs:element name="source">
 		<xs:complexType>
