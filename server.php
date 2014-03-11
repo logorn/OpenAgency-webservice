@@ -1316,7 +1316,7 @@ class openAgency extends webServiceServer {
                   vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                   txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                   bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
-                  kat.url_best_blanket, kat.url_laanerstatus, kat.ncip_lookup_user,
+                  kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
                   kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn
           FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
                vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
@@ -1645,7 +1645,7 @@ class openAgency extends webServiceServer {
                           vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                           txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                           bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
-                          kat.url_best_blanket, kat.url_laanerstatus, kat.ncip_lookup_user,
+                          kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
                           kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn
                   FROM vip v, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
                        vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
@@ -2089,6 +2089,7 @@ class openAgency extends webServiceServer {
       if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];
       if ($row['URL_SERV_DKL']) $pickupAgency->serviceDeclarationUrl->_value = $row['URL_SERV_DKL'];
       if ($row['URL_BEST_BLANKET']) $pickupAgency->registrationFormUrl->_value = $row['URL_BEST_BLANKET'];
+      if ($row['URL_BEST_BLANKET_TEXT']) $pickupAgency->registrationFormUrlText->_value = $row['URL_BEST_BLANKET_TEXT'];
       if ($row['URL_PAYMENT']) $pickupAgency->paymentUrl->_value = $row['URL_PAYMENT'];
       if ($row['URL_LAANERSTATUS']) $pickupAgency->userStatusUrl->_value = $row['URL_LAANERSTATUS'];
       if ($row['SUPPORT_EMAIL']) $pickupAgency->librarydkSupportEmail->_value = $row['SUPPORT_EMAIL'];

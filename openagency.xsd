@@ -737,6 +737,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:branchWebsiteUrl" minOccurs="0"/>
 				<xs:element ref="oa:serviceDeclarationUrl" minOccurs="0"/>
 				<xs:element ref="oa:registrationFormUrl" minOccurs="0"/>
+				<xs:element ref="oa:registrationFormUrlText" minOccurs="0"/>
 				<xs:element ref="oa:paymentUrl" minOccurs="0"/>
 				<xs:element ref="oa:userStatusUrl" minOccurs="0"/>
 				<xs:element ref="oa:librarydkSupportEmail" minOccurs="0"/>
@@ -792,6 +793,7 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="rdfLabel" type="xs:string"/>
 	<xs:element name="rdfInverse" type="xs:string"/>
 	<xs:element name="registrationFormUrl" type="xs:string"/>
+	<xs:element name="registrationFormUrlText" type="xs:string"/>
 	<xs:element name="relation">
 		<xs:complexType>
 			<xs:sequence>
