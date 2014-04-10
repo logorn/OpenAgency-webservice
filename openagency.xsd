@@ -819,12 +819,12 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:ncipRenewOrder" minOccurs="0"/>
 				<xs:element ref="oa:ncipCancelOrder" minOccurs="0"/>
 				<xs:element ref="oa:ncipUpdateOrder" minOccurs="0"/>
+				<xs:element ref="oa:ncipServerAddress" minOccurs="0"/>
+				<xs:element ref="oa:ncipPassword" minOccurs="0"/>
 				<xs:element ref="oa:branchDomains" minOccurs="0"/>
 				<xs:element ref="oa:dropOffBranch" minOccurs="0"/>
 				<xs:element ref="oa:dropOffName" minOccurs="0"/>
 				<xs:element ref="oa:lastUpdated" minOccurs="0"/>
-				<xs:element ref="oa:ncipServerAddress" minOccurs="0"/>
-				<xs:element ref="oa:ncipPassword" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
