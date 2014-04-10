@@ -8,7 +8,7 @@
 ;service_http_error = HTTP/1.0 503 Service Unavailable
 
 ;version
-version = 2.9
+version = 2.10
 
 ; set only_https to accept https call only
 ;only_https = 1
@@ -29,6 +29,7 @@ soapAction[encryption] = encryptionRequest
 soapAction[endUserOrderPolicy] = endUserOrderPolicyRequest
 soapAction[findLibrary] = findLibraryRequest
 soapAction[getCulrProfile] = getCulrProfileRequest
+soapAction[getRegistryInfo] = getRegistryInfoRequest
 soapAction[getSaouLicenseInfo] = getSaouLicenseInfoRequest
 soapAction[nameList] = nameListRequest
 soapAction[pickupAgencyList] = pickupAgencyListRequest
@@ -128,22 +129,34 @@ aaa_ip_rights[dbc][ressource]['netpunkt.dk'] = 500,550,551,552
 ; </thisSoapAction>
 ; from url: action=thisSoapAction&some.number=nn&another.number=mm
 ;
+action[automation][authentication][] = groupIdAut
+action[automation][authentication][] = passwordAut
+action[automation][authentication][] = userIdAut
 action[automation][] = agencyId
 action[automation][] = autService
 action[automation][] = materialType
 action[automation][] = callback
 action[automation][] = outputType
 
+action[encryption][authentication][] = groupIdAut
+action[encryption][authentication][] = passwordAut
+action[encryption][authentication][] = userIdAut
 action[encryption][] = email
 action[encryption][] = callback
 action[encryption][] = outputType
 
+action[endUserOrderPolicy][authentication][] = groupIdAut
+action[endUserOrderPolicy][authentication][] = passwordAut
+action[endUserOrderPolicy][authentication][] = userIdAut
 action[endUserOrderPolicy][] = agencyId
 action[endUserOrderPolicy][] = orderMaterialType
 action[endUserOrderPolicy][] = ownedByAgency
 action[endUserOrderPolicy][] = callback
 action[endUserOrderPolicy][] = outputType
 
+action[findLibrary][authentication][] = groupIdAut
+action[findLibrary][authentication][] = passwordAut
+action[findLibrary][authentication][] = userIdAut
 action[findLibrary][] = agencyId
 action[findLibrary][] = agencyName
 action[findLibrary][] = agencyAddress
@@ -157,20 +170,43 @@ action[findLibrary][] = sort
 action[findLibrary][] = callback
 action[findLibrary][] = outputType
 
+action[getCulrProfile][authentication][] = groupIdAut
+action[getCulrProfile][authentication][] = passwordAut
+action[getCulrProfile][authentication][] = userIdAut
 action[getCulrProfile][] = agencyId
 action[getCulrProfile][] = profileName
 action[getCulrProfile][] = requesterIp
 action[getCulrProfile][] = callback
 action[getCulrProfile][] = outputType
 
+action[getRegistryInfo][authentication][] = groupIdAut
+action[getRegistryInfo][authentication][] = passwordAut
+action[getRegistryInfo][authentication][] = userIdAut
+action[getRegistryInfo][] = agencyId
+action[getRegistryInfo][] = agencyName
+action[getRegistryInfo][] = lastUpdated
+action[getRegistryInfo][] = libraryType
+action[getRegistryInfo][] = libraryStatus
+action[getRegistryInfo][] = callback
+action[getRegistryInfo][] = outputType
+
+action[getSaouLicenseInfo][authentication][] = groupIdAut
+action[getSaouLicenseInfo][authentication][] = passwordAut
+action[getSaouLicenseInfo][authentication][] = userIdAut
 action[getSaouLicenseInfo][] = agencyId
 action[getSaouLicenseInfo][] = callback
 action[getSaouLicenseInfo][] = outputType
 
+action[nameList][authentication][] = groupIdAut
+action[nameList][authentication][] = passwordAut
+action[nameList][authentication][] = userIdAut
 action[nameList][] = libraryType
 action[nameList][] = callback
 action[nameList][] = outputType
 
+action[pickupAgencyList][authentication][] = groupIdAut
+action[pickupAgencyList][authentication][] = passwordAut
+action[pickupAgencyList][authentication][] = userIdAut
 action[pickupAgencyList][] = agencyId
 action[pickupAgencyList][] = agencyName
 action[pickupAgencyList][] = agencyAddress
@@ -182,29 +218,47 @@ action[pickupAgencyList][] = pickupAllowed
 action[pickupAgencyList][] = callback
 action[pickupAgencyList][] = outputType
 
+action[openSearchProfile][authentication][] = groupIdAut
+action[openSearchProfile][authentication][] = passwordAut
+action[openSearchProfile][authentication][] = userIdAut
 action[openSearchProfile][] = agencyId
 action[openSearchProfile][] = profileName
 action[openSearchProfile][] = profileVersion
 action[openSearchProfile][] = callback
 action[openSearchProfile][] = outputType
 
+action[remoteAccess][authentication][] = groupIdAut
+action[remoteAccess][authentication][] = passwordAut
+action[remoteAccess][authentication][] = userIdAut
 action[remoteAccess][] = agencyId
 action[remoteAccess][] = callback
 action[remoteAccess][] = outputType
 
+action[requestOrder][authentication][] = groupIdAut
+action[requestOrder][authentication][] = passwordAut
+action[requestOrder][authentication][] = userIdAut
 action[requestOrder][] = agencyId
 action[requestOrder][] = callback
 action[requestOrder][] = outputType
 
+action[service][authentication][] = groupIdAut
+action[service][authentication][] = passwordAut
+action[service][authentication][] = userIdAut
 action[service][] = agencyId
 action[service][] = service
 action[service][] = callback
 action[service][] = outputType
 
+;action[proxyDomains][authentication][] = groupIdAut
+;action[proxyDomains][authentication][] = passwordAut
+;action[proxyDomains][authentication][] = userIdAut
 ;action[proxyDomains][] = agencyId
 ;action[proxyDomains][] = callback
 ;action[proxyDomains][] = outputType
 
+;action[proxyIp][authentication][] = groupIdAut
+;action[proxyIp][authentication][] = passwordAut
+;action[proxyIp][authentication][] = userIdAut
 ;action[proxyIp][] = agencyId
 ;action[proxyIp][] = callback
 ;action[proxyIp][] = outputType

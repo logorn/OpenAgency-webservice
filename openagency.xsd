@@ -22,6 +22,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:materialType"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -42,6 +43,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:email"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -64,6 +66,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:ownedByAgency"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -94,6 +97,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:sort" minOccurs="0" maxOccurs="6"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -114,6 +118,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:requesterIp" minOccurs="0"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -125,6 +130,38 @@ You should have received a copy of the GNU Affero General Public License along w
 			</xs:choice>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="getRegistryInfoRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="oa:authentication" minOccurs="0"/>
+				<xs:element ref="oa:agencyId" minOccurs="0"/>
+				<xs:element ref="oa:agencyName" minOccurs="0"/>
+				<xs:element ref="oa:lastUpdated" minOccurs="0"/>
+				<xs:element ref="oa:libraryType" minOccurs="0"/>
+				<xs:element ref="oa:libraryStatus" minOccurs="0"/>
+				<xs:element ref="oa:callback" minOccurs="0"/>
+				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="getRegistryInfoResponse">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="oa:registryInfo" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="oa:error"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="registryInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="oa:pickupAgency"/>
+				<xs:element ref="oa:iso18626" minOccurs="0"/>
+				<xs:element ref="oa:z3950Ill" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="getSaouLicenseInfoRequest">
 		<xs:complexType>
 			<xs:sequence>
@@ -132,6 +169,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:agencyId" minOccurs="0"  maxOccurs="1"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -150,6 +188,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:libraryType" minOccurs="0"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -182,6 +221,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:pickupAllowed" minOccurs="0"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -202,6 +242,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:profileVersion"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -220,6 +261,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:agencyId"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -244,6 +286,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:agencyId"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -263,6 +306,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:service"/>
 				<xs:element ref="oa:callback" minOccurs="0"/>
 				<xs:element ref="oa:outputType" minOccurs="0"/>
+                <xs:element ref="oa:trackingId" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -546,6 +590,10 @@ You should have received a copy of the GNU Affero General Public License along w
 			<xs:documentation xml:lang="en">Identifier of the group (most often a library number) the user belongs to (for authentication purposes)</xs:documentation>
 		</xs:annotation>
 	</xs:element>
+	<xs:element name="illAnswer" type="xs:boolean"/>
+	<xs:element name="illCancel" type="xs:boolean"/>
+	<xs:element name="illCancelReply" type="xs:boolean"/>
+	<xs:element name="illCancelReplySynchronous" type="xs:boolean"/>
 	<xs:element name="illOrderReceiptText">
 		<xs:complexType>
 			<xs:simpleContent>
@@ -555,6 +603,11 @@ You should have received a copy of the GNU Affero General Public License along w
 			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="illRenew" type="xs:boolean"/>
+	<xs:element name="illRenewAnswer" type="xs:boolean"/>
+	<xs:element name="illRenewAnswerSynchronous" type="xs:boolean"/>
+	<xs:element name="illRequest" type="xs:boolean"/>
+	<xs:element name="illShipped" type="xs:boolean"/>
 	<xs:element name="information">
 		<xs:complexType>
 			<xs:sequence>
@@ -590,6 +643,16 @@ You should have received a copy of the GNU Affero General Public License along w
 	</xs:element>
 	<xs:element name="ipAddress" type="xs:string"/>
 	<xs:element name="isil" type="xs:string"/>
+    <xs:element name="iso18626">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="oa:iso18626Address"/>
+				<xs:element ref="oa:iso18626Password"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="iso18626Address" type="xs:string"/>
+	<xs:element name="iso18626Password" type="xs:string"/>
 	<xs:element name="itemParameter">
 		<xs:annotation>
 			<xs:documentation xml:lang="en">Indicator whether a given itemParameterType is either required or optional for the given combination of orderType and orderMaterialType</xs:documentation>
@@ -655,7 +718,9 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="name" type="xs:string"/>
 	<xs:element name="ncipCancelOrder" type="xs:boolean"/>
 	<xs:element name="ncipLookupUser" type="xs:boolean"/>
+	<xs:element name="ncipPassword" type="xs:string"/>
 	<xs:element name="ncipRenewOrder" type="xs:boolean"/>
+	<xs:element name="ncipServerAddress" type="xs:string"/>
 	<xs:element name="ncipUpdateOrder" type="xs:boolean"/>
 	<xs:element name="norfri" type="xs:string"/>
 	<xs:element name="openingHours">
@@ -734,6 +799,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:postalCode" minOccurs="0"/>
 				<xs:element ref="oa:city" minOccurs="0"/>
 				<xs:element ref="oa:isil" minOccurs="0"/>
+				<xs:element ref="oa:junction" minOccurs="0"/>
 				<xs:element ref="oa:branchWebsiteUrl" minOccurs="0"/>
 				<xs:element ref="oa:serviceDeclarationUrl" minOccurs="0"/>
 				<xs:element ref="oa:registrationFormUrl" minOccurs="0"/>
@@ -757,6 +823,8 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:dropOffBranch" minOccurs="0"/>
 				<xs:element ref="oa:dropOffName" minOccurs="0"/>
 				<xs:element ref="oa:lastUpdated" minOccurs="0"/>
+				<xs:element ref="oa:ncipServerAddress" minOccurs="0"/>
+				<xs:element ref="oa:ncipPassword" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -864,6 +932,11 @@ You should have received a copy of the GNU Affero General Public License along w
 			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
+    <xs:element name="trackingId" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">Unique id to track this request</xs:documentation>
+        </xs:annotation>
+    </xs:element>
 	<xs:element name="typeOfClient" type="xs:string"/>
 	<xs:element name="UnrelatePatronIdAndAccountId" type="xs:boolean"/>
 	<xs:element name="UpdateAccountId" type="xs:boolean"/>
@@ -935,6 +1008,29 @@ You should have received a copy of the GNU Affero General Public License along w
 			<xs:enumeration value="YES"/>
 		</xs:restriction>
 	</xs:simpleType>
+	<xs:element name="z3950Address" type="xs:string"/>
+	<xs:element name="z3950GroupId" type="xs:string"/>
+    <xs:element name="z3950Ill">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="oa:z3950Address" minOccurs="0"/>
+				<xs:element ref="oa:z3950GroupId" minOccurs="0"/>
+				<xs:element ref="oa:z3950UserId" minOccurs="0"/>
+				<xs:element ref="oa:z3950Password" minOccurs="0"/>
+				<xs:element ref="oa:illRequest"/>
+				<xs:element ref="oa:illAnswer"/>
+				<xs:element ref="oa:illShipped"/>
+				<xs:element ref="oa:illCancel"/>
+				<xs:element ref="oa:illCancelReply"/>
+				<xs:element ref="oa:illCancelReplySynchronous"/>
+				<xs:element ref="oa:illRenew"/>
+				<xs:element ref="oa:illRenewAnswer"/>
+				<xs:element ref="oa:illRenewAnswerSynchronous"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="z3950Password" type="xs:string"/>
+	<xs:element name="z3950UserId" type="xs:string"/>
 	<xs:attribute name="language" type="oa:languageType"/>
 	<xs:complexType name="ors">
 		<xs:sequence>
