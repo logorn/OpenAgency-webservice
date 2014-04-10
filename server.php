@@ -56,7 +56,7 @@ class openAgency extends webServiceServer {
    * or
    * - error
    **/
-  function automation($param) {
+  public function automation($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
@@ -433,6 +433,151 @@ class openAgency extends webServiceServer {
     return $ret;
   }
 
+  /** \brief getRegistryInfo
+   *
+   * Request:
+   * - agencyId
+   * - agencyName
+   * - lastUpdated
+   * - libraryType
+   * - libraryStatus
+   * Response:
+   * - registryInfo (see xsd for parameters)
+   * or
+   * - error
+   */
+  public function getRegistryInfo($param) {
+    if (!$this->aaa->has_right('netpunkt.dk', 550))
+      $res->error->_value = 'authentication_error';
+    else {
+      $agency = $this->strip_agency($param->agencyId->_value);
+      $cache_key = 'OA_getRI' . 
+                   $this->config->get_inifile_hash() . 
+                   $agency . 
+                   $param->agencyName->_value . 
+                   $param->lastUpdated->_value . 
+                   $param->libraryType->_value . 
+                   $param->libraryStatus->_value;
+      if ($ret = $this->cache->get($cache_key)) {
+        verbose::log(STAT, 'Cache hit');
+        return $ret;
+      }
+      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+      $oci->set_charset('UTF8');
+      try {
+        $oci->connect();
+      }
+      catch (ociException $e) {
+        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+        $res->error->_value = 'service_unavailable';
+      }
+      if (empty($res->error)) {
+        try {
+      // agencyId
+          if ($agency) {
+            $sqls[] = 'v.bib_nr = :bind_bib_nr';
+            $oci->bind('bind_bib_nr', $agency);
+          }
+      // agencyName
+          if ($val = $param->agencyName->_value) {
+            $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_navn))' .
+                      ' OR (regexp_like(upper(sup.tekst), upper(:bind_navn)) AND sup.type = :bind_n))';
+            $oci->bind('bind_navn', $this->build_regexp_like($val));
+            $oci->bind('bind_n', 'N');
+          }
+      // lastUpdated
+          if ($val = $param->lastUpdated->_value) {
+            $sqls[] = '(v.dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\') OR v.bs_dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\') OR vsn.dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\'))' .
+            $oci->bind('bind_date', $val);
+          }
+      // libraryType
+          if ($val = $param->libraryType->_value
+            && ($param->libraryType->_value == 'Folkebibliotek'
+              || $param->libraryType->_value == 'Forskningsbibliotek')) {
+            $sqls[] = 'vsn.bib_type = :bind_bib_type';
+            $oci->bind('bind_bib_type', $param->libraryType->_value);
+          }
+      // libraryStatus
+          if ($param->libraryStatus->_value == 'usynlig') {
+            $u = 'U';
+            $oci->bind('bind_u', $u);
+            $sqls[] = '(vsn.delete_mark_vsn is null OR vsn.delete_mark_vsn = :bind_u)' .
+                      ' AND (v.delete_mark is null OR v.delete_mark = :bind_u)';
+          } elseif ($param->libraryStatus->_value == 'slettet') {
+            $s = 'S';
+            $oci->bind('bind_s', $s);
+            $sqls[] = '(vsn.delete_mark_vsn is null OR vsn.delete_mark_vsn = :bind_s)' . 
+                      ' AND (v.delete_mark is null OR v.delete_mark = :bind_s)';
+          } elseif ($param->libraryStatus->_value <> 'alle') {
+            $sqls[] = 'vsn.delete_mark_vsn is null AND v.delete_mark is null';
+          }
+          $filter_sql = implode(' AND ', $sqls);
+          $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+                        v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
+                        v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt,
+                        TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
+                        vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
+                        vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
+                        TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato,
+                        vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                        txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
+                        bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
+                        kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
+                        kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn,
+                        vd.mailbestil_via, vd.url_itemorder_bestil, vd.zbestil_groupid, vd.zbestil_userid, vd.zbestil_passw,
+                        vd.holdingsformat,
+                        ors.shipping ors_shipping, ors.cancel ors_cancel, ors.answer ors_answer, 
+                        ors.cancelreply ors_cancelreply, ors.cancel_answer_synchronic ors_cancel_answer_synchronic,
+                        ors.renew ors_renew, ors.renewanswer ors_renewanswer, 
+                        ors.renew_answer_synchronic ors_renew_answer_synchronic
+                FROM vip v, vip_vsn vsn, vip_danbib vd, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
+                     vip_sup sup, vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat, open_agency_ors ors
+                WHERE 
+                  ' . $filter_sql . '
+                  AND v.kmd_nr = vsn.bib_nr (+)
+                  AND v.bib_nr = vd.bib_nr (+)
+                  AND v.bib_nr = vb.bib_nr (+)
+                  AND v.bib_nr = sup.bib_nr (+)
+                  AND v.bib_nr = txt.bib_nr (+)
+                  AND v.bib_nr = hold.bib_nr (+)
+                  AND v.bib_nr = eng.bib_nr (+)
+                  AND v.bib_nr = bestil.bib_nr (+)
+                  AND v.bib_nr = ors.bib_nr (+)
+                  AND v.bib_nr = kat.bib_nr (+)';
+          $oci->set_query($sql);
+          while ($row = $oci->fetch_into_assoc()) {
+            if (empty($curr_bib)) {
+              $curr_bib = $row['BIB_NR'];
+            }
+            if ($curr_bib <> $row['BIB_NR']) {
+              $res->registryInfo[]->_value = $registryInfo;
+              unset($registryInfo);
+              $curr_bib = $row['BIB_NR'];
+            }
+            if ($row) {
+              self::fill_pickupAgency($registryInfo->pickupAgency->_value, $row);
+              self::set_iso18626($registryInfo, $row);
+              if ($row['HOLDINGSFORMAT'] == 'B') {
+                self::use_dbc_as_z3950_target($row, $param->authentication->_value);
+              }
+              self::set_z3950Ill($registryInfo, $row);
+            }
+          }
+          if ($registryInfo)
+            $res->registryInfo[]->_value = $registryInfo;
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+      }
+    }
+    //var_dump($res); var_dump($param); die();
+    $ret->getRegistryInfoResponse->_value = $res;
+    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+    if (empty($res->error)) $this->cache->set($cache_key, $ret);
+    return $ret;
+  }
 
   /** \brief getSaouLicenseInfo
    *
@@ -1309,13 +1454,13 @@ class openAgency extends webServiceServer {
     $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                   v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
                   v.afsaetningsbibliotek, v.afsaetningsnavn_k, 
-                  TO_CHAR(v.dato, \'YYYY-MM-DD\'), TO_CHAR(v.bs_dato, \'YYYY-MM-DD\'),
+                  TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                   vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                   vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
                   TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato,
                   vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                   txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
-                  bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
+                  bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password
                   kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
                   kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn
           FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
@@ -2038,6 +2183,49 @@ class openAgency extends webServiceServer {
   }
 
 
+  /** \brief overwrite z-target informations
+   *
+   */
+  private function use_dbc_as_z3950_target(&$row, $auth) {
+    $row['URL_ITEMORDER_BESTIL'] = 'z3950.dbc.dk:210/danbib';
+    $row['ZBESTIL_GROUPID'] = $auth->groupIdAut->_value;;
+    $row['ZBESTIL_USERID'] = $auth->userIdAut->_value;;
+    $row['ZBESTIL_PASSW'] = $auth->passwordAut->_value;;
+  }
+
+  /** \brief add iso18626 data to result
+   *
+   */
+  private function set_iso18626(&$buf, $row) {
+    if ($row['ISO18626_ADDRESS'] || $row['ISO18626_PASSWORD']) {
+      $val = &$buf->iso18626->_value;
+      $val->iso18626Address->_value = $row['ISO18626_ADDRESS'];
+      $val->iso18626Password->_value = $row['ISO18626_PASSWORD'];
+    }
+  }
+
+  /** \brief add z39.50 ill data to result
+   *
+   */
+  private function set_z3950Ill(&$buf, $row) {
+    if ($row['MAILBESTIL_VIA'] == 'C') {
+      $val = &$buf->z3950Ill->_value;
+      if ($row['URL_ITEMORDER_BESTIL']) $val->z3950Address->_value = $row['URL_ITEMORDER_BESTIL'];
+      if ($row['ZBESTIL_GROUPID']) $val->z3950GroupId->_value = $row['ZBESTIL_GROUPID'];
+      if ($row['ZBESTIL_USERID']) $val->z3950UserId->_value = $row['ZBESTIL_USERID'];
+      if ($row['ZBESTIL_PASSW']) $val->z3950Password->_value = $row['ZBESTIL_PASSW'];
+      $val->illRequest->_value = 1;    // AHP dok?
+      $val->illAnswer->_value = ($row['ORS_ANSWER'] == 'z3950' ? '1' : '0');
+      $val->illShipped->_value = ($row['ORS_SHIPPING'] == 'z3950' ? '1' : '0');
+      $val->illCancel->_value = ($row['ORS_CANCEL'] == 'z3950' ? '1' : '0');
+      $val->illCancelReply->_value = ($row['ORS_CANCELREPLY'] == 'z3950' ? '1' : '0');
+      $val->illCancelReplySynchronous->_value = ($row['ORS_CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
+      $val->illRenew->_value = ($row['ORS_RENEW'] == 'z3950' ? '1' : '0');
+      $val->illRenewAnswer->_value = ($row['ORS_RENEWANSWER'] == 'z3950' ? '1' : '0');
+      $val->illRenewAnswerSynchronous->_value = ($row['ORS_RENEW_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
+    }
+  }
+
   /** \brief parse status and status_eget from vip_fjernlaan 
    *
    */
@@ -2086,6 +2274,7 @@ class openAgency extends webServiceServer {
       if ($row['BPOSTNR']) $pickupAgency->postalCode->_value = $row['BPOSTNR'];
       if ($row['BCITY']) $pickupAgency->city->_value = $row['BCITY'];
       if ($row['ISIL']) $pickupAgency->isil->_value = $row['ISIL'];
+      if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = $row['KNUDEPUNKT'];
       if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];
       if ($row['URL_SERV_DKL']) $pickupAgency->serviceDeclarationUrl->_value = $row['URL_SERV_DKL'];
       if ($row['URL_BEST_BLANKET']) $pickupAgency->registrationFormUrl->_value = $row['URL_BEST_BLANKET'];
@@ -2144,6 +2333,12 @@ class openAgency extends webServiceServer {
       $pickupAgency->dropOffName->_value = $row['AFSAETNINGSNAVN_K'];
     if ($last_date = max($row['DATO'], $row['BS_DATO'], $row['VSN_DATO']))
       $pickupAgency->lastUpdated->_value = $last_date;
+    if ($row['NCIP_ADDRESS']) {
+      $pickupAgency->ncipServerAddress->_value = $row['NCIP_ADDRESS'];
+    }
+    if ($row['NCIP_PASSWORD']) {
+      $pickupAgency->ncipPassword->_value = $row['NCIP_PASSWORD'];
+    }
 
     return;
   }
