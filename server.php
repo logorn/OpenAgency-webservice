@@ -2322,6 +2322,12 @@ class openAgency extends webServiceServer {
     $pickupAgency->ncipRenewOrder->_value = ($row['NCIP_RENEW'] == 'J' ? '1' : '0');
     $pickupAgency->ncipCancelOrder->_value = ($row['NCIP_CANCEL'] == 'J' ? '1' : '0');
     $pickupAgency->ncipUpdateOrder->_value = ($row['NCIP_UPDATE_REQUEST'] == 'J' ? '1' : '0');
+    if ($row['NCIP_ADDRESS']) {
+      $pickupAgency->ncipServerAddress->_value = $row['NCIP_ADDRESS'];
+    }
+    if ($row['NCIP_PASSWORD']) {
+      $pickupAgency->ncipPassword->_value = $row['NCIP_PASSWORD'];
+    }
     if (is_array($ip_list)) {
       foreach ($ip_list as $ip) {
         $pickupAgency->branchDomains->_value->domain[]->_value = $ip;
@@ -2333,12 +2339,6 @@ class openAgency extends webServiceServer {
       $pickupAgency->dropOffName->_value = $row['AFSAETNINGSNAVN_K'];
     if ($last_date = max($row['DATO'], $row['BS_DATO'], $row['VSN_DATO']))
       $pickupAgency->lastUpdated->_value = $last_date;
-    if ($row['NCIP_ADDRESS']) {
-      $pickupAgency->ncipServerAddress->_value = $row['NCIP_ADDRESS'];
-    }
-    if ($row['NCIP_PASSWORD']) {
-      $pickupAgency->ncipPassword->_value = $row['NCIP_PASSWORD'];
-    }
 
     return;
   }
