@@ -653,6 +653,7 @@ You should have received a copy of the GNU Affero General Public License along w
 	</xs:element>
 	<xs:element name="iso18626Address" type="xs:string"/>
 	<xs:element name="iso18626Password" type="xs:string"/>
+	<xs:element name="isOclcRsLibrary" type="xs:boolean"/>
 	<xs:element name="itemParameter">
 		<xs:annotation>
 			<xs:documentation xml:lang="en">Indicator whether a given itemParameterType is either required or optional for the given combination of orderType and orderMaterialType</xs:documentation>
@@ -825,6 +826,7 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:dropOffBranch" minOccurs="0"/>
 				<xs:element ref="oa:dropOffName" minOccurs="0"/>
 				<xs:element ref="oa:lastUpdated" minOccurs="0"/>
+				<xs:element ref="oa:isOclcRsLibrary" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

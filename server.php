@@ -518,7 +518,7 @@ class openAgency extends webServiceServer {
                         TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                         vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                         vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
-                        TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato,
+                        TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, 
                         vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                         txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                         bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
@@ -1457,7 +1457,7 @@ class openAgency extends webServiceServer {
                   TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                   vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                   vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
-                  TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato,
+                  TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, 
                   vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                   txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                   bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
@@ -2339,6 +2339,7 @@ class openAgency extends webServiceServer {
       $pickupAgency->dropOffName->_value = $row['AFSAETNINGSNAVN_K'];
     if ($last_date = max($row['DATO'], $row['BS_DATO'], $row['VSN_DATO']))
       $pickupAgency->lastUpdated->_value = $last_date;
+    $pickupAgency->isOclcRsLibrary->_value = ($row['OCLC_SYMBOL'] == 'J' ? '1' : '0');
 
     return;
   }
