@@ -75,6 +75,19 @@ class TestOfAgency extends WebTestCase {
             'pars' => array('agencyId' => 'DK-710100'),
             'text' => array('Krystalgade', '1172'),
             'pattern' => array('/pickupAgency.*branchName.*postalCode.*openingHours.*findLibraryResponse/'));
+  // getCulrProfile
+    $this->test_cases[] = 
+      array('action' => array('post' => 'getCulrProfileRequest', 'get' => 'getCulrProfile'),
+            'pars' => array('agencyId' => 'DK-010100', 'profileName' => 'DBCtest-provider'),
+            'text' => array('Anders'),
+            'pattern' => array('/culrProfile.*profileName.*CreateAccountId.*UpdateAccountId.*getCulrProfileResponse/'));
+  // getRegistryInfo
+    $this->test_cases[] = 
+      array('action' => array('post' => 'getRegistryInfoRequest', 'get' => 'getRegistryInfo'),
+            'pars' => array('agencyId' => 'DK-710100'),
+            'text' => array('Krystalgade'),
+            'pattern' => array('/pickupAgency.*branchName.*postalCode.*openingHours.*getRegistryInfoResponse/',
+                               '/z3950Ill.*z3950Address.*getRegistryInfoResponse/'));
   // nameList
     $this->test_cases[] = 
       array('action' => array('post' => 'nameListRequest', 'get' => 'nameList'),
@@ -110,12 +123,6 @@ class TestOfAgency extends WebTestCase {
             'pars' => array('agencyId' => 'DK-810010', 'service' => 'userOrderParameters'),
             'text' => array('userId'),
             'pattern' => array('/userOrderParameters.*userParameter.*parameterRequired.*borrowerCheckParameters.*serviceResponse/'));
-  // getCulrProfile
-    $this->test_cases[] = 
-      array('action' => array('post' => 'getCulrProfileRequest', 'get' => 'getCulrProfile'),
-            'pars' => array('agencyId' => 'DK-010100', 'profileName' => 'DBCtest-provider'),
-            'text' => array('Anders'),
-            'pattern' => array('/culrProfile.*profileName.*CreateAccountId.*UpdateAccountId.*getCulrProfileResponse/'));
   }
 
   private function post_service($action, $pars, $texts, $patterns) {
