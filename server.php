@@ -1948,9 +1948,7 @@ class openAgency extends webServiceServer {
                 $profiler[$p['PROFIL_ID']][$p['BROENDKILDE_ID']] = $p;
               }
             }
-//var_dump($kilder);
             foreach ($profiler as $profil_no => $profil) {
-//echo 'Profil: '; var_dump($profil);
               foreach ($kilder as $kilde) {
                 if (empty($kilde['ACCESS_FOR']) || strpos($kilde['ACCESS_FOR'], $agency) !== FALSE) {
                   $oci->bind('bind_kilde_id', $kilde['ID_NR']);
@@ -1962,7 +1960,6 @@ class openAgency extends webServiceServer {
                                       AND broend_profil_kilde_relation.kilde_relation_id =  broend_kilde_relation.id_nr 
                                       AND broend_kilde_relation.relation_id = broend_relation.id_nr');
                   $relations = $oci->fetch_all_into_assoc();
-//echo $kilde['NAME'] . ': '; var_dump($relations);
                   $s->sourceName->_value = $kilde['NAME'];
                   if (isset($profil[$kilde['ID_NR']])) {
                     $profile_name = $profil[$kilde['ID_NR']]['NAME'];
@@ -1988,8 +1985,6 @@ class openAgency extends webServiceServer {
                 }
               }
             }
-//var_dump($res);
-//die();
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -2088,7 +2083,6 @@ class openAgency extends webServiceServer {
                           AND fjernadgang.faust = fjernadgang_andre.faust (+)
                           AND fjernadgang.bib_nr = licensguide.bib_nr (+)');
           $buf = $oci->fetch_all_into_assoc();
-//if ($this->debug) die('<pre>' . print_r($buf, TRUE));
           $res->agencyId->_value = $param->agencyId->_value;
           foreach ($buf as $val) {
             if ($s->name->_value = $val['licens_navn']) {
@@ -2189,6 +2183,9 @@ class openAgency extends webServiceServer {
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
   }
+
+
+  /* ----------------------------------------------------------------------------- */
 
 
   /** \brief overwrite z-target informations
