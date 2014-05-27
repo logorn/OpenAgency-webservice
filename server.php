@@ -1470,7 +1470,8 @@ class openAgency extends webServiceServer {
                   txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                   bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
                   kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
-                  kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn
+                  kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, 
+                  kat.url_viderestil, kat.url_bib_kat
           FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
                vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
           WHERE 
@@ -1799,7 +1800,8 @@ class openAgency extends webServiceServer {
                           txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                           bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
                           kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
-                          kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn
+                          kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn,
+                          kat.url_viderestil, kat.url_bib_kat
                   FROM vip v, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
                        vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
                   WHERE v.kmd_nr IN (SELECT UNIQUE vsn.bib_nr
@@ -2280,6 +2282,8 @@ class openAgency extends webServiceServer {
       if ($row['BCITY']) $pickupAgency->city->_value = $row['BCITY'];
       if ($row['ISIL']) $pickupAgency->isil->_value = $row['ISIL'];
       if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = $row['KNUDEPUNKT'];
+      if ($row['URL_VIDERESTIL']) $pickupAgency->agencyCatalogueUrl->_value = $row['URL_VIDERESTIL'];
+      elseif ($row['URL_BIB_KAT']) $pickupAgency->lookupUrl->_value = $row['URL_BIB_KAT'];
       if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];
       if ($row['URL_SERV_DKL']) $pickupAgency->serviceDeclarationUrl->_value = $row['URL_SERV_DKL'];
       if ($row['URL_BEST_BLANKET']) $pickupAgency->registrationFormUrl->_value = $row['URL_BEST_BLANKET'];

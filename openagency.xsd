@@ -801,6 +801,8 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:city" minOccurs="0"/>
 				<xs:element ref="oa:isil" minOccurs="0"/>
 				<xs:element ref="oa:junction" minOccurs="0"/>
+				<xs:element ref="oa:agencyCatalogueUrl" minOccurs="0"/>
+				<xs:element ref="oa:lookupUrl" minOccurs="0"/>
 				<xs:element ref="oa:branchWebsiteUrl" minOccurs="0"/>
 				<xs:element ref="oa:serviceDeclarationUrl" minOccurs="0"/>
 				<xs:element ref="oa:registrationFormUrl" minOccurs="0"/>
