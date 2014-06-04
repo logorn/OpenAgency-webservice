@@ -2282,8 +2282,8 @@ class openAgency extends webServiceServer {
       if ($row['BCITY']) $pickupAgency->city->_value = $row['BCITY'];
       if ($row['ISIL']) $pickupAgency->isil->_value = $row['ISIL'];
       if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = $row['KNUDEPUNKT'];
-      if ($row['URL_VIDERESTIL']) $pickupAgency->agencyCatalogueUrl->_value = $row['URL_VIDERESTIL'];
-      elseif ($row['URL_BIB_KAT']) $pickupAgency->lookupUrl->_value = $row['URL_BIB_KAT'];
+      if ($row['URL_BIB_KAT']) $pickupAgency->agencyCatalogueUrl->_value = $row['URL_BIB_KAT'];
+      if ($row['URL_VIDERESTIL']) $pickupAgency->lookupUrl->_value = $row['URL_VIDERESTIL'];
       if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];
       if ($row['URL_SERV_DKL']) $pickupAgency->serviceDeclarationUrl->_value = $row['URL_SERV_DKL'];
       if ($row['URL_BEST_BLANKET']) $pickupAgency->registrationFormUrl->_value = $row['URL_BEST_BLANKET'];
