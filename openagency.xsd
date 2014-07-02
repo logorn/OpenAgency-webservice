@@ -886,10 +886,11 @@ You should have received a copy of the GNU Affero General Public License along w
 			<xs:sequence>
 				<xs:element ref="oa:responder"/>
 				<xs:element ref="oa:isil"/>
-				<xs:element ref="oa:address"/>
-				<xs:element ref="oa:userId"/>
-				<xs:element ref="oa:groupId"/>
-				<xs:element ref="oa:passWord"/>
+				<xs:element ref="oa:protocol"/>
+				<xs:element ref="oa:address" minOccurs="0"/>
+				<xs:element ref="oa:userId" minOccurs="0"/>
+				<xs:element ref="oa:groupId" minOccurs="0"/>
+				<xs:element ref="oa:passWord" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
