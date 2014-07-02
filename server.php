@@ -20,7 +20,7 @@
 */
 
 
-/** \brief
+/** \brief Service to query info the VIP database
  *
  */
 
@@ -1108,10 +1108,21 @@ class openAgency extends webServiceServer {
               $serI = &$res->serverInformation->_value;
               $serI->responder->_value = $this->normalize_agency($oa_row['VD.BIB_NR']);
               $serI->isil->_value = $this->normalize_agency($oa_row['ISIL']);
-              $serI->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
-              $serI->userId->_value = $oa_row['ZBESTIL_USERID'];
-              $serI->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
-              $serI->passWord->_value = $oa_row['ZBESTIL_PASSW'];
+              if ($oa_row['ISO20775_URL']) {
+                $serI->protocol->_value = 'iso20775';
+                $serI->address->_value = $oa_row['ISO20775_URL'];
+                $serI->passWord->_value = $oa_row['ISO20775_PASSWORD'];
+              }
+              elseif ($oa_row['URL_ITEMORDER_BESTIL']) {
+                $serI->protocol->_value = 'z3950';
+                $serI->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
+                $serI->userId->_value = $oa_row['ZBESTIL_USERID'];
+                $serI->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
+                $serI->passWord->_value = $oa_row['ZBESTIL_PASSW'];
+              }
+              else {
+                $serI->protocol->_value = 'none';
+              }
               //var_dump($res->serverInformation->_value); die();
               break;
             case 'userParameters':
@@ -1432,83 +1443,83 @@ class openAgency extends webServiceServer {
         else
           $sqls[] .= 'vb.best_modt != :bind_j';
       }
-    }
-    $filter_sql = implode(' AND ', $sqls);
+      $filter_sql = implode(' AND ', $sqls);
 
   // sort
-    if (isset($param->sort)) {
-      if (is_array($param->sort)) {
-        $sorts = $param->sort;
+      if (isset($param->sort)) {
+        if (is_array($param->sort)) {
+          $sorts = $param->sort;
+        }
+        else {
+          $sorts = array($param->sort);
+        }
+        foreach ($sorts as $s) {
+          switch ($s->_value) {
+            case 'agencyId':      $sort_order[] = 'v.bib_nr'; break;
+            case 'agencyName':    $sort_order[] = 'v.navn'; break;
+            case 'agencyAddress': $sort_order[] = 'v.badr'; break;
+            case 'postalCode':    $sort_order[] = 'v.postnr'; break;
+            case 'city':          $sort_order[] = 'v.bcity'; break;
+            case 'libraryType':   $sort_order[] = 'vsn.bib_type'; break;
+          }
+        }
+      }
+      if (is_array($sort_order)) {
+        $order_by = implode(', ', $sort_order);
       }
       else {
-        $sorts = array($param->sort);
+        $order_by = 'v.bib_nr';
       }
-      foreach ($sorts as $s) {
-        switch ($s->_value) {
-          case 'agencyId':      $sort_order[] = 'v.bib_nr'; break;
-          case 'agencyName':    $sort_order[] = 'v.navn'; break;
-          case 'agencyAddress': $sort_order[] = 'v.badr'; break;
-          case 'postalCode':    $sort_order[] = 'v.postnr'; break;
-          case 'city':          $sort_order[] = 'v.bcity'; break;
-          case 'libraryType':   $sort_order[] = 'vsn.bib_type'; break;
+  
+      $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+                    v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
+                    v.afsaetningsbibliotek, v.afsaetningsnavn_k, 
+                    TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
+                    vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
+                    vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
+                    TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, 
+                    vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                    txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
+                    bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
+                    kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
+                    kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, 
+                    kat.url_viderestil, kat.url_bib_kat
+            FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
+                 vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
+            WHERE 
+              ' . $filter_sql . '
+              AND v.kmd_nr = vsn.bib_nr (+)
+              AND v.bib_nr = vb.bib_nr (+)
+              AND v.bib_nr = sup.bib_nr (+)
+              AND v.bib_nr = txt.bib_nr (+)
+              AND v.bib_nr = hold.bib_nr (+)
+              AND v.bib_nr = eng.bib_nr (+)
+              AND v.bib_nr = bestil.bib_nr (+)
+              AND v.bib_nr = kat.bib_nr (+)
+            ORDER BY ' . $order_by;
+      try {
+        $oci->set_query($sql);
+        while ($row = $oci->fetch_into_assoc()) {
+          if (empty($curr_bib)) {
+            $curr_bib = $row['BIB_NR'];
+          }
+          if ($curr_bib <> $row['BIB_NR']) {
+            $res->pickupAgency[]->_value = $pickupAgency;
+            unset($pickupAgency);
+            $curr_bib = $row['BIB_NR'];
+          }
+          if ($row) {
+            //$row['NAVN'] = $row['VSN_NAVN'];
+            $this->fill_pickupAgency($pickupAgency, $row);
+          }
         }
-      }
-    }
-    if (is_array($sort_order)) {
-      $order_by = implode(', ', $sort_order);
-    }
-    else {
-      $order_by = 'v.bib_nr';
-    }
-
-    $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                  v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-                  v.afsaetningsbibliotek, v.afsaetningsnavn_k, 
-                  TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
-                  vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
-                  vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
-                  TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, 
-                  vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
-                  txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
-                  bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
-                  kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
-                  kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, 
-                  kat.url_viderestil, kat.url_bib_kat
-          FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
-               vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
-          WHERE 
-            ' . $filter_sql . '
-            AND v.kmd_nr = vsn.bib_nr (+)
-            AND v.bib_nr = vb.bib_nr (+)
-            AND v.bib_nr = sup.bib_nr (+)
-            AND v.bib_nr = txt.bib_nr (+)
-            AND v.bib_nr = hold.bib_nr (+)
-            AND v.bib_nr = eng.bib_nr (+)
-            AND v.bib_nr = bestil.bib_nr (+)
-            AND v.bib_nr = kat.bib_nr (+)
-          ORDER BY ' . $order_by;
-    try {
-      $oci->set_query($sql);
-      while ($row = $oci->fetch_into_assoc()) {
-        if (empty($curr_bib)) {
-          $curr_bib = $row['BIB_NR'];
-        }
-        if ($curr_bib <> $row['BIB_NR']) {
+        if ($pickupAgency)
           $res->pickupAgency[]->_value = $pickupAgency;
-          unset($pickupAgency);
-          $curr_bib = $row['BIB_NR'];
-        }
-        if ($row) {
-          //$row['NAVN'] = $row['VSN_NAVN'];
-          $this->fill_pickupAgency($pickupAgency, $row);
-        }
       }
-      if ($pickupAgency)
-        $res->pickupAgency[]->_value = $pickupAgency;
-    }
-    catch (ociException $e) {
-      verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-      $res->error->_value = 'service_unavailable';
+      catch (ociException $e) {
+        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+        $res->error->_value = 'service_unavailable';
+      }
     }
     //var_dump($res); var_dump($param); die();
     $ret->findLibraryResponse->_value = $res;
