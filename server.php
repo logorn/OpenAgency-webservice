@@ -661,8 +661,7 @@ class openAgency extends webServiceServer {
    * - agencyId
    * - service
    * Response (depending on service):
-   * -  serverInformation - see xsd for parameters
-   * or information - see xsd for parameters
+   * -  information - see xsd for parameters
    * or orsAnswer - see xsd for parameters
    * or orsCancel - see xsd for parameters
    * or orsCancelReply - see xsd for parameters
@@ -677,6 +676,9 @@ class openAgency extends webServiceServer {
    * or orsRenewAnswer - see xsd for parameters
    * or orsRenewItemUser - see xsd for parameters
    * or orsShipping - see xsd for parameters
+   * or orsStatusRequest - see xsd for parameters
+   * or orsStatusResponse - see xsd for parameters
+   * or serverInformation - see xsd for parameters
    * or userOrderParameters - see xsd for parameters
    * or userParameters - see xsd for parameters
    * or error
@@ -822,18 +824,23 @@ class openAgency extends webServiceServer {
             case 'orsAnswer':
               $orsA = &$res->orsAnswer->_value;
               $orsA->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
-              $orsA->willReceive->_value = (in_array($oa_row['ANSWER'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-              $orsA->synchronous->_value = 0;
-              $orsA->protocol->_value = $oa_row['ANSWER'];
-              if ($oa_row['ANSWER'] == 'z3950') {
-                $orsA->address->_value = $oa_row['ANSWER_Z3950_ADDRESS'];
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsA, $oa_row);
               }
-              elseif ($oa_row['ANSWER'] == 'mail') {
-                $orsA->address->_value = $oa_row['ANSWER_MAIL_ADDRESS'];
+              else {
+                $orsA->willReceive->_value = (in_array($oa_row['ANSWER'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
+                $orsA->synchronous->_value = 0;
+                $orsA->protocol->_value = $oa_row['ANSWER'];
+                if ($oa_row['ANSWER'] == 'z3950') {
+                  $orsA->address->_value = $oa_row['ANSWER_Z3950_ADDRESS'];
+                }
+                elseif ($oa_row['ANSWER'] == 'mail') {
+                  $orsA->address->_value = $oa_row['ANSWER_MAIL_ADDRESS'];
+                }
+                $orsA->userId->_value = $oa_row['ANSWER_Z3950_USER'];
+                $orsA->groupId->_value = $oa_row['ANSWER_Z3950_GROUP'];
+                $orsA->passWord->_value = ($oa_row['ANSWER'] == 'z3950' ? $oa_row['ANSWER_Z3950_PASSWORD'] : $oa_row['ANSWER_NCIP_AUTH']);
               }
-              $orsA->userId->_value = $oa_row['ANSWER_Z3950_USER'];
-              $orsA->groupId->_value = $oa_row['ANSWER_Z3950_GROUP'];
-              $orsA->passWord->_value = ($oa_row['ANSWER'] == 'z3950' ? $oa_row['ANSWER_Z3950_PASSWORD'] : $oa_row['ANSWER_NCIP_AUTH']);
               //var_dump($res->orsAnswer->_value); die();
               break;
             case 'orsCancelRequestUser':
@@ -914,6 +921,9 @@ class openAgency extends webServiceServer {
                   $orsIR->protocol->_value = 'z3950';
                   $orsIR->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
                   break;
+                case 'E':
+                  self::fill_iso18626_protocol($orsIR, $oa_row);
+                  break;
                 case 'D':
                 default:
                   $orsIR->willReceive->_value = 'NO';
@@ -922,21 +932,19 @@ class openAgency extends webServiceServer {
                   }
                   break;
               }
-              if ($orsIR->willReceive->_value == 'YES') {
+              if (in_array($orsIR->protocol->_value, array('mail', 'ors', 'z3950'))) {
                 if ($oa_row['ZBESTIL_USERID'])
                   $orsIR->userId->_value = $oa_row['ZBESTIL_USERID'];
                 if ($oa_row['ZBESTIL_GROUPID'])
                   $orsIR->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
                 if ($oa_row['ZBESTIL_PASSW'])
                   $orsIR->passWord->_value = $oa_row['ZBESTIL_PASSW'];
-                if ($oa_row['MAILBESTIL_VIA'] == 'A')
+                if ($orsIR->protocol->_value == 'mail')
                   switch ($oa_row['FORMAT_BEST']) {
                     case 'illdanbest':
                       $orsIR->format->_value = 'text';
                       break;
                     case 'ill0form':
-                      $orsIR->format->_value = 'ill0';
-                      break;
                     case 'ill5form':
                       $orsIR->format->_value = 'ill0';
                       break;
@@ -1004,80 +1012,102 @@ class openAgency extends webServiceServer {
             case 'orsRenew':
               $orsR = &$res->orsRenew->_value;
               $orsR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
-                $orsR->willReceive->_value = 'YES';
-                $orsR->synchronous->_value = 0;
-                $orsR->protocol->_value = $oa_row['RENEW'];
-                if ($oa_row['RENEW'] == 'z3950') {
-                  $orsR->address->_value = $oa_row['RENEW_Z3950_ADDRESS'];
-                  $orsR->userId->_value = $oa_row['RENEW_Z3950_USER'];
-                  $orsR->groupId->_value = $oa_row['RENEW_Z3950_GROUP'];
-                  $orsR->passWord->_value = $oa_row['RENEW_Z3950_PASSWORD'];
-                }
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsR, $oa_row);
               }
               else {
-                $orsR->willReceive->_value = 'NO';
-                $orsR->synchronous->_value = 0;
+                if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
+                  $orsR->willReceive->_value = 'YES';
+                  $orsR->synchronous->_value = 0;
+                  $orsR->protocol->_value = $oa_row['RENEW'];
+                  if ($oa_row['RENEW'] == 'z3950') {
+                    $orsR->address->_value = $oa_row['RENEW_Z3950_ADDRESS'];
+                    $orsR->userId->_value = $oa_row['RENEW_Z3950_USER'];
+                    $orsR->groupId->_value = $oa_row['RENEW_Z3950_GROUP'];
+                    $orsR->passWord->_value = $oa_row['RENEW_Z3950_PASSWORD'];
+                  }
+                }
+                else {
+                  $orsR->willReceive->_value = 'NO';
+                  $orsR->synchronous->_value = 0;
+                }
               }
               //var_dump($res->orsRenew->_value); die();
               break;
             case 'orsRenewAnswer':
               $orsRA = &$res->orsRenewAnswer->_value;
               $orsRA->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['RENEWANSWER'] == 'z3950' || $oa_row['RENEWANSWER'] == 'ors') {
-                $orsRA->willReceive->_value = 'YES';
-                $orsRA->synchronous->_value = $oa_row['RENEW_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                $orsRA->protocol->_value = $oa_row['RENEWANSWER'];
-                if ($oa_row['RENEWANSWER'] == 'z3950') {
-                  $orsRA->address->_value = $oa_row['RENEWANSWER_Z3950_ADDRESS'];
-                  $orsRA->userId->_value = $oa_row['RENEWANSWER_Z3950_USER'];
-                  $orsRA->groupId->_value = $oa_row['RENEWANSWER_Z3950_GROUP'];
-                  $orsRA->passWord->_value = $oa_row['RENEWANSWER_Z3950_PASSWORD'];
-                }
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsR, $oa_row);
               }
               else {
-                $orsRA->willReceive->_value = 'NO';
-                $orsRA->synchronous->_value = 0;
+                if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
+                  if ($oa_row['RENEWANSWER'] == 'z3950' || $oa_row['RENEWANSWER'] == 'ors') {
+                    $orsRA->willReceive->_value = 'YES';
+                    $orsRA->synchronous->_value = $oa_row['RENEW_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
+                    $orsRA->protocol->_value = $oa_row['RENEWANSWER'];
+                    if ($oa_row['RENEWANSWER'] == 'z3950') {
+                      $orsRA->address->_value = $oa_row['RENEWANSWER_Z3950_ADDRESS'];
+                      $orsRA->userId->_value = $oa_row['RENEWANSWER_Z3950_USER'];
+                      $orsRA->groupId->_value = $oa_row['RENEWANSWER_Z3950_GROUP'];
+                      $orsRA->passWord->_value = $oa_row['RENEWANSWER_Z3950_PASSWORD'];
+                    }
+                  }
+                  else {
+                    $orsRA->willReceive->_value = 'NO';
+                    $orsRA->synchronous->_value = 0;
+                  }
+                }
               }
               //var_dump($res->orsRenewAnswer->_value); die();
               break;
             case 'orsCancel':
               $orsC = &$res->orsCancel->_value;
               $orsC->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['CANCEL'] == 'z3950' || $oa_row['CANCEL'] == 'ors') {
-                $orsC->willReceive->_value = 'YES';
-                $orsC->synchronous->_value = 0;
-                $orsC->protocol->_value = $oa_row['CANCEL'];
-                if ($oa_row['CANCEL'] == 'z3950') {
-                  $orsC->address->_value = $oa_row['CANCEL_Z3950_ADDRESS'];
-                  $orsC->userId->_value = $oa_row['CANCEL_Z3950_USER'];
-                  $orsC->groupId->_value = $oa_row['CANCEL_Z3950_GROUP'];
-                  $orsC->passWord->_value = $oa_row['CANCEL_Z3950_PASSWORD'];
-                }
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsC, $oa_row);
               }
               else {
-                $orsC->willReceive->_value = 'NO';
-                $orsC->synchronous->_value = 0;
+                if ($oa_row['CANCEL'] == 'z3950' || $oa_row['CANCEL'] == 'ors') {
+                  $orsC->willReceive->_value = 'YES';
+                  $orsC->synchronous->_value = 0;
+                  $orsC->protocol->_value = $oa_row['CANCEL'];
+                  if ($oa_row['CANCEL'] == 'z3950') {
+                    $orsC->address->_value = $oa_row['CANCEL_Z3950_ADDRESS'];
+                    $orsC->userId->_value = $oa_row['CANCEL_Z3950_USER'];
+                    $orsC->groupId->_value = $oa_row['CANCEL_Z3950_GROUP'];
+                    $orsC->passWord->_value = $oa_row['CANCEL_Z3950_PASSWORD'];
+                  }
+                }
+                else {
+                  $orsC->willReceive->_value = 'NO';
+                  $orsC->synchronous->_value = 0;
+                }
               }
               //var_dump($res->orsCancel->_value); die();
               break;
             case 'orsCancelReply':
               $orsCR = &$res->orsCancelReply->_value;
               $orsCR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['CANCELREPLY'] == 'z3950' || $oa_row['CANCELREPLY'] == 'ors') {
-                $orsCR->willReceive->_value = 'YES';
-                $orsCR->synchronous->_value = $oa_row['CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                $orsCR->protocol->_value = $oa_row['CANCELREPLY'];
-                if ($oa_row['CANCELREPLY'] == 'z3950') {
-                  $orsCR->address->_value = $oa_row['CANCELREPLY_Z3950_ADDRESS'];
-                  $orsCR->userId->_value = $oa_row['CANCELREPLY_Z3950_USER'];
-                  $orsCR->groupId->_value = $oa_row['CANCELREPLY_Z3950_GROUP'];
-                  $orsCR->passWord->_value = $oa_row['CANCELREPLY_Z3950_PASSWORD'];
-                }
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsCR, $oa_row);
               }
               else {
-                $orsCR->willReceive->_value = 'NO';
-                $orsCR->synchronous->_value = 0;
+                if ($oa_row['CANCELREPLY'] == 'z3950' || $oa_row['CANCELREPLY'] == 'ors') {
+                  $orsCR->willReceive->_value = 'YES';
+                  $orsCR->synchronous->_value = $oa_row['CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
+                  $orsCR->protocol->_value = $oa_row['CANCELREPLY'];
+                  if ($oa_row['CANCELREPLY'] == 'z3950') {
+                    $orsCR->address->_value = $oa_row['CANCELREPLY_Z3950_ADDRESS'];
+                    $orsCR->userId->_value = $oa_row['CANCELREPLY_Z3950_USER'];
+                    $orsCR->groupId->_value = $oa_row['CANCELREPLY_Z3950_GROUP'];
+                    $orsCR->passWord->_value = $oa_row['CANCELREPLY_Z3950_PASSWORD'];
+                  }
+                }
+                else {
+                  $orsCR->willReceive->_value = 'NO';
+                  $orsCR->synchronous->_value = 0;
+                }
               }
               //var_dump($res->orsCancelReply->_value); die();
               break;
@@ -1093,16 +1123,37 @@ class openAgency extends webServiceServer {
             case 'orsShipping':
               $orsS = &$res->orsShipping->_value;
               $orsS->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
-              $orsS->willReceive->_value = (in_array($oa_row['SHIPPING'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-              $orsS->synchronous->_value = 0;
-              $orsS->protocol->_value = $oa_row['SHIPPING'];
-              $orsS->address->_value = '';
-              $orsS->userId->_value = $oa_row['SHIPPING_Z3950_USER'];
-              $orsS->groupId->_value = $oa_row['SHIPPING_Z3950_GROUP'];
-              $orsS->passWord->_value = ($oa_row['SHIPPING'] == 'z3950' ? $oa_row['SHIPPING_Z3950_PASSWORD'] : $oa_row['SHIPPING_NCIP_AUTH']);
-              if ($oa_row['SHIPPING'] == 'z3950')
-                $orsS->address->_value = $oa_row['SHIPPING_Z3950_ADDRESS'];
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsS, $oa_row);
+              }
+              else {
+                $orsS->willReceive->_value = (in_array($oa_row['SHIPPING'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
+                $orsS->synchronous->_value = 0;
+                $orsS->protocol->_value = $oa_row['SHIPPING'];
+                $orsS->address->_value = '';
+                $orsS->userId->_value = $oa_row['SHIPPING_Z3950_USER'];
+                $orsS->groupId->_value = $oa_row['SHIPPING_Z3950_GROUP'];
+                $orsS->passWord->_value = ($oa_row['SHIPPING'] == 'z3950' ? $oa_row['SHIPPING_Z3950_PASSWORD'] : $oa_row['SHIPPING_NCIP_AUTH']);
+                if ($oa_row['SHIPPING'] == 'z3950')
+                  $orsS->address->_value = $oa_row['SHIPPING_Z3950_ADDRESS'];
+              }
               //var_dump($res->orsShipping->_value); die();
+              break;
+            case 'orsStatusRequest':
+              $orsSR = &$res->orsStatusRequest->_value;
+              $orsSR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsSR->willReceive->_value = '';
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsSR, $oa_row);
+              }
+              break;
+            case 'orsStatusResponse':
+              $orsSR = &$res->orsStatusResponse->_value;
+              $orsSR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsSR->willReceive->_value = '';
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsSR, $oa_row);
+              }
               break;
             case 'serverInformation':
               $serI = &$res->serverInformation->_value;
@@ -2211,6 +2262,17 @@ class openAgency extends webServiceServer {
     $row['ZBESTIL_GROUPID'] = $auth->groupIdAut->_value;;
     $row['ZBESTIL_USERID'] = $auth->userIdAut->_value;;
     $row['ZBESTIL_PASSW'] = $auth->passwordAut->_value;;
+  }
+
+  /** \brief add iso18626 protocol info to result
+   *
+   */
+  private function fill_iso18626_protocol(&$buf, $row) {
+    $buf->willReceive->_value = 'YES';
+    $buf->synchronous->_value = 0;
+    $buf->protocol->_value = 'iso18626';
+    $buf->address->_value = $row['ISO18626_ADDRESS'];
+    $buf->passWord->_value = $row['ISO18626_PASSWORD'];
   }
 
   /** \brief add iso18626 data to result
