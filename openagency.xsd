@@ -313,7 +313,6 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="serviceResponse">
 		<xs:complexType>
 			<xs:choice>
-				<xs:element ref="oa:serverInformation"/>
 				<xs:element ref="oa:information"/>
 				<xs:element ref="oa:orsAnswer"/>
 				<xs:element ref="oa:orsCancel"/>
@@ -329,6 +328,9 @@ You should have received a copy of the GNU Affero General Public License along w
 				<xs:element ref="oa:orsRenewAnswer"/>
 				<xs:element ref="oa:orsRenewItemUser"/>
 				<xs:element ref="oa:orsShipping"/>
+				<xs:element ref="oa:orsStatusRequest"/>
+				<xs:element ref="oa:orsStatusResponse"/>
+				<xs:element ref="oa:serverInformation"/>
 				<xs:element ref="oa:userOrderParameters"/>
 				<xs:element ref="oa:userParameters"/>
 				<xs:element ref="oa:error"/>
@@ -766,6 +768,8 @@ You should have received a copy of the GNU Affero General Public License along w
 	<xs:element name="orsRenewAnswer" type="oa:ors"/>
 	<xs:element name="orsRenewItemUser" type="oa:ors"/>
 	<xs:element name="orsShipping" type="oa:ors"/>
+	<xs:element name="orsStatusRequest" type="oa:ors"/>
+	<xs:element name="orsStatusResponse" type="oa:ors"/>
 	<xs:element name="outputType" type="oa:outputTypeType">
 		<xs:annotation>
 			<xs:documentation xml:lang="en">E.g. xml, json or php.</xs:documentation>
@@ -1149,6 +1153,8 @@ You should have received a copy of the GNU Affero General Public License along w
 			<xs:enumeration value="orsRenewAnswer"/>
 			<xs:enumeration value="orsRenewItemUser"/>
 			<xs:enumeration value="orsShipping"/>
+			<xs:enumeration value="orsStatusRequest"/>
+			<xs:enumeration value="orsStatusResponse"/>
 			<xs:enumeration value="serverInformation"/>
 			<xs:enumeration value="userParameters"/>
 		</xs:restriction>
