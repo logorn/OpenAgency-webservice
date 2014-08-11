@@ -1038,7 +1038,7 @@ class openAgency extends webServiceServer {
               $orsRA = &$res->orsRenewAnswer->_value;
               $orsRA->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsR, $oa_row);
+                self::fill_iso18626_protocol($orsRA, $oa_row);
               }
               else {
                 if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
