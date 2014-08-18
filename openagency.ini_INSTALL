@@ -8,7 +8,7 @@
 ;service_http_error = HTTP/1.0 503 Service Unavailable
 
 ;version
-version = 2.13
+version = 2.14
 
 ; set only_https to accept https call only
 ;only_https = 1
@@ -74,6 +74,12 @@ agency_credentials = some_user/some_pwd@some.server.dbc.dk
 ;cache_host = localhost
 ;cache_port = 11211
 ;cache_expire = 60
+;
+; each operation can be set to cache differently by setting cache_operation[operation] specifically
+; like:
+;   cache_operation_expire[automation] = 600
+; the operations can be found in soapAction. 
+; if cache_operation_expire is not set for operation(s), the cache_expire above will be used
 
 [aaa]
 ; aaa Authentication, Access control and Accounting
