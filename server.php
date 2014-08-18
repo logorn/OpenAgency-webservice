@@ -31,13 +31,14 @@ require_once 'OLS_class_lib/memcache_class.php';
 
 class openAgency extends webServiceServer {
   protected $cache;
+  protected $cache_expire = array();
 
   public function __construct() {
     webServiceServer::__construct('openagency.ini');
     $this->cache = new cache($this->config->get_value('cache_host', 'setup'),
                              $this->config->get_value('cache_port', 'setup'),
                              $this->config->get_value('cache_expire', 'setup'));
-
+    $this->cache_expire = $this->config->get_value('cache_operation_expire', 'setup');
   }
 
 
@@ -62,6 +63,7 @@ class openAgency extends webServiceServer {
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
       $cache_key = 'OA_aut_' . $this->config->get_inifile_hash() . $agency . $param->autService->_value . $param->materialType->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -217,6 +219,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $cache_key = 'OA_enc_' . $this->config->get_inifile_hash() . $param->email->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -281,6 +284,7 @@ class openAgency extends webServiceServer {
       $agency = $this->strip_agency($param->agencyId->_value);
       $mat_type = strtolower($param->orderMaterialType->_value);
       $cache_key = 'OA_endUOP_' . $this->config->get_inifile_hash() . $agency . $param->orderMaterialType->_value . $param->ownedByAgency->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -365,6 +369,7 @@ class openAgency extends webServiceServer {
       $profile_name = $param->profileName->_value;
       $trusted_ip = $this->trusted_culr_ip($param->authentication->_value, $param->requesterIp->_value);
       $cache_key = 'OA_getCP' . $this->config->get_inifile_hash() . $agency . $profile_name;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -458,6 +463,7 @@ class openAgency extends webServiceServer {
                    $param->lastUpdated->_value . 
                    $param->libraryType->_value . 
                    $param->libraryStatus->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -596,6 +602,7 @@ class openAgency extends webServiceServer {
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
       $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -689,6 +696,7 @@ class openAgency extends webServiceServer {
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
       $cache_key = 'OA_ser_' . $this->config->get_inifile_hash() . $agency . $param->service->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1399,6 +1407,7 @@ class openAgency extends webServiceServer {
                    $this->stringiefy($param->libraryStatus) . '_' . 
                    $this->stringiefy($param->pickupAllowed) . '_' . 
                    $this->stringiefy($param->sort);
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1595,6 +1604,7 @@ class openAgency extends webServiceServer {
     else {
       //var_dump($this->aaa->get_rights()); die();
       $cache_key = 'OA_namL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1732,6 +1742,7 @@ class openAgency extends webServiceServer {
                    $param->pickupAllowed->_value . 
                    $param->libraryStatus->_value . 
                    $param->libraryType->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -1971,6 +1982,7 @@ class openAgency extends webServiceServer {
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
       $cache_key = 'OA_opeSP_' . $this->config->get_inifile_hash() . $agency . $param->profileName->_value . $param->profileVersion->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -2111,6 +2123,7 @@ class openAgency extends webServiceServer {
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
       $cache_key = 'OA_remA_' . $this->config->get_inifile_hash() . $agency;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -2209,6 +2222,7 @@ class openAgency extends webServiceServer {
     else {
       $agency = $this->strip_agency($param->agencyId->_value);
       $cache_key = 'OA_reqO_' . $this->config->get_inifile_hash() . $agency;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
         return $ret;
@@ -2511,6 +2525,14 @@ class openAgency extends webServiceServer {
    */
   private function build_regexp_like($par) {
     return '(^|[ ,.;:])' . str_replace('?', '[a-zæøå0-9]*', $par) . '([ .,;:]|$)';
+  }
+
+  /** \brief
+   */
+  private function set_cache_expire($expire) {
+    if (!is_null($expire)) {
+      $this->cache->set_expire((int) $expire);
+    }
   }
 
 }
