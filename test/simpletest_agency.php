@@ -67,7 +67,7 @@ class TestOfAgency extends WebTestCase {
     $this->test_cases[] = 
       array('action' => array('post' => 'endUserOrderPolicyRequest', 'get' => 'endUserOrderPolicy'),
             'pars' => array('agencyId' => 'DK-710117', 'orderMaterialType' => 'monograph', 'ownedByAgency' => '1'),
-            'text' => array('1'),
+            'text' => array('0'),
             'pattern' => array('/willReceive.*condition.*endUserOrderPolicyResponse/'));
   // findLibrary
     $this->test_cases[] = 
@@ -141,7 +141,7 @@ class TestOfAgency extends WebTestCase {
       $this->assertResponse($http_codes);
     }
     if ($texts && is_array($texts)) {
-      foreach ($texts as $text) {
+      foreach ($texts as $i => $text) {
         $this->assertText($text);
       }
     }
