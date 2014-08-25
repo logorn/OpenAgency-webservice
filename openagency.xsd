@@ -157,8 +157,10 @@ You should have received a copy of the GNU Affero General Public License along w
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="oa:pickupAgency"/>
-				<xs:element ref="oa:iso18626" minOccurs="0"/>
-				<xs:element ref="oa:z3950Ill" minOccurs="0"/>
+			  <xs:choice>
+				  <xs:element ref="oa:iso18626" minOccurs="0"/>
+				  <xs:element ref="oa:z3950Ill" minOccurs="0"/>
+			  </xs:choice>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
