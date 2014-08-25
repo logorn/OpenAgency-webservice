@@ -42,7 +42,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief automation
+  /** \brief Fetch information about automation of ILL
    *
    * Request:
    * - agencyId
@@ -199,7 +199,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief encryption
+  /** \brief Fetch encryption to use when sending mails
    *
    * Request:
    * - email
@@ -265,7 +265,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief endUserOrderPolicy
+  /** \brief Fetch endUserOrderPolicy - which item can be ordered by externals systems
    *
    * Request:
    * - agencyId
@@ -350,7 +350,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief getCulrProfile
+  /** \brief Fetch the CulrProfile
    *
    * Request:
    * - agencyId
@@ -537,7 +537,8 @@ class openAgency extends webServiceServer {
                         ors.shipping ors_shipping, ors.cancel ors_cancel, ors.answer ors_answer, 
                         ors.cancelreply ors_cancelreply, ors.cancel_answer_synchronic ors_cancel_answer_synchronic,
                         ors.renew ors_renew, ors.renewanswer ors_renewanswer, 
-                        ors.renew_answer_synchronic ors_renew_answer_synchronic
+                        ors.renew_answer_synchronic ors_renew_answer_synchronic,
+                        ors.iso18626_address, ors.iso18626_password
                 FROM vip v, vip_vsn vsn, vip_danbib vd, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
                      vip_sup sup, vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat, open_agency_ors ors
                 WHERE 
@@ -564,11 +565,17 @@ class openAgency extends webServiceServer {
             }
             if ($row) {
               self::fill_pickupAgency($registryInfo->pickupAgency->_value, $row);
-              self::set_iso18626($registryInfo, $row);
               if ($row['HOLDINGSFORMAT'] == 'B') {
-                self::use_dbc_as_z3950_target($row, $param->authentication->_value);
+                $dbc_target = $this->config->get_value('dbc_target', 'setup');
+                self::use_dbc_as_z3950_target($row, $dbc_target['z3950'], $param->authentication->_value);
+                self::use_dbc_as_iso18626_target($row, $dbc_target['iso18626']);
               }
-              self::set_z3950Ill($registryInfo, $row);
+              if ($row['MAILBESTIL_VIA'] == 'C') {
+                self::set_z3950Ill($registryInfo, $row);
+              }
+              elseif ($row['MAILBESTIL_VIA'] == 'E') {
+                self::set_iso18626($registryInfo, $row);
+              }
             }
           }
           if ($registryInfo)
@@ -587,7 +594,7 @@ class openAgency extends webServiceServer {
     return $ret;
   }
 
-  /** \brief getSaouLicenseInfo
+  /** \brief Fetch SaouLicenseInfo
    *
    * Request:
    * - agencyId
@@ -662,7 +669,7 @@ class openAgency extends webServiceServer {
     return $ret;
   }
 
-  /** \brief service
+  /** \brief Fetching different info for the ORS-system
    *
    * Request:
    * - agencyId
@@ -1353,7 +1360,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief findLibrary
+  /** \brief Fetch information about the library: name, address, ...
    *
    * Request:
    * - agencyId
@@ -1589,7 +1596,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief nameList
+  /** \brief Fetch a list of libraries
    *
    * Request:
    * - libraryType
@@ -1658,7 +1665,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief pickupAgencyList
+  /** \brief Fetch information about pickupAgency
    *
    * Request:
    * - agencyId
@@ -1957,7 +1964,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief openSearchProfile
+  /** \brief Fetch search profiles for the openSearch service
    *
    * Request:
    * - agencyId
@@ -2105,7 +2112,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief remoteAccess
+  /** \brief Fetch information about remote access 
    *
    * Request:
    * - agencyId
@@ -2203,7 +2210,7 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief requestOrder
+  /** \brief Fetch an ordered sequence of agencies
    *
    * Request:
    * - agencyId
@@ -2270,16 +2277,31 @@ class openAgency extends webServiceServer {
 
   /** \brief overwrite z-target informations
    *
+   * @param row (array) - one result array from the DB, adjusted to DBC settings
+   * @param dbc_z3950 (array) - DBC settings for z3950
+   * @param auth (object) - Authentication object of the client
    */
-  private function use_dbc_as_z3950_target(&$row, $auth) {
-    $row['URL_ITEMORDER_BESTIL'] = 'z3950.dbc.dk:210/danbib';
+  private function use_dbc_as_z3950_target(&$row, $dbc_z3950, $auth) {
+    $row['URL_ITEMORDER_BESTIL'] = $dbc_z3950['address'];
     $row['ZBESTIL_GROUPID'] = $auth->groupIdAut->_value;;
     $row['ZBESTIL_USERID'] = $auth->userIdAut->_value;;
     $row['ZBESTIL_PASSW'] = $auth->passwordAut->_value;;
   }
 
+  /** \brief overwrite iso18626 informations
+   *
+   * @param row (array) - one result array from the DB, adjusted to DBC settings
+   * @param dbc_iso18626 (array) - DBC settings for iso18626
+   */
+  private function use_dbc_as_iso18626_target(&$row, $dbc_iso18626) {
+    $row['ISO18626_ADDRESS'] = $dbc_iso18626['address'];
+    $row['ISO18626_PASSWORD'] = $dbc_iso18626['password'];
+  }
+
   /** \brief add iso18626 protocol info to result
    *
+   * @param buf (object) - structure for the result
+   * @param row (array) - one result array from the DB
    */
   private function fill_iso18626_protocol(&$buf, $row) {
     $buf->willReceive->_value = 'YES';
@@ -2291,6 +2313,8 @@ class openAgency extends webServiceServer {
 
   /** \brief add iso18626 data to result
    *
+   * @param buf (object) - structure for the result
+   * @param row (array) - one result array from the DB
    */
   private function set_iso18626(&$buf, $row) {
     if ($row['ISO18626_ADDRESS'] || $row['ISO18626_PASSWORD']) {
@@ -2302,28 +2326,30 @@ class openAgency extends webServiceServer {
 
   /** \brief add z39.50 ill data to result
    *
+   * @param buf (object) - structure for the result
+   * @param row (array) - one result array from the DB
    */
   private function set_z3950Ill(&$buf, $row) {
-    if ($row['MAILBESTIL_VIA'] == 'C') {
-      $val = &$buf->z3950Ill->_value;
-      if ($row['URL_ITEMORDER_BESTIL']) $val->z3950Address->_value = $row['URL_ITEMORDER_BESTIL'];
-      if ($row['ZBESTIL_GROUPID']) $val->z3950GroupId->_value = $row['ZBESTIL_GROUPID'];
-      if ($row['ZBESTIL_USERID']) $val->z3950UserId->_value = $row['ZBESTIL_USERID'];
-      if ($row['ZBESTIL_PASSW']) $val->z3950Password->_value = $row['ZBESTIL_PASSW'];
-      $val->illRequest->_value = 1;    // AHP dok?
-      $val->illAnswer->_value = ($row['ORS_ANSWER'] == 'z3950' ? '1' : '0');
-      $val->illShipped->_value = ($row['ORS_SHIPPING'] == 'z3950' ? '1' : '0');
-      $val->illCancel->_value = ($row['ORS_CANCEL'] == 'z3950' ? '1' : '0');
-      $val->illCancelReply->_value = ($row['ORS_CANCELREPLY'] == 'z3950' ? '1' : '0');
-      $val->illCancelReplySynchronous->_value = ($row['ORS_CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
-      $val->illRenew->_value = ($row['ORS_RENEW'] == 'z3950' ? '1' : '0');
-      $val->illRenewAnswer->_value = ($row['ORS_RENEWANSWER'] == 'z3950' ? '1' : '0');
-      $val->illRenewAnswerSynchronous->_value = ($row['ORS_RENEW_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
-    }
+    $val = &$buf->z3950Ill->_value;
+    if ($row['URL_ITEMORDER_BESTIL']) $val->z3950Address->_value = $row['URL_ITEMORDER_BESTIL'];
+    if ($row['ZBESTIL_GROUPID']) $val->z3950GroupId->_value = $row['ZBESTIL_GROUPID'];
+    if ($row['ZBESTIL_USERID']) $val->z3950UserId->_value = $row['ZBESTIL_USERID'];
+    if ($row['ZBESTIL_PASSW']) $val->z3950Password->_value = $row['ZBESTIL_PASSW'];
+    $val->illRequest->_value = 1;    // AHP dok?
+    $val->illAnswer->_value = ($row['ORS_ANSWER'] == 'z3950' ? '1' : '0');
+    $val->illShipped->_value = ($row['ORS_SHIPPING'] == 'z3950' ? '1' : '0');
+    $val->illCancel->_value = ($row['ORS_CANCEL'] == 'z3950' ? '1' : '0');
+    $val->illCancelReply->_value = ($row['ORS_CANCELREPLY'] == 'z3950' ? '1' : '0');
+    $val->illCancelReplySynchronous->_value = ($row['ORS_CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
+    $val->illRenew->_value = ($row['ORS_RENEW'] == 'z3950' ? '1' : '0');
+    $val->illRenewAnswer->_value = ($row['ORS_RENEWANSWER'] == 'z3950' ? '1' : '0');
+    $val->illRenewAnswerSynchronous->_value = ($row['ORS_RENEW_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
   }
 
   /** \brief parse status and status_eget from vip_fjernlaan 
    *
+   * @param status (char) - single character status to translate
+   * @return (string) - translated string
    */
   private function parse_will_send($status) {
     switch ($status) {
@@ -2336,6 +2362,9 @@ class openAgency extends webServiceServer {
   /** \brief Fill pickupAgency with info from oracle
    *
    * used by findLibrary and pickupAgencyList to ensure identical structure
+   * @param pickupAgency (object) - Structure for result
+   * @param row (array) - one result array from the DB
+   * @param ip_list (array) - List of ip-adresses for branchDomains
    */
   private function fill_pickupAgency(&$pickupAgency, $row, $ip_list = array()) {
     if (empty($pickupAgency)) {
@@ -2444,6 +2473,8 @@ class openAgency extends webServiceServer {
 
   /** \brief return an xs:boolean 
    *
+   * @param ip (char) - character to test
+   * @return (integer) - 1 for true and 0 for false
    */
   private function J_is_true($ch) {
     return ($ch === 'J' ? 1 : 0);
@@ -2451,6 +2482,9 @@ class openAgency extends webServiceServer {
 
   /** \brief Check if a given requester (auth and ip) is a trusted server/client
    *
+   * @param auth (object) - Authentication object of the client
+   * @param ip (string) - Client ip-address
+   * @return (boolean) - TRUE if the client has right 552
    */
   private function trusted_culr_ip($auth, $ip) {
     $fors = new aaa($this->config->get_section('aaa'));
@@ -2459,6 +2493,9 @@ class openAgency extends webServiceServer {
   }
 
   /** \brief set a node and its language attribute
+   * @param val (string) - value of the object
+   * @param lang (string) - language for the attribute
+   * @return (object) - with element _value and language attribute
    *
    */
   private function value_and_language($val, $lang) {
@@ -2468,7 +2505,8 @@ class openAgency extends webServiceServer {
   }
 
   /** \brief
-   *  return libraryno - align to 6 digits
+   * @param id (string) the library number, like 710100
+   * @return (string) - $id numeric aligned align to 6 digits
    */
   private function normalize_agency($id) {
     if (is_numeric($id))
@@ -2477,15 +2515,16 @@ class openAgency extends webServiceServer {
       return $id;
   }
 
-  /** \brief
-   *  return only digits, so something like DK-710100 returns 710100
+  /** \brief Removes anything but digits
+   * @param id (string) the ISIL number, like DK-710100
+   * @return (string) only digits, so something like DK-710100 returns 710100
    */
   private function strip_agency($id) {
     return preg_replace('/\D/', '', $id);
   }
 
-  /** \brief
-   *  removes chr-10 and chr-13
+  /** \brief Removes NL(ascii 10) and CR (ascii 13)
+   * @param arr (array of strings)
    */
   private function sanitize_array(&$arr) {
     if (is_array($arr)) {
@@ -2496,8 +2535,9 @@ class openAgency extends webServiceServer {
     }
   }
 
-  /** \brief
-   *  return true if xs:boolean is so
+  /** \brief converts an xs:boolean to a php boolean
+   * @param str (string)
+   * @return true if xs:boolean is so
    */
   private function xs_boolean($str) {
     return (strtolower($str) == 'true' || $str == 1);
@@ -2505,6 +2545,10 @@ class openAgency extends webServiceServer {
 
   /** \brief
    *  return change array to string. For cache key
+   *
+   * @param mix (object or array of objects) 
+   * @param glue (string) Seperator between the elements
+   * @return (string) the concatenated string
    */
   private function stringiefy($mix, $glue = '') {
     if (is_array($mix)) {
@@ -2522,12 +2566,17 @@ class openAgency extends webServiceServer {
    *
    * select navn from vip where regexp_like(navn, '[ ,.;:]bibliotek[ .,;:$]');
    * select bib_nr, navn from vip where regexp_like(lower(navn), '(^|[ ,.;:])krystal[a-zæøå]*([ .,;:]|$)');
+   *
+   * @param par (string) the string to eventually locate in the DB 
+   * @return (string) the DB like expression
    */
   private function build_regexp_like($par) {
     return '(^|[ ,.;:])' . str_replace('?', '[a-zæøå0-9]*', $par) . '([ .,;:]|$)';
   }
 
-  /** \brief
+  /** \brief alters the timeout for cahce invalidation
+   *
+   * @param expire (integer) Number of seconds to cache stuff
    */
   private function set_cache_expire($expire) {
     if (!is_null($expire)) {
