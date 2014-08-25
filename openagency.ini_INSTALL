@@ -70,6 +70,11 @@ dump_timer = openAgency(%s)
 
 agency_credentials = some_user/some_pwd@some.server.dbc.dk
 
+; DBC target address for order-systems
+dbc_target[z3950][address] = z3950.dbc.dk:210/danbib
+dbc_target[iso18626][address] = dbc_iso18626_address
+dbc_target[iso18626][password] = dbc_iso18626_password
+
 ; memcache - enabling this will cache result for 'cache_expire' seconds
 ;cache_host = localhost
 ;cache_port = 11211
