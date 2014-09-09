@@ -7,21 +7,28 @@
 ;service_http_error = HTTP/1.1 410 Gone
 ;service_http_error = HTTP/1.0 503 Service Unavailable
 
+; --------------
 ;version
 version = 2.14
 
+; --------------
 ; set only_https to accept https call only
 ;only_https = 1
 
+; --------------
 ; wsdl for service
 wsdl = openagency.wsdl
 
+; --------------
 ; in_house_domain may use ?ShowInfo and use create_sample form
 ;in_house_domain = .dbc.dk
 
+; --------------
 ; set to TRUE to expose the create_sample form
 ;show_samples = 1
+; show_samples_ip_list = 127.0.0.1
 
+; --------------
 ; soapActions and their corresponding request structure
 ; Can be found in the wsdl but is stated here for convenience
 soapAction[automation] = automationRequest
@@ -40,16 +47,20 @@ soapAction[service] = serviceRequest
 ;soapAction[proxyDomains] = proxyDomainsRequest
 ;soapAction[proxyIp] = proxyIpRequest
 
+; --------------
 ; validate
 ;validate[request] = openagency.xsd
 ;validate[response] = openagency.xsd
 
+; --------------
 ; prefixes and namespaces
 default_namespace_prefix = oa
 xmlns[oa] = http://oss.dbc.dk/ns/openagency
 
+; --------------
 xmldir = ./xml
 
+; --------------
 ; logfile for verbose output
 logfile = /tmp/openagency.log
 
@@ -68,13 +79,16 @@ verbose = WARNING+ERROR+FATAL+STAT+TIMER+TRACE+DEBUG+Z3950+OCI
 ; format for automatic timer dump %s is the operation used
 dump_timer = openAgency(%s)
 
+; --------------
 agency_credentials = some_user/some_pwd@some.server.dbc.dk
 
+; --------------
 ; DBC target address for order-systems
 dbc_target[z3950][address] = z3950.dbc.dk:210/danbib
 dbc_target[iso18626][address] = dbc_iso18626_address
 dbc_target[iso18626][password] = dbc_iso18626_password
 
+; --------------
 ; memcache - enabling this will cache result for 'cache_expire' seconds
 ;cache_host = localhost
 ;cache_port = 11211
@@ -85,6 +99,8 @@ dbc_target[iso18626][password] = dbc_iso18626_password
 ;   cache_operation_expire[automation] = 600
 ; the operations can be found in soapAction. 
 ; if cache_operation_expire is not set for operation(s), the cache_expire above will be used
+
+; ==============
 
 [aaa]
 ; aaa Authentication, Access control and Accounting
@@ -121,6 +137,7 @@ aaa_ip_rights[dbc][ressource]['netpunkt.dk'] = 500,550,551,552
 ;aaa_cache_seconds = 3600
 ;
 
+; ==============
 
 [rest]
 
@@ -274,9 +291,10 @@ action[service][] = outputType
 ;action[proxyIp][] = callback
 ;action[proxyIp][] = outputType
 
+; ==============
 
-; section to dump setting online
 [showinfo]
+; section to dump setting online
 ; make one or more line to display if ?ShowInfo is part of the url
 ; __var__ will be replace by the corresponding ini-file setting - if it exists
 ; __var.section__ will be replace by the corresponding ini-file setting from section [section]
@@ -288,6 +306,8 @@ action[service][] = outputType
 ;showinfo[] = aaa_credentials:    __aaa_credentials__
 ;showinfo[] = show_samples:       __show_samples__
 ;showinfo[] = </pre>
+
+; ==============
 
 [howru]
 test[] = service&agencyId=710100&service=orsItemRequest
