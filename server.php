@@ -554,7 +554,8 @@ class openAgency extends webServiceServer {
                   AND v.bib_nr = eng.bib_nr (+)
                   AND v.bib_nr = bestil.bib_nr (+)
                   AND v.bib_nr = ors.bib_nr (+)
-                  AND v.bib_nr = kat.bib_nr (+)';
+                  AND v.bib_nr = kat.bib_nr (+)
+                ORDER BY vsn.bib_nr ASC, v.bib_nr ASC';
           $oci->set_query($sql);
           while ($row = $oci->fetch_into_assoc()) {
             if (empty($curr_bib)) {
