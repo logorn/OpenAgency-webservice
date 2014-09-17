@@ -123,7 +123,7 @@ class openAgency extends webServiceServer {
                   $ap = &$res->autPotential->_value;
                   $ap->materialType->_value = $param->materialType->_value;
                   while ($vfb_row = $oci->fetch_into_assoc())
-                    $ap->responder[]->_value = $this->normalize_agency($vfb_row['BIB_NR']);
+                    $ap->responder[]->_value = self::normalize_agency($vfb_row['BIB_NR']);
                 }
                 catch (ociException $e) {
                   verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -391,7 +391,7 @@ class openAgency extends webServiceServer {
                            WHERE bib_nr = :bind_agency 
                              AND profilename = :bind_profile_name');
           while ($cp_row = $oci->fetch_into_assoc()) {
-            $cp->agencyId->_value = $this->normalize_agency($cp_row['BIB_NR']);
+            $cp->agencyId->_value = self::normalize_agency($cp_row['BIB_NR']);
             $cp->profileName->_value = $cp_row['PROFILENAME'];
             $cp->typeOfClient->_value = $cp_row['TYPEOFCLIENT'];
             $cp->contactTechName->_value = $cp_row['CONTACT_TECH_NAME'];
@@ -806,14 +806,14 @@ class openAgency extends webServiceServer {
           switch ($param->service->_value) {
             case 'information':
               $inf = &$res->information->_value;
-              $inf->agencyId->_value = $this->normalize_agency($oa_row['VV.BIB_NR']);
+              $inf->agencyId->_value = self::normalize_agency($oa_row['VV.BIB_NR']);
               $inf->agencyName->_value = $oa_row['VV.NAVN'];
               $inf->agencyPhone->_value = $oa_row['VV.TLF_NR'];
               $inf->agencyFax->_value = $oa_row['VV.FAX_NR'];
               $inf->agencyEmail->_value = $oa_row['VV.EMAIL'];
               $inf->agencyType->_value = $oa_row['VV.BIB_TYPE'];
               $inf->agencyCatalogueUrl->_value = $oa_row['URL_BIB_KAT'];
-              $inf->branchId->_value = $this->normalize_agency($oa_row['V.BIB_NR']);
+              $inf->branchId->_value = self::normalize_agency($oa_row['V.BIB_NR']);
               $inf->branchName->_value = $oa_row['V.NAVN'];
               $inf->branchPhone->_value = $oa_row['V.TLF_NR'];
               $inf->branchFax->_value = $oa_row['VD.SVAR_FAX'];
@@ -824,14 +824,14 @@ class openAgency extends webServiceServer {
               $inf->postalAddress->_value = $oa_row['V.BADR'];
               $inf->postalCode->_value = $oa_row['V.BPOSTNR'];
               $inf->city->_value = $oa_row['V.BCITY'];
-              $inf->isil->_value = $this->normalize_agency($oa_row['ISIL']);
+              $inf->isil->_value = self::normalize_agency($oa_row['ISIL']);
               $inf->junction->_value = $oa_row['KNUDEPUNKT'];
               $inf->kvik->_value = ($oa_row['KVIK'] == 'kvik' ? 'YES' : 'NO');
               $inf->lookupUrl->_value = $oa_row['URL_VIDERESTIL'];
               $inf->norfri->_value = ($oa_row['NORFRI'] == 'norfri' ? 'YES' : 'NO');
               $inf->requestOrder->_value = $oa_row['USE_LAANEVEJ'];
-              if (is_null($inf->sender->_value = $this->normalize_agency($oa_row['CHANGE_REQUESTER'])))
-                $inf->sender->_value = $this->normalize_agency($oa_row['V.BIB_NR']);
+              if (is_null($inf->sender->_value = self::normalize_agency($oa_row['CHANGE_REQUESTER'])))
+                $inf->sender->_value = self::normalize_agency($oa_row['V.BIB_NR']);
               $inf->replyToEmail->_value = $oa_row['VD.SVAR_EMAIL'];
               foreach ($consortia as $c_key => &$c) {
                 $inf->consortia[$c_key]->_value->agencyId->_value = $c['BIB_NR_VIDERESTIL'];
@@ -841,7 +841,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsAnswer':
               $orsA = &$res->orsAnswer->_value;
-              $orsA->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsA, $oa_row);
               }
@@ -863,7 +863,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsCancelRequestUser':
               $orsCRU = &$res->orsCancelRequestUser->_value;
-              $orsCRU->responder->_value = $this->normalize_agency($oa_row['VK.BIB_NR']);
+              $orsCRU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
               $orsCRU->willReceive->_value = ($oa_row['NCIP_CANCEL'] == 'J' ? 'YES' : 'NO');
               $orsCRU->synchronous->_value = 0;
               $orsCRU->address->_value = $oa_row['NCIP_CANCEL_ADDRESS'];
@@ -872,7 +872,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsEndUserRequest':
               $orsEUR = &$res->orsEndUserRequest->_value;
-              $orsEUR->responder->_value = $this->normalize_agency($oa_row['VB.BIB_NR']);
+              $orsEUR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
               $orsEUR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
               $orsEUR->synchronous->_value = 0;
               switch ($oa_row['BESTIL_VIA']) {
@@ -899,7 +899,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsEndUserIllRequest':
               $orsEUIR = &$res->orsEndUserIllRequest->_value;
-              $orsEUIR->responder->_value = $this->normalize_agency($oa_row['VB.BIB_NR']);
+              $orsEUIR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
               $orsEUIR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
               $orsEUIR->synchronous->_value = 0;
               switch ($oa_row['BESTIL_FJL_VIA']) {
@@ -920,7 +920,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsItemRequest':
               $orsIR = &$res->orsItemRequest->_value;
-              $orsIR->responder->_value = $this->normalize_agency($oa_row['VD.BIB_NR']);
+              $orsIR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
               switch ($oa_row['MAILBESTIL_VIA']) {
                 case 'A':
                   $orsIR->willReceive->_value = 'YES';
@@ -972,7 +972,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsLookupUser':
               $orsLU = &$res->orsLookupUser->_value;
-              $orsLU->responder->_value = $this->normalize_agency($oa_row['VK.BIB_NR']);
+              $orsLU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
               $orsLU->willReceive->_value = ($oa_row['NCIP_LOOKUP_USER'] == 'J' ? 'YES' : 'NO');
               $orsLU->synchronous->_value = 0;
               $orsLU->address->_value = $oa_row['NCIP_LOOKUP_USER_ADDRESS'];
@@ -981,7 +981,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsRecall':
               $orsR = &$res->orsRecall->_value;
-              $orsR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               $orsR->willReceive->_value = (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
               $orsR->synchronous->_value = 0;
               $orsR->protocol->_value = $oa_row['RECALL'];
@@ -995,7 +995,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsReceipt':
               $orsR = &$res->orsReceipt->_value;
-              $orsR->responder->_value = $this->normalize_agency($oa_row['VD.BIB_NR']);
+              $orsR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
               $orsR->willReceive->_value = (in_array($oa_row['MAILKVITTER_VIA'], array('A', 'B', 'C')) ? 'YES' : 'NO');
               $orsR->synchronous->_value = 0;
               if ($oa_row['MAILKVITTER_VIA'] == 'C') {
@@ -1029,7 +1029,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsRenew':
               $orsR = &$res->orsRenew->_value;
-              $orsR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsR, $oa_row);
               }
@@ -1054,7 +1054,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsRenewAnswer':
               $orsRA = &$res->orsRenewAnswer->_value;
-              $orsRA->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsRA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsRA, $oa_row);
               }
@@ -1081,7 +1081,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsCancel':
               $orsC = &$res->orsCancel->_value;
-              $orsC->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsC->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsC, $oa_row);
               }
@@ -1106,7 +1106,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsCancelReply':
               $orsCR = &$res->orsCancelReply->_value;
-              $orsCR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsCR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsCR, $oa_row);
               }
@@ -1131,7 +1131,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsRenewItemUser':
               $orsRIU = &$res->orsRenewItemUser->_value;
-              $orsRIU->responder->_value = $this->normalize_agency($oa_row['VK.BIB_NR']);
+              $orsRIU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
               $orsRIU->willReceive->_value = ($oa_row['NCIP_RENEW'] == 'J' ? 'YES' : 'NO');
               $orsRIU->synchronous->_value = 0;
               $orsRIU->address->_value = $oa_row['NCIP_RENEW_ADDRESS'];
@@ -1140,7 +1140,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsShipping':
               $orsS = &$res->orsShipping->_value;
-              $orsS->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsS->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsS, $oa_row);
               }
@@ -1159,7 +1159,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsStatusRequest':
               $orsSR = &$res->orsStatusRequest->_value;
-              $orsSR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               $orsSR->willReceive->_value = '';
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsSR, $oa_row);
@@ -1167,7 +1167,7 @@ class openAgency extends webServiceServer {
               break;
             case 'orsStatusResponse':
               $orsSR = &$res->orsStatusResponse->_value;
-              $orsSR->responder->_value = $this->normalize_agency($oa_row['OAO.BIB_NR']);
+              $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               $orsSR->willReceive->_value = '';
               if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                 self::fill_iso18626_protocol($orsSR, $oa_row);
@@ -1175,8 +1175,8 @@ class openAgency extends webServiceServer {
               break;
             case 'serverInformation':
               $serI = &$res->serverInformation->_value;
-              $serI->responder->_value = $this->normalize_agency($oa_row['VD.BIB_NR']);
-              $serI->isil->_value = $this->normalize_agency($oa_row['ISIL']);
+              $serI->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
+              $serI->isil->_value = self::normalize_agency($oa_row['ISIL']);
               if ($oa_row['ISO20775_URL']) {
                 $serI->protocol->_value = 'iso20775';
                 $serI->address->_value = $oa_row['ISO20775_URL'];
@@ -1645,7 +1645,7 @@ class openAgency extends webServiceServer {
                             AND (v.delete_mark is null or v.delete_mark = :bind_u)
                             ' . $filter_bib_type);
             while ($vv_row = $oci->fetch_into_assoc()) {
-              $o->agencyId->_value = $this->normalize_agency($vv_row['BIB_NR']);
+              $o->agencyId->_value = self::normalize_agency($vv_row['BIB_NR']);
               $o->agencyName->_value = $vv_row['NAVN'];
               $res->agency[]->_value = $o;
               unset($o);
@@ -2372,12 +2372,12 @@ class openAgency extends webServiceServer {
   private function fill_pickupAgency(&$pickupAgency, $row, $ip_list = array()) {
     if (empty($pickupAgency)) {
       if (isset($row['VSN_NAVN'])) $pickupAgency->agencyName->_value = $row['VSN_NAVN'];
-      if (isset($row['VSN_BIB_NR'])) $pickupAgency->agencyId->_value = $row['VSN_BIB_NR'];
+      if (isset($row['VSN_BIB_NR'])) $pickupAgency->agencyId->_value = self::normalize_agency($row['VSN_BIB_NR']);
       if (isset($row['VSN_BIB_TYPE'])) $pickupAgency->agencyType->_value = $row['VSN_BIB_TYPE'];
       if (isset($row['VSN_EMAIL'])) $pickupAgency->agencyEmail->_value = $row['VSN_EMAIL'];
       if (isset($row['VSN_TLF_NR'])) $pickupAgency->agencyPhone->_value = $row['VSN_TLF_NR'];
       if (isset($row['VSN_FAX_NR'])) $pickupAgency->agencyFax->_value = $row['VSN_FAX_NR'];
-      $pickupAgency->branchId->_value = $row['BIB_NR'];
+      $pickupAgency->branchId->_value = self::normalize_agency($row['BIB_NR']);
       $pickupAgency->branchType->_value = $row['TYPE'];
       if (empty($pickupAgency->branchName)) {
         if ($row['NAVN']) {
