@@ -61,7 +61,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_aut_' . $this->config->get_inifile_hash() . $agency . $param->autService->_value . $param->materialType->_value;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
@@ -147,8 +147,8 @@ class openAgency extends webServiceServer {
               $ar->requester->_value = $agency;
               $ar->materialType->_value = $param->materialType->_value;
               if ($vf_row = $oci->fetch_into_assoc()) {
-                $ar->willSend->_value = $this->parse_will_send($vf_row['STATUS']);
-                $ar->willSendOwn->_value = $this->parse_will_send($vf_row['STATUS_EGET']);
+                $ar->willSend->_value = self::parse_will_send($vf_row['STATUS']);
+                $ar->willSendOwn->_value = self::parse_will_send($vf_row['STATUS_EGET']);
                 $ar->autPeriod->_value = $vf_row['PERIODE'];
                 $ar->autId->_value = $vf_row['ID_NR'];
                 $ar->autChoice->_value = $vf_row['VALG'];
@@ -281,7 +281,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $mat_type = strtolower($param->orderMaterialType->_value);
       $cache_key = 'OA_endUOP_' . $this->config->get_inifile_hash() . $agency . $param->orderMaterialType->_value . $param->ownedByAgency->_value;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
@@ -305,7 +305,7 @@ class openAgency extends webServiceServer {
         $assoc['music']     = array('MUSIK_BEST_MODT', 'BEST_TEKST_MUSIK');
         $assoc['newspaper'] = array('AVIS_BEST_MODT',  'BEST_TEKST_AVIS');
         $assoc['video']     = array('VIDEO_BEST_MODT', 'BEST_TEKST_VIDEO');
-        if ($this->xs_boolean($param->ownedByAgency->_value)) {
+        if (self::xs_boolean($param->ownedByAgency->_value)) {
           $fjernl = '';
         }
         else {
@@ -325,8 +325,8 @@ class openAgency extends webServiceServer {
                 ($vb_row['BEST_MODT'] == 'J' && ($vb_row['WR'] == 'J' || $vb_row['WR'] == 'B') ? 1 : 0);
               if ($vb_row['WR'] == 'B') {
                 $col = $assoc[$mat_type][1] . $fjernl;
-                $res->condition[] = $this->value_and_language($vb_row[$col], 'dan');
-                $res->condition[] = $this->value_and_language($vb_row[$col.'_E'], 'eng');
+                $res->condition[] = self::value_and_language($vb_row[$col], 'dan');
+                $res->condition[] = self::value_and_language($vb_row[$col.'_E'], 'eng');
               }
             }
           }
@@ -365,9 +365,9 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 551))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $profile_name = $param->profileName->_value;
-      $trusted_ip = $this->trusted_culr_ip($param->authentication->_value, $param->requesterIp->_value);
+      $trusted_ip = self::trusted_culr_ip($param->authentication->_value, $param->requesterIp->_value);
       $cache_key = 'OA_getCP' . $this->config->get_inifile_hash() . $agency . $profile_name;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
@@ -400,24 +400,24 @@ class openAgency extends webServiceServer {
             $cp->contactAdmName->_value = $cp_row['CONTACT_ADM_NAME'];
             $cp->contactAdmMail->_value = $cp_row['CONTACT_ADM_EMAIL'];
             $cp->contactAdmPhone->_value = $cp_row['CONTACT_ADM_PHONE'];
-            $cp->CreateAccountId->_value = $this->J_is_true($cp_row['CREATEACCOUNTID']);
-            $cp->CreatePatronId->_value = $this->J_is_true($cp_row['CREATEPATRONID']);
-            $cp->CreateProviderId->_value = $trusted_ip ? $this->J_is_true($cp_row['CREATEPROVIDERID']) : '0';
-            $cp->DeleteAccountId->_value = $this->J_is_true($cp_row['DELETEACCOUNTID']);
-            $cp->DeletePatronId->_value = $this->J_is_true($cp_row['DELETEPATRONID']);
-            $cp->DeleteProviderId->_value = $trusted_ip ? $this->J_is_true($cp_row['DELETEPROVIDERID']) : '0';
-            $cp->GetAccountIdsByAccountId->_value = $this->J_is_true($cp_row['GETACCOUNTIDSBYACCOUNTID']);
-            $cp->GetAccountIdsByPatronId->_value = $this->J_is_true($cp_row['GETACCOUNTIDSBYPATRONID']);
-            $cp->GetAccountIdsByProviderId->_value = $this->J_is_true($cp_row['GETACCOUNTIDSBYPROVIDERID']);
-            $cp->GetMunicipalityNoByAccountId->_value = $this->J_is_true($cp_row['GETMUNICIPALITYNOBYACCOUNTID']);
-            $cp->GetMunicipalityNoByPatronId->_value = $this->J_is_true($cp_row['GETMUNICIPALITYNOBYPATRONID']);
-            $cp->GetPatronIdsByAccountId->_value = $this->J_is_true($cp_row['GETPATRONIDSBYACCOUNTID']);
-            $cp->GetPatronIdsByProviderId->_value = $this->J_is_true($cp_row['GETPATRONIDSBYPROVIDERID']);
-            $cp->GetProviderIdsByAccountId->_value = $this->J_is_true($cp_row['GETPROVIDERIDSBYACCOUNTID']);
-            $cp->GetProviderIdsByPatronId->_value = $this->J_is_true($cp_row['GETPROVIDERIDSBYPATRONID']);
-            $cp->MergePatronIds->_value = $this->J_is_true($cp_row['MERGEPATRONIDS']);
-            $cp->UnrelatePatronIdAndAccountId->_value = $this->J_is_true($cp_row['UNRELATEPATRONIDANDACCOUNTID']);
-            $cp->UpdateAccountId->_value = $this->J_is_true($cp_row['UPDATEACCOUNTID']);
+            $cp->CreateAccountId->_value = self::J_is_true($cp_row['CREATEACCOUNTID']);
+            $cp->CreatePatronId->_value = self::J_is_true($cp_row['CREATEPATRONID']);
+            $cp->CreateProviderId->_value = $trusted_ip ? self::J_is_true($cp_row['CREATEPROVIDERID']) : '0';
+            $cp->DeleteAccountId->_value = self::J_is_true($cp_row['DELETEACCOUNTID']);
+            $cp->DeletePatronId->_value = self::J_is_true($cp_row['DELETEPATRONID']);
+            $cp->DeleteProviderId->_value = $trusted_ip ? self::J_is_true($cp_row['DELETEPROVIDERID']) : '0';
+            $cp->GetAccountIdsByAccountId->_value = self::J_is_true($cp_row['GETACCOUNTIDSBYACCOUNTID']);
+            $cp->GetAccountIdsByPatronId->_value = self::J_is_true($cp_row['GETACCOUNTIDSBYPATRONID']);
+            $cp->GetAccountIdsByProviderId->_value = self::J_is_true($cp_row['GETACCOUNTIDSBYPROVIDERID']);
+            $cp->GetMunicipalityNoByAccountId->_value = self::J_is_true($cp_row['GETMUNICIPALITYNOBYACCOUNTID']);
+            $cp->GetMunicipalityNoByPatronId->_value = self::J_is_true($cp_row['GETMUNICIPALITYNOBYPATRONID']);
+            $cp->GetPatronIdsByAccountId->_value = self::J_is_true($cp_row['GETPATRONIDSBYACCOUNTID']);
+            $cp->GetPatronIdsByProviderId->_value = self::J_is_true($cp_row['GETPATRONIDSBYPROVIDERID']);
+            $cp->GetProviderIdsByAccountId->_value = self::J_is_true($cp_row['GETPROVIDERIDSBYACCOUNTID']);
+            $cp->GetProviderIdsByPatronId->_value = self::J_is_true($cp_row['GETPROVIDERIDSBYPATRONID']);
+            $cp->MergePatronIds->_value = self::J_is_true($cp_row['MERGEPATRONIDS']);
+            $cp->UnrelatePatronIdAndAccountId->_value = self::J_is_true($cp_row['UNRELATEPATRONIDANDACCOUNTID']);
+            $cp->UpdateAccountId->_value = self::J_is_true($cp_row['UPDATEACCOUNTID']);
             $res->culrProfile[]->_value = $cp;
             unset($cp);
           }
@@ -455,7 +455,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 550))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_getRI' . 
                    $this->config->get_inifile_hash() . 
                    $agency . 
@@ -490,7 +490,7 @@ class openAgency extends webServiceServer {
           if ($val = $param->agencyName->_value) {
             $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_navn))' .
                       ' OR (regexp_like(upper(sup.tekst), upper(:bind_navn)) AND sup.type = :bind_n))';
-            $oci->bind('bind_navn', $this->build_regexp_like($val));
+            $oci->bind('bind_navn', self::build_regexp_like($val));
             $oci->bind('bind_n', 'N');
           }
       // lastUpdated
@@ -610,7 +610,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
@@ -704,7 +704,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_ser_' . $this->config->get_inifile_hash() . $agency . $param->service->_value;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
@@ -747,7 +747,7 @@ class openAgency extends webServiceServer {
                           AND v.bib_nr = oao.bib_nr (+)
                           AND v.bib_nr = :bind_bib_nr');
           $oa_row = $oci->fetch_into_assoc();
-          $this->sanitize_array($oa_row);
+          self::sanitize_array($oa_row);
           if ($param->service->_value == 'information') {
             $consortia = array();
             if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
@@ -824,7 +824,7 @@ class openAgency extends webServiceServer {
               $inf->postalAddress->_value = $oa_row['V.BADR'];
               $inf->postalCode->_value = $oa_row['V.BPOSTNR'];
               $inf->city->_value = $oa_row['V.BCITY'];
-              $inf->isil->_value = self::normalize_agency($oa_row['ISIL']);
+              $inf->isil->_value = $oa_row['ISIL'];
               $inf->junction->_value = $oa_row['KNUDEPUNKT'];
               $inf->kvik->_value = ($oa_row['KVIK'] == 'kvik' ? 'YES' : 'NO');
               $inf->lookupUrl->_value = $oa_row['URL_VIDERESTIL'];
@@ -946,7 +946,7 @@ class openAgency extends webServiceServer {
                 default:
                   $orsIR->willReceive->_value = 'NO';
                   if ($oa_row['BEST_TXT']) {
-                    $orsIR->reason = $this->value_and_language($oa_row['BEST_TXT'], 'dan');
+                    $orsIR->reason = self::value_and_language($oa_row['BEST_TXT'], 'dan');
                   }
                   break;
               }
@@ -1176,7 +1176,7 @@ class openAgency extends webServiceServer {
             case 'serverInformation':
               $serI = &$res->serverInformation->_value;
               $serI->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
-              $serI->isil->_value = self::normalize_agency($oa_row['ISIL']);
+              $serI->isil->_value = $oa_row['ISIL'];
               if ($oa_row['ISO20775_URL']) {
                 $serI->protocol->_value = 'iso20775';
                 $serI->address->_value = $oa_row['ISO20775_URL'];
@@ -1233,18 +1233,18 @@ class openAgency extends webServiceServer {
               }
               if (in_array($oa_row['LD_ID'][0], array('J', 'O'))) {
                 if ($oa_row['LD_ID_TXT']) {
-                  $usrOP->userIdTxt[] = $this->value_and_language($oa_row['LD_ID_TXT'], 'dan');
+                  $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT'], 'dan');
                 }
                 if ($oa_row['LD_ID_TXT_ENG']) {
-                  $usrOP->userIdTxt[] = $this->value_and_language($oa_row['LD_ID_TXT_ENG'], 'eng');
+                  $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT_ENG'], 'eng');
                 }
               }
               if (in_array($oa_row['LD_TXT'][0], array('J', 'O'))) {
                 if ($oa_row['LD_TXT2']) {
-                  $usrOP->customIdTxt[] = $this->value_and_language($oa_row['LD_TXT2'], 'dan');
+                  $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2'], 'dan');
                 }
                 if ($oa_row['LD_TXT2_ENG']) {
-                  $usrOP->customIdTxt[] = $this->value_and_language($oa_row['LD_TXT2_ENG'], 'eng');
+                  $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2_ENG'], 'eng');
                 }
               }
               $per = array('PER_NR' => 'volume',
@@ -1302,10 +1302,10 @@ class openAgency extends webServiceServer {
               $aP->borrowerCheckParameters = $bCP;
               $aP->acceptOrderFromUnknownUser->_value = in_array($oa_row['BEST_UKENDT'], array('N', 'K'))? '1' : '0';
               if ($oa_row['BEST_UKENDT_TXT']) {
-                $aP->acceptOrderFromUnknownUserText[] = $this->value_and_language($oa_row['BEST_UKENDT_TXT'], 'dan');
+                $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT'], 'dan');
               }
               if ($oa_row['BEST_UKENDT_TXT_ENG']) {
-                $aP->acceptOrderFromUnknownUserText[] = $this->value_and_language($oa_row['BEST_UKENDT_TXT_ENG'], 'eng');
+                $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT_ENG'], 'eng');
               }
               $aP->acceptOrderAgencyOffline->_value = $oa_row['LAANERTJEK_NORESPONSE'] == 'N' ? '0' : '1';
               $aP->payForPostage->_value = $oa_row['PORTO_BETALING'] == 'N' ? '0' : '1';
@@ -1407,16 +1407,16 @@ class openAgency extends webServiceServer {
     else {
       $cache_key = 'OA_FinL_' . 
                    $this->config->get_inifile_hash() . 
-                   $this->stringiefy($param->agencyId) . '_' . 
-                   $this->stringiefy($param->agencyname) . '_' . 
-                   $this->stringiefy($param->agencyAddress) . '_' . 
-                   $this->stringiefy($param->postalCode) . '_' . 
-                   $this->stringiefy($param->city) . '_' . 
-                   $this->stringiefy($param->anyField) . '_' . 
-                   $this->stringiefy($param->libraryType) . '_' . 
-                   $this->stringiefy($param->libraryStatus) . '_' . 
-                   $this->stringiefy($param->pickupAllowed) . '_' . 
-                   $this->stringiefy($param->sort);
+                   self::stringiefy($param->agencyId) . '_' . 
+                   self::stringiefy($param->agencyname) . '_' . 
+                   self::stringiefy($param->agencyAddress) . '_' . 
+                   self::stringiefy($param->postalCode) . '_' . 
+                   self::stringiefy($param->city) . '_' . 
+                   self::stringiefy($param->anyField) . '_' . 
+                   self::stringiefy($param->libraryType) . '_' . 
+                   self::stringiefy($param->libraryStatus) . '_' . 
+                   self::stringiefy($param->pickupAllowed) . '_' . 
+                   self::stringiefy($param->sort);
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
@@ -1432,7 +1432,7 @@ class openAgency extends webServiceServer {
         $res->error->_value = 'service_unavailable';
       }
   // agencyId
-      if ($val = $this->strip_agency($param->agencyId->_value)) {
+      if ($val = self::strip_agency($param->agencyId->_value)) {
         $sqls[] = 'v.bib_nr = :bind_bib_nr';
         $oci->bind('bind_bib_nr', $val);
       }
@@ -1440,7 +1440,7 @@ class openAgency extends webServiceServer {
       if ($val = $param->agencyName->_value) {
         $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_navn))' .
                   ' OR (regexp_like(upper(sup.tekst), upper(:bind_navn)) AND sup.type = :bind_n))';
-        $oci->bind('bind_navn', $this->build_regexp_like($val));
+        $oci->bind('bind_navn', self::build_regexp_like($val));
         $oci->bind('bind_n', 'N');
       }
   // agencyAddress
@@ -1448,24 +1448,24 @@ class openAgency extends webServiceServer {
         $sqls[] = '(regexp_like(upper(v.badr), upper(:bind_addr))' . 
                   ' OR (regexp_like(upper(sup.tekst), upper(:bind_addr)) AND sup.type = :bind_a)' .
                   ' OR regexp_like(upper(vsn.badr), upper(:bind_addr)))';
-        $oci->bind('bind_addr', $this->build_regexp_like($val));
+        $oci->bind('bind_addr', self::build_regexp_like($val));
         $oci->bind('bind_a', 'A');
       }
   // postalCode
       if ($val = $param->postalCode->_value) {
         $sqls[] = '(regexp_like(upper(v.bpostnr), upper(:bind_postnr))' .
                   ' OR (regexp_like(upper(sup.tekst), upper(:bind_postnr)) AND sup.type = :bind_p))';
-        $oci->bind('bind_postnr', $this->build_regexp_like($val));
+        $oci->bind('bind_postnr', self::build_regexp_like($val));
         $oci->bind('bind_p', 'P');
       }
   // city
       if ($val = $param->city->_value) {
         $sqls[] = 'regexp_like(upper(v.bcity), upper(:bind_city))';
-        $oci->bind('bind_city', $this->build_regexp_like($val));
+        $oci->bind('bind_city', self::build_regexp_like($val));
       }
   // anyField
       if ($val = $param->anyField->_value) {
-        $bib_nr = $this->strip_agency($param->anyField->_value);
+        $bib_nr = self::strip_agency($param->anyField->_value);
         if (is_numeric($bib_nr) && (strlen($bib_nr) == 6)) {
           $oci->bind('bind_bib_nr', $bib_nr);
           $bibnr_sql = '(v.bib_nr = :bind_bib_nr) OR ';
@@ -1478,7 +1478,7 @@ class openAgency extends webServiceServer {
                   ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_n)' .
                   ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_a)' .
                   ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_p))';
-        $oci->bind('bind_any', $this->build_regexp_like($val));
+        $oci->bind('bind_any', self::build_regexp_like($val));
         $oci->bind('bind_a', 'A');
         $oci->bind('bind_n', 'N');
         $oci->bind('bind_p', 'P');
@@ -1508,7 +1508,7 @@ class openAgency extends webServiceServer {
       if (isset($param->pickupAllowed->_value)) {
         $j = 'J';
         $oci->bind('bind_j', $j);
-        if ($this->xs_boolean($param->pickupAllowed->_value))
+        if (self::xs_boolean($param->pickupAllowed->_value))
           $sqls[] .= 'vb.best_modt = :bind_j';
         else
           $sqls[] .= 'vb.best_modt != :bind_j';
@@ -1580,7 +1580,7 @@ class openAgency extends webServiceServer {
           }
           if ($row) {
             //$row['NAVN'] = $row['VSN_NAVN'];
-            $this->fill_pickupAgency($pickupAgency, $row);
+            self::fill_pickupAgency($pickupAgency, $row);
           }
         }
         if ($pickupAgency)
@@ -1720,7 +1720,7 @@ class openAgency extends webServiceServer {
         if (is_array($param->$par)) {
           foreach ($param->$par as $p) {
             if ($par == 'agencyId') {
-              $ag = $this->strip_agency($p->_value);
+              $ag = self::strip_agency($p->_value);
               if ($ag)
                 $ora_par[$par][] = $ag;
               $param_agencies[$ag] = $p->_value;
@@ -1732,7 +1732,7 @@ class openAgency extends webServiceServer {
         }
         elseif ($param->$par) {
           if ($par == 'agencyId') {
-            $ag = $this->strip_agency($param->$par->_value);
+            $ag = self::strip_agency($param->$par->_value);
             if ($ag)
               $ora_par[$par][] = $ag;
             $param_agencies[$ag] = $param->$par->_value;
@@ -1856,7 +1856,7 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
             if (isset($param->pickupAllowed->_value)) {
-              if ($this->xs_boolean($param->pickupAllowed->_value))
+              if (self::xs_boolean($param->pickupAllowed->_value))
                 $filter_bib_type .= ' AND vb.best_modt = \'J\'';
               else
                 $filter_bib_type .= ' AND vb.best_modt != \'J\'';
@@ -1931,7 +1931,7 @@ class openAgency extends webServiceServer {
                 $library->pickupAgency[]->_value = $pickupAgency;
                 unset($pickupAgency);
               }
-              $this->fill_pickupAgency($pickupAgency, $row, $ip_list[$row['BIB_NR']]);
+              self::fill_pickupAgency($pickupAgency, $row, $ip_list[$row['BIB_NR']]);
             }
             if ($pickupAgency) {
               $library->pickupAgency[]->_value = $pickupAgency;
@@ -1990,7 +1990,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_opeSP_' . $this->config->get_inifile_hash() . $agency . $param->profileName->_value . $param->profileVersion->_value;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
@@ -2131,7 +2131,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 550))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_remA_' . $this->config->get_inifile_hash() . $agency;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
@@ -2230,7 +2230,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
-      $agency = $this->strip_agency($param->agencyId->_value);
+      $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_reqO_' . $this->config->get_inifile_hash() . $agency;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
@@ -2381,18 +2381,18 @@ class openAgency extends webServiceServer {
       $pickupAgency->branchType->_value = $row['TYPE'];
       if (empty($pickupAgency->branchName)) {
         if ($row['NAVN']) {
-          $pickupAgency->branchName[] = $this->value_and_language($row['NAVN'], 'dan');
+          $pickupAgency->branchName[] = self::value_and_language($row['NAVN'], 'dan');
         }
         if ($row['NAVN_E']) {
-          $pickupAgency->branchName[] = $this->value_and_language($row['NAVN_E'], 'eng');
+          $pickupAgency->branchName[] = self::value_and_language($row['NAVN_E'], 'eng');
         }
       }
       if (empty($pickupAgency->branchShortName)) {
         if ($row['NAVN_K']) {
-          $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_K'], 'dan');
+          $pickupAgency->branchShortName[] = self::value_and_language($row['NAVN_K'], 'dan');
         }
         if ($row['NAVN_E_K']) {
-          $pickupAgency->branchShortName[] = $this->value_and_language($row['NAVN_E_K'], 'eng');
+          $pickupAgency->branchShortName[] = self::value_and_language($row['NAVN_E_K'], 'eng');
         }
       }
       $pickupAgency->branchPhone->_value = $row['TLF_NR'];
@@ -2401,8 +2401,8 @@ class openAgency extends webServiceServer {
       if ($row['BADR']) $pickupAgency->postalAddress->_value = $row['BADR'];
       if ($row['BPOSTNR']) $pickupAgency->postalCode->_value = $row['BPOSTNR'];
       if ($row['BCITY']) $pickupAgency->city->_value = $row['BCITY'];
-      if ($row['ISIL']) $pickupAgency->isil->_value = $row['ISIL'];
-      if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = $row['KNUDEPUNKT'];
+      if ($row['ISIL'] && ($row['BIB_NR'] >= 700000 && $row['BIB_NR'] <= 899999)) $pickupAgency->isil->_value = $row['ISIL'];
+      if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = self::normalize_agency($row['KNUDEPUNKT']);
       if ($row['URL_BIB_KAT']) $pickupAgency->branchCatalogueUrl->_value = $row['URL_BIB_KAT'];
       if ($row['URL_VIDERESTIL']) $pickupAgency->lookupUrl->_value = $row['URL_VIDERESTIL'];
       if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];
@@ -2419,10 +2419,10 @@ class openAgency extends webServiceServer {
     if (empty($pickupAgency->openingHours)
         && ($row['AABN_TID'] || $row['AABN_TID_E'])) {
       if ($row['AABN_TID']) {
-        $pickupAgency->openingHours[] = $this->value_and_language($row['AABN_TID'], 'dan');
+        $pickupAgency->openingHours[] = self::value_and_language($row['AABN_TID'], 'dan');
       }
       if ($row['AABN_TID_E']) {
-        $pickupAgency->openingHours[] = $this->value_and_language($row['AABN_TID_E'], 'eng');
+        $pickupAgency->openingHours[] = self::value_and_language($row['AABN_TID_E'], 'eng');
       }
     }
     $pickupAgency->temporarilyClosed->_value = ($row['BEST_MODT'] == 'J' ? 0 : 1);
@@ -2430,18 +2430,18 @@ class openAgency extends webServiceServer {
         && empty($pickupAgency->temporarilyClosedReason)
         && ($row['BEST_MODT_LUK'] || $row['BEST_MODT_LUK_ENG'])) {
       if ($row['BEST_MODT_LUK']) {
-        $pickupAgency->temporarilyClosedReason[] = $this->value_and_language($row['BEST_MODT_LUK'], 'dan');
+        $pickupAgency->temporarilyClosedReason[] = self::value_and_language($row['BEST_MODT_LUK'], 'dan');
       }
       if ($row['BEST_MODT_LUK_ENG']) {
-        $pickupAgency->temporarilyClosedReason[] = $this->value_and_language($row['BEST_MODT_LUK_ENG'], 'eng');
+        $pickupAgency->temporarilyClosedReason[] = self::value_and_language($row['BEST_MODT_LUK_ENG'], 'eng');
       }
     }
     if (empty($pickupAgency->illOrderReceiptText)) {
       if ($row['KVT_TEKST_FJL']) {
-        $pickupAgency->illOrderReceiptText[] = $this->value_and_language($row['KVT_TEKST_FJL'], 'dan');
+        $pickupAgency->illOrderReceiptText[] = self::value_and_language($row['KVT_TEKST_FJL'], 'dan');
       }
       if ($row['KVT_TEKST_FJL_E']) {
-        $pickupAgency->illOrderReceiptText[] = $this->value_and_language($row['KVT_TEKST_FJL_E'], 'eng');
+        $pickupAgency->illOrderReceiptText[] = self::value_and_language($row['KVT_TEKST_FJL_E'], 'eng');
       }
     }
     $pickupAgency->pickupAllowed->_value = ($row['BEST_MODT'] == 'J' ? '1' : '0');
