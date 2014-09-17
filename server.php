@@ -479,6 +479,8 @@ class openAgency extends webServiceServer {
       }
       if (empty($res->error)) {
         try {
+      // remove all libraries starting with 5 or 6 - cannot be part of getRegistryInfo
+          $sqls[] = '(v.bib_nr < 500000 OR v.bib_nr >= 700000)';
       // agencyId
           if ($agency) {
             $sqls[] = 'v.bib_nr = :bind_bib_nr';
