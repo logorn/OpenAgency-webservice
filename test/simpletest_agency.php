@@ -87,7 +87,8 @@ class TestOfAgency extends WebTestCase {
             'pars' => array('agencyId' => 'DK-710100'),
             'text' => array('Krystalgade'),
             'pattern' => array('/pickupAgency.*branchName.*postalCode.*openingHours.*getRegistryInfoResponse/',
-                               '/iso18626.*iso18626Address.*getRegistryInfoResponse/'));
+//                               '/iso18626.*iso18626Address.*getRegistryInfoResponse/'));
+                               '/z3950Ill.*z3950Address.*getRegistryInfoResponse/'));
   // nameList
     $this->test_cases[] = 
       array('action' => array('post' => 'nameListRequest', 'get' => 'nameList'),
