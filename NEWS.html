@@ -1,6 +1,11 @@
 <pre>
 2.15
 ===
+getRegistryInfo, findLibrary and pickupAgencyList: chaged behaviour of libraryStatus parameter - US 1319
+- "usynlig" only find libraries with delete_mark = U
+- "slettet" only find libraries with delete_mark = S
+- "alle" find libraries regardless of delete_mark setting
+- "" find libraries with empty delete_mark, except for getRegistryInfo which also include delete_mark = U
 xsd: pickupAgency: added stateAndUniversityLibraryCopyService - US 1302
 agencyId and branchId in pickupAgency normalized to 6 digits
 

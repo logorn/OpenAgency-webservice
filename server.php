@@ -97,8 +97,7 @@ class openAgency extends webServiceServer {
               if ($vf_row['VALG'] == 'a') {
                 try {
                   $oci->bind('bind_materiale_id', $param->materialType->_value);
-                  $J = 'J';
-                  $oci->bind('bind_status', $J);
+                  $oci->bind('bind_status', 'J');
                   $oci->set_query('SELECT laangiver
                                   FROM vip_fjernlaan
                                   WHERE materiale_id = :bind_materiale_id
@@ -509,17 +508,14 @@ class openAgency extends webServiceServer {
           }
       // libraryStatus
           if ($param->libraryStatus->_value == 'usynlig') {
-            $u = 'U';
-            $oci->bind('bind_u', $u);
-            $sqls[] = '(vsn.delete_mark_vsn is null OR vsn.delete_mark_vsn = :bind_u)' .
-                      ' AND (v.delete_mark is null OR v.delete_mark = :bind_u)';
+            $oci->bind('bind_u', 'U');
+            $sqls[] = 'v.delete_mark = :bind_u';
           } elseif ($param->libraryStatus->_value == 'slettet') {
-            $s = 'S';
-            $oci->bind('bind_s', $s);
-            $sqls[] = '(vsn.delete_mark_vsn is null OR vsn.delete_mark_vsn = :bind_s)' . 
-                      ' AND (v.delete_mark is null OR v.delete_mark = :bind_s)';
+            $oci->bind('bind_s', 'S');
+            $sqls[] = 'v.delete_mark = :bind_s';
           } elseif ($param->libraryStatus->_value <> 'alle') {
-            $sqls[] = 'vsn.delete_mark_vsn is null AND v.delete_mark is null';
+            $oci->bind('bind_u', 'U');
+            $sqls[] = '(v.delete_mark is null OR v.delete_mark = :bind_u)';
           }
           $filter_sql = implode(' AND ', $sqls);
           $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
@@ -1492,17 +1488,13 @@ class openAgency extends webServiceServer {
       }
   // libraryStatus
       if ($param->libraryStatus->_value == 'usynlig') {
-        $u = 'U';
-        $oci->bind('bind_u', $u);
-        $sqls[] = '(vsn.delete_mark_vsn is null OR vsn.delete_mark_vsn = :bind_u)' .
-                  ' AND (v.delete_mark is null OR v.delete_mark = :bind_u)';
+        $oci->bind('bind_u', 'U');
+        $sqls[] = 'v.delete_mark = :bind_u';
       } elseif ($param->libraryStatus->_value == 'slettet') {
-        $s = 'S';
-        $oci->bind('bind_s', $s);
-        $sqls[] = '(vsn.delete_mark_vsn is null OR vsn.delete_mark_vsn = :bind_s)' . 
-                  ' AND (v.delete_mark is null OR v.delete_mark = :bind_s)';
+        $oci->bind('bind_s', 'S');
+        $sqls[] = 'v.delete_mark = :bind_s';
       } elseif ($param->libraryStatus->_value <> 'alle') {
-        $sqls[] = 'vsn.delete_mark_vsn is null AND v.delete_mark is null';
+        $sqls[] = 'v.delete_mark is null';
       }
   // pickupAllowed
       if (isset($param->pickupAllowed->_value)) {
@@ -1637,8 +1629,7 @@ class openAgency extends webServiceServer {
               $filter_bib_type = 'AND vsn.bib_type = :bind_bib_type';
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
-            $u = 'U';
-            $oci->bind('bind_u', $u);
+            $oci->bind('bind_u', 'U');
             $oci->set_query('SELECT vsn.bib_nr, vsn.navn
                             FROM vip v, vip_vsn vsn
                             WHERE v.bib_nr = vsn.bib_nr
@@ -1818,15 +1809,13 @@ class openAgency extends webServiceServer {
             if ($param->libraryStatus->_value == 'alle') {
               $filter_delete_vsn = '';
             } elseif ($param->libraryStatus->_value == 'usynlig') {
-              $u = 'U';
-              $oci->bind('bind_u', $u);
-              $filter_delete_vsn = '(vsn.delete_mark_vsn is null or vsn.delete_mark_vsn = :bind_u) AND (v.delete_mark is null or v.delete_mark = :bind_u) AND ';
+              $oci->bind('bind_u', 'U');
+              $filter_delete_vsn = 'v.delete_mark = :bind_u AND ';
             } elseif ($param->libraryStatus->_value == 'slettet') {
-              $s = 'S';
-              $oci->bind('bind_s', $s);
-              $filter_delete_vsn = '(vsn.delete_mark_vsn is null or vsn.delete_mark_vsn = :bind_s) AND (v.delete_mark is null or v.delete_mark = :bind_s) AND ';
+              $oci->bind('bind_s', 'S');
+              $filter_delete_vsn = 'v.delete_mark = :bind_s AND ';
             } else {
-              $filter_delete_vsn = 'vsn.delete_mark_vsn is null AND v.delete_mark is null AND ';
+              $filter_delete_vsn = 'v.delete_mark is null AND ';
             }
             $sql = 'SELECT vsn.bib_nr, vsn.navn, vsn.bib_type, vsn.tlf_nr, vsn.email,
                                     vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil
@@ -1856,27 +1845,25 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
             if (isset($param->pickupAllowed->_value)) {
+              $oci->bind('bind_j', 'J');
               if (self::xs_boolean($param->pickupAllowed->_value))
-                $filter_bib_type .= ' AND vb.best_modt = \'J\'';
+                $filter_bib_type .= ' AND vb.best_modt = :bind_j';
               else
-                $filter_bib_type .= ' AND vb.best_modt != \'J\'';
+                $filter_bib_type .= ' AND vb.best_modt != :bind_j';
             }
             if ($param->libraryStatus->_value == 'alle') {
               $filter_delete = '';
             } elseif ($param->libraryStatus->_value == 'usynlig') {
-              $u = 'U';
-              $oci->bind('bind_u', $u);
-              $filter_delete = ' AND (v.delete_mark is null OR v.delete_mark = :bind_u)';
+              $oci->bind('bind_u', 'U');
+              $filter_delete = ' AND v.delete_mark = :bind_u';
             } elseif ($param->libraryStatus->_value == 'slettet') {
-              $s = 'S';
-              $oci->bind('bind_s', $s);
-              $filter_delete = ' AND (v.delete_mark is null OR v.delete_mark = :bind_s)';
+              $oci->bind('bind_s', 'S');
+              $filter_delete = ' AND v.delete_mark = :bind_s';
             } else {
               $filter_delete = ' AND v.delete_mark is null';
             }
             if ($filter_delete) {
-              $n = 'N';
-              $oci->bind('bind_n', $n);
+              $oci->bind('bind_n', 'N');
               $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
             }
             $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
