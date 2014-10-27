@@ -520,11 +520,12 @@ class openAgency extends webServiceServer {
           $filter_sql = implode(' AND ', $sqls);
           $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                         v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-                        v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt,
+                        v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt, v.p_nr,
                         TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                         vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                         vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
                         TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, 
+                        vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
                         vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                         txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                         bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
@@ -1535,11 +1536,12 @@ class openAgency extends webServiceServer {
   
       $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                     v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-                    v.afsaetningsbibliotek, v.afsaetningsnavn_k, 
+                    v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr,
                     TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                     vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                     vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
                     TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, vsn.sb_kopibestil,
+                    vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
                     vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                     txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                     bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
@@ -1818,7 +1820,8 @@ class openAgency extends webServiceServer {
               $filter_delete_vsn = 'v.delete_mark is null AND ';
             }
             $sql = 'SELECT vsn.bib_nr, vsn.navn, vsn.bib_type, vsn.tlf_nr, vsn.email,
-                                    vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil
+                                    vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil,
+                                    vsn.cvr_nr, vsn.p_nr, vsn.ean_nummer
                             FROM vip_vsn vsn, vip v, vip_sup vs
                             WHERE ' . $filter_delete_vsn . $filter_bib_type . '
                               AND v.bib_nr = vs.bib_nr (+)
@@ -1867,7 +1870,7 @@ class openAgency extends webServiceServer {
               $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
             }
             $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
+                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr,
                           vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                           txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                           bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
@@ -1913,6 +1916,9 @@ class openAgency extends webServiceServer {
                 if ($vsn[$this_vsn]['BPOSTNR']) $library->postalCode->_value = $vsn[$this_vsn]['BPOSTNR'];
                 if ($vsn[$this_vsn]['BCITY']) $library->city->_value = $vsn[$this_vsn]['BCITY'];
                 if ($vsn[$this_vsn]['URL']) $library->agencyWebsiteUrl->_value = $vsn[$this_vsn]['URL'];
+                if ($vsn[$this_vsn]['CVR_NR']) $library->agencyCvrNumber->_value = $vsn[$this_vsn]['CVR_NR'];
+                if ($vsn[$this_vsn]['P_NR']) $library->agencyPNumber->_value = $vsn[$this_vsn]['P_NR'];
+                if ($vsn[$this_vsn]['EAN_NUMMER']) $library->agencyEanNumber->_value = $vsn[$this_vsn]['EAN_NUMMER'];
               }
               if ($pickupAgency && $pickupAgency->branchId->_value <> $row['BIB_NR']) {
                 $library->pickupAgency[]->_value = $pickupAgency;
@@ -2365,6 +2371,9 @@ class openAgency extends webServiceServer {
       if (isset($row['VSN_EMAIL'])) $pickupAgency->agencyEmail->_value = $row['VSN_EMAIL'];
       if (isset($row['VSN_TLF_NR'])) $pickupAgency->agencyPhone->_value = $row['VSN_TLF_NR'];
       if (isset($row['VSN_FAX_NR'])) $pickupAgency->agencyFax->_value = $row['VSN_FAX_NR'];
+      if (isset($row['VSN_CVR_NR'])) $pickupAgency->agencyCvrNumber->_value = $row['VSN_CVR_NR'];
+      if (isset($row['VSN_P_NR'])) $pickupAgency->agencyPNumber->_value = $row['VSN_P_NR'];
+      if (isset($row['VSN_EAN_NUMMER'])) $pickupAgency->agencyEanNumber->_value = $row['VSN_EAN_NUMMER'];
       $pickupAgency->branchId->_value = self::normalize_agency($row['BIB_NR']);
       $pickupAgency->branchType->_value = $row['TYPE'];
       if (empty($pickupAgency->branchName)) {
@@ -2391,6 +2400,7 @@ class openAgency extends webServiceServer {
       if ($row['BCITY']) $pickupAgency->city->_value = $row['BCITY'];
       if ($row['ISIL'] && ($row['BIB_NR'] >= 700000 && $row['BIB_NR'] <= 899999)) $pickupAgency->isil->_value = $row['ISIL'];
       if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = self::normalize_agency($row['KNUDEPUNKT']);
+      if ($row['P_NR']) $pickupAgency->branchPNumber->_value = self::normalize_agency($row['P_NR']);
       if ($row['URL_BIB_KAT']) $pickupAgency->branchCatalogueUrl->_value = $row['URL_BIB_KAT'];
       if ($row['URL_VIDERESTIL']) $pickupAgency->lookupUrl->_value = $row['URL_VIDERESTIL'];
       if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];

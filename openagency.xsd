@@ -416,11 +416,14 @@ You should have received a copy of the GNU Affero General Public License along w
   </xs:element>
   <xs:element name="agencyAddress" type="xs:string"/>
   <xs:element name="agencyCatalogueUrl" type="xs:string"/>
+  <xs:element name="agencyCvrNumber" type="xs:string"/>
+  <xs:element name="agencyEanNumber" type="xs:string"/>
   <xs:element name="agencyEmail" type="xs:string"/>
   <xs:element name="agencyFax" type="xs:string"/>
   <xs:element name="agencyId" type="xs:string"/>
   <xs:element name="agencyName" type="xs:string"/>
   <xs:element name="agencyPhone" type="xs:string"/>
+  <xs:element name="agencyPNumber" type="xs:string"/>
   <xs:element name="agencySubdivision" type="xs:string"/>
   <xs:element name="agencyType" type="xs:string"/>
   <xs:element name="agencyWebsiteUrl" type="xs:string"/>
@@ -474,6 +477,7 @@ You should have received a copy of the GNU Affero General Public License along w
     </xs:complexType>
   </xs:element>
   <xs:element name="branchPhone" type="xs:string"/>
+  <xs:element name="branchPNumber" type="xs:string"/>
   <xs:element name="branchStatus" type="xs:string"/>
   <xs:element name="branchType" type="xs:string"/>
   <xs:element name="branchWebsiteUrl" type="xs:string"/>
@@ -689,6 +693,9 @@ You should have received a copy of the GNU Affero General Public License along w
             <xs:element ref="oa:postalCode" minOccurs="0"/>
             <xs:element ref="oa:city" minOccurs="0"/>
             <xs:element ref="oa:agencyWebsiteUrl" minOccurs="0"/>
+            <xs:element ref="oa:agencyCvrNumber" minOccurs="0"/>
+            <xs:element ref="oa:agencyPNumber" minOccurs="0"/>
+            <xs:element ref="oa:agencyEanNumber" minOccurs="0"/>
             <xs:element ref="oa:pickupAgency" maxOccurs="unbounded"/>
           </xs:sequence>
           <xs:element ref="oa:error"/>
@@ -796,6 +803,9 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:agencyEmail" minOccurs="0"/>
         <xs:element ref="oa:agencyPhone" minOccurs="0"/>
         <xs:element ref="oa:agencyFax" minOccurs="0"/>
+        <xs:element ref="oa:agencyCvrNumber" minOccurs="0"/>
+        <xs:element ref="oa:agencyPNumber" minOccurs="0"/>
+        <xs:element ref="oa:agencyEanNumber" minOccurs="0"/>
         <xs:element ref="oa:branchId"/>
         <xs:element ref="oa:branchType"/>
         <xs:element ref="oa:branchName" minOccurs="0" maxOccurs="2"/>
@@ -808,6 +818,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:city" minOccurs="0"/>
         <xs:element ref="oa:isil" minOccurs="0"/>
         <xs:element ref="oa:junction" minOccurs="0"/>
+        <xs:element ref="oa:branchPNumber" minOccurs="0"/>
         <xs:element ref="oa:branchCatalogueUrl" minOccurs="0"/>
         <xs:element ref="oa:lookupUrl" minOccurs="0"/>
         <xs:element ref="oa:branchWebsiteUrl" minOccurs="0"/>
