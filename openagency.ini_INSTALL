@@ -9,7 +9,7 @@
 
 ; --------------
 ;version
-version = 2.15
+version = 2.16
 
 ; --------------
 ; set only_https to accept https call only
