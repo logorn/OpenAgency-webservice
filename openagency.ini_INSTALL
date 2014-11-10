@@ -9,7 +9,7 @@
 
 ; --------------
 ;version
-version = 2.16
+version = 2.17
 
 ; --------------
 ; set only_https to accept https call only
@@ -44,6 +44,7 @@ soapAction[openSearchProfile] = openSearchProfileRequest
 soapAction[remoteAccess] = remoteAccessRequest
 soapAction[requestOrder] = requestOrderRequest
 soapAction[service] = serviceRequest
+soapAction[showOrder] = showOrderRequest
 ;soapAction[proxyDomains] = proxyDomainsRequest
 ;soapAction[proxyIp] = proxyIpRequest
 
@@ -165,6 +166,7 @@ action[automation][] = autService
 action[automation][] = materialType
 action[automation][] = callback
 action[automation][] = outputType
+action[automation][] = trackingId
 
 action[encryption][authentication][] = groupIdAut
 action[encryption][authentication][] = passwordAut
@@ -172,6 +174,7 @@ action[encryption][authentication][] = userIdAut
 action[encryption][] = email
 action[encryption][] = callback
 action[encryption][] = outputType
+action[encryption][] = trackingId
 
 action[endUserOrderPolicy][authentication][] = groupIdAut
 action[endUserOrderPolicy][authentication][] = passwordAut
@@ -181,6 +184,7 @@ action[endUserOrderPolicy][] = orderMaterialType
 action[endUserOrderPolicy][] = ownedByAgency
 action[endUserOrderPolicy][] = callback
 action[endUserOrderPolicy][] = outputType
+action[endUserOrderPolicy][] = trackingId
 
 action[findLibrary][authentication][] = groupIdAut
 action[findLibrary][authentication][] = passwordAut
@@ -197,6 +201,7 @@ action[findLibrary][] = pickupAllowed
 action[findLibrary][] = sort
 action[findLibrary][] = callback
 action[findLibrary][] = outputType
+action[findLibrary][] = trackingId
 
 action[getCulrProfile][authentication][] = groupIdAut
 action[getCulrProfile][authentication][] = passwordAut
@@ -206,6 +211,7 @@ action[getCulrProfile][] = profileName
 action[getCulrProfile][] = requesterIp
 action[getCulrProfile][] = callback
 action[getCulrProfile][] = outputType
+action[getCulrProfile][] = trackingId
 
 action[getRegistryInfo][authentication][] = groupIdAut
 action[getRegistryInfo][authentication][] = passwordAut
@@ -217,6 +223,7 @@ action[getRegistryInfo][] = libraryType
 action[getRegistryInfo][] = libraryStatus
 action[getRegistryInfo][] = callback
 action[getRegistryInfo][] = outputType
+action[getRegistryInfo][] = trackingId
 
 action[getSaouLicenseInfo][authentication][] = groupIdAut
 action[getSaouLicenseInfo][authentication][] = passwordAut
@@ -224,6 +231,7 @@ action[getSaouLicenseInfo][authentication][] = userIdAut
 action[getSaouLicenseInfo][] = agencyId
 action[getSaouLicenseInfo][] = callback
 action[getSaouLicenseInfo][] = outputType
+action[getSaouLicenseInfo][] = trackingId
 
 action[nameList][authentication][] = groupIdAut
 action[nameList][authentication][] = passwordAut
@@ -231,6 +239,7 @@ action[nameList][authentication][] = userIdAut
 action[nameList][] = libraryType
 action[nameList][] = callback
 action[nameList][] = outputType
+action[nameList][] = trackingId
 
 action[pickupAgencyList][authentication][] = groupIdAut
 action[pickupAgencyList][authentication][] = passwordAut
@@ -245,6 +254,7 @@ action[pickupAgencyList][] = libraryStatus
 action[pickupAgencyList][] = pickupAllowed
 action[pickupAgencyList][] = callback
 action[pickupAgencyList][] = outputType
+action[pickupAgencyList][] = trackingId
 
 action[openSearchProfile][authentication][] = groupIdAut
 action[openSearchProfile][authentication][] = passwordAut
@@ -254,6 +264,7 @@ action[openSearchProfile][] = profileName
 action[openSearchProfile][] = profileVersion
 action[openSearchProfile][] = callback
 action[openSearchProfile][] = outputType
+action[openSearchProfile][] = trackingId
 
 action[remoteAccess][authentication][] = groupIdAut
 action[remoteAccess][authentication][] = passwordAut
@@ -261,6 +272,7 @@ action[remoteAccess][authentication][] = userIdAut
 action[remoteAccess][] = agencyId
 action[remoteAccess][] = callback
 action[remoteAccess][] = outputType
+action[remoteAccess][] = trackingId
 
 action[requestOrder][authentication][] = groupIdAut
 action[requestOrder][authentication][] = passwordAut
@@ -268,6 +280,7 @@ action[requestOrder][authentication][] = userIdAut
 action[requestOrder][] = agencyId
 action[requestOrder][] = callback
 action[requestOrder][] = outputType
+action[requestOrder][] = trackingId
 
 action[service][authentication][] = groupIdAut
 action[service][authentication][] = passwordAut
@@ -276,6 +289,15 @@ action[service][] = agencyId
 action[service][] = service
 action[service][] = callback
 action[service][] = outputType
+action[service][] = trackingId
+
+action[showOrder][authentication][] = groupIdAut
+action[showOrder][authentication][] = passwordAut
+action[showOrder][authentication][] = userIdAut
+action[showOrder][] = agencyId
+action[showOrder][] = callback
+action[showOrder][] = outputType
+action[showOrder][] = trackingId
 
 ;action[proxyDomains][authentication][] = groupIdAut
 ;action[proxyDomains][authentication][] = passwordAut
@@ -283,6 +305,7 @@ action[service][] = outputType
 ;action[proxyDomains][] = agencyId
 ;action[proxyDomains][] = callback
 ;action[proxyDomains][] = outputType
+;action[proxyDomains][] = trackingId
 
 ;action[proxyIp][authentication][] = groupIdAut
 ;action[proxyIp][authentication][] = passwordAut
@@ -290,6 +313,7 @@ action[service][] = outputType
 ;action[proxyIp][] = agencyId
 ;action[proxyIp][] = callback
 ;action[proxyIp][] = outputType
+;action[proxyIp][] = trackingId
 
 ; ==============
 

@@ -22,7 +22,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:materialType"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -43,7 +43,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:email"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -66,7 +66,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:ownedByAgency"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -97,7 +97,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:sort" minOccurs="0" maxOccurs="6"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -118,7 +118,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:requesterIp" minOccurs="0"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -141,7 +141,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:libraryStatus" minOccurs="0"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -171,7 +171,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:agencyId" minOccurs="0"  maxOccurs="1"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -190,7 +190,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:libraryType" minOccurs="0"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -223,7 +223,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:pickupAllowed" minOccurs="0"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -244,7 +244,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:profileVersion"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -263,7 +263,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:agencyId"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -288,7 +288,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:agencyId"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -308,7 +308,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:service"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
-                <xs:element ref="oa:trackingId" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -335,6 +335,28 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:serverInformation"/>
         <xs:element ref="oa:userOrderParameters"/>
         <xs:element ref="oa:userParameters"/>
+        <xs:element ref="oa:error"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="showOrderRequest">
+    <xs:annotation>
+      <xs:documentation>Retrieve a prioritised list giving the order records should be shown/selected for a given agency</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="oa:authentication" minOccurs="0"/>
+        <xs:element ref="oa:agencyId"/>
+        <xs:element ref="oa:callback" minOccurs="0"/>
+        <xs:element ref="oa:outputType" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="showOrderResponse">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="oa:agencyId" maxOccurs="unbounded"/>
         <xs:element ref="oa:error"/>
       </xs:choice>
     </xs:complexType>

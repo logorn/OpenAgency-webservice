@@ -2207,16 +2207,12 @@ class openAgency extends webServiceServer {
   }
 
 
-  /** \brief Fetch an ordered sequence of agencies
+  /** \brief Fetch an ordered sequence of agencies to use when ordering materials
    *
    * Request:
    * - agencyId
    * Response:
-   * - autPotential
-   * or
-   * - autProvider
-   * or
-   * - autRequester
+   * - agencyId's
    * or
    * - error
    */
@@ -2231,35 +2227,7 @@ class openAgency extends webServiceServer {
         verbose::log(STAT, 'Cache hit');
         return $ret;
       }
-      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
-      $oci->set_charset('UTF8');
-      try {
-        $oci->connect();
-      }
-      catch (ociException $e) {
-        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
-      }
-      if (empty($res->error)) {
-        try {
-          $oci->bind('bind_agency', $agency);
-          $oci->set_query('SELECT vilse 
-                          FROM vip, laaneveje
-                          WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
-                            AND vip.bib_nr = :bind_agency
-                          ORDER BY prionr DESC');
-          $prio = array();
-          while ($s_row = $oci->fetch_into_assoc()) {
-            $res->agencyId[]->_value = $s_row['VILSE'];
-          }
-          if (empty($res->agencyId))
-            $res->error->_value = 'no_agencies_found';
-        }
-        catch (ociException $e) {
-          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
-        }
-      }
+      $res = self::get_prioritized_agency_list($agency, 'laaneveje');
     }
     //var_dump($res); var_dump($param); die();
     $ret->requestOrderResponse->_value = $res;
@@ -2268,9 +2236,78 @@ class openAgency extends webServiceServer {
     return $ret;
   }
 
+  /** \brief Fetch an ordered sequence of agencies to use when selecting records to show
+   *
+   * Request:
+   * - agencyId
+   * Response:
+   * - agencyId's
+   * or
+   * - error
+   */
+  public function showOrder($param) {
+    if (!$this->aaa->has_right('netpunkt.dk', 500))
+      $res->error->_value = 'authentication_error';
+    else {
+      $agency = self::strip_agency($param->agencyId->_value);
+      $cache_key = 'OA_reqO_' . $this->config->get_inifile_hash() . $agency;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+      if ($ret = $this->cache->get($cache_key)) {
+        verbose::log(STAT, 'Cache hit');
+        return $ret;
+      }
+      $is_folk = substr($agency, 0, 1) == '7';
+      $res = self::get_prioritized_agency_list(($is_folk ? '870970' : $agency), 'visprioritet');
+    }
+    //var_dump($res); var_dump($param); die();
+    $ret->showOrderResponse->_value = $res;
+    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+    if (empty($res->error)) $this->cache->set($cache_key, $ret);
+    return $ret;
+  }
+
 
   /* ----------------------------------------------------------------------------- */
 
+
+  /** \brief get a priority list from some table
+   *
+   * @param string $agency 
+   * @param string $table_name - must contain columns: bibliotek, vilse and prionr
+   * $retval array - of agencies
+   */
+  private function get_prioritized_agency_list($agency, $table_name) {
+    $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+    $oci->set_charset('UTF8');
+    try {
+      $oci->connect();
+    }
+    catch (ociException $e) {
+      verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+      $res->error->_value = 'service_unavailable';
+    }
+    if (empty($res->error)) {
+      try {
+        $oci->bind('bind_agency', $agency);
+        $oci->set_query('SELECT vilse 
+            FROM vip, ' . $table_name . '
+            WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
+            AND vip.bib_nr = :bind_agency
+            ORDER BY prionr DESC');
+        $prio = array();
+        while ($s_row = $oci->fetch_into_assoc()) {
+          $res->agencyId[]->_value = $s_row['VILSE'];
+        }
+        if (empty($res->agencyId))
+          $res->error->_value = 'no_agencies_found';
+      }
+      catch (ociException $e) {
+        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+        $res->error->_value = 'service_unavailable';
+      }
+    }
+    return $res;
+  }
 
   /** \brief overwrite z-target informations
    *
