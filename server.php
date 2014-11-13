@@ -2237,6 +2237,7 @@ class openAgency extends webServiceServer {
   }
 
   /** \brief Fetch an ordered sequence of agencies to use when selecting records to show
+   * default to use 870970 if no list exists for the actual agency
    *
    * Request:
    * - agencyId
@@ -2256,8 +2257,10 @@ class openAgency extends webServiceServer {
         verbose::log(STAT, 'Cache hit');
         return $ret;
       }
-      $is_folk = substr($agency, 0, 1) == '7';
-      $res = self::get_prioritized_agency_list(($is_folk ? '870970' : $agency), 'visprioritet');
+      $res = self::get_prioritized_agency_list($agency, 'visprioritet');
+      if ($res->error->_value == 'no_agencies_found') {
+        $res = self::get_prioritized_agency_list('870970', 'visprioritet');
+      }
     }
     //var_dump($res); var_dump($param); die();
     $ret->showOrderResponse->_value = $res;
