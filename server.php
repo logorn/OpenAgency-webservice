@@ -845,7 +845,7 @@ class openAgency extends webServiceServer {
               else {
                 $orsA->willReceive->_value = (in_array($oa_row['ANSWER'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
                 $orsA->synchronous->_value = 0;
-                $orsA->protocol->_value = $oa_row['ANSWER'];
+                $orsA->protocol->_value = self::normalize_iso18626($oa_row['ANSWER']);
                 if ($oa_row['ANSWER'] == 'z3950') {
                   $orsA->address->_value = $oa_row['ANSWER_Z3950_ADDRESS'];
                 }
@@ -981,7 +981,7 @@ class openAgency extends webServiceServer {
               $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
               $orsR->willReceive->_value = (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
               $orsR->synchronous->_value = 0;
-              $orsR->protocol->_value = $oa_row['RECALL'];
+              $orsR->protocol->_value = self::normalize_iso18626($oa_row['RECALL']);
               $orsR->address->_value = '';
               $orsR->userId->_value = $oa_row['RECALL_Z3950_USER'];
               $orsR->groupId->_value = $oa_row['RECALL_Z3950_GROUP'];
@@ -1034,7 +1034,7 @@ class openAgency extends webServiceServer {
                 if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
                   $orsR->willReceive->_value = 'YES';
                   $orsR->synchronous->_value = 0;
-                  $orsR->protocol->_value = $oa_row['RENEW'];
+                  $orsR->protocol->_value = self::normalize_iso18626($oa_row['RENEW']);
                   if ($oa_row['RENEW'] == 'z3950') {
                     $orsR->address->_value = $oa_row['RENEW_Z3950_ADDRESS'];
                     $orsR->userId->_value = $oa_row['RENEW_Z3950_USER'];
@@ -1060,7 +1060,7 @@ class openAgency extends webServiceServer {
                   if ($oa_row['RENEWANSWER'] == 'z3950' || $oa_row['RENEWANSWER'] == 'ors') {
                     $orsRA->willReceive->_value = 'YES';
                     $orsRA->synchronous->_value = $oa_row['RENEW_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                    $orsRA->protocol->_value = $oa_row['RENEWANSWER'];
+                    $orsRA->protocol->_value = self::normalize_iso18626($oa_row['RENEWANSWER']);
                     if ($oa_row['RENEWANSWER'] == 'z3950') {
                       $orsRA->address->_value = $oa_row['RENEWANSWER_Z3950_ADDRESS'];
                       $orsRA->userId->_value = $oa_row['RENEWANSWER_Z3950_USER'];
@@ -1086,7 +1086,7 @@ class openAgency extends webServiceServer {
                 if ($oa_row['CANCEL'] == 'z3950' || $oa_row['CANCEL'] == 'ors') {
                   $orsC->willReceive->_value = 'YES';
                   $orsC->synchronous->_value = 0;
-                  $orsC->protocol->_value = $oa_row['CANCEL'];
+                  $orsC->protocol->_value = self::normalize_iso18626($oa_row['CANCEL']);
                   if ($oa_row['CANCEL'] == 'z3950') {
                     $orsC->address->_value = $oa_row['CANCEL_Z3950_ADDRESS'];
                     $orsC->userId->_value = $oa_row['CANCEL_Z3950_USER'];
@@ -1111,7 +1111,7 @@ class openAgency extends webServiceServer {
                 if ($oa_row['CANCELREPLY'] == 'z3950' || $oa_row['CANCELREPLY'] == 'ors') {
                   $orsCR->willReceive->_value = 'YES';
                   $orsCR->synchronous->_value = $oa_row['CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                  $orsCR->protocol->_value = $oa_row['CANCELREPLY'];
+                  $orsCR->protocol->_value = self::normalize_iso18626($oa_row['CANCELREPLY']);
                   if ($oa_row['CANCELREPLY'] == 'z3950') {
                     $orsCR->address->_value = $oa_row['CANCELREPLY_Z3950_ADDRESS'];
                     $orsCR->userId->_value = $oa_row['CANCELREPLY_Z3950_USER'];
@@ -1144,7 +1144,7 @@ class openAgency extends webServiceServer {
               else {
                 $orsS->willReceive->_value = (in_array($oa_row['SHIPPING'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
                 $orsS->synchronous->_value = 0;
-                $orsS->protocol->_value = $oa_row['SHIPPING'];
+                $orsS->protocol->_value = self::normalize_iso18626($oa_row['SHIPPING']);
                 $orsS->address->_value = '';
                 $orsS->userId->_value = $oa_row['SHIPPING_Z3950_USER'];
                 $orsS->groupId->_value = $oa_row['SHIPPING_Z3950_GROUP'];
@@ -2273,11 +2273,20 @@ class openAgency extends webServiceServer {
   /* ----------------------------------------------------------------------------- */
 
 
+  /** \brief change 18626 to iso18626 and leaves rest unchanged
+   *
+   * @param string $protocol 
+   * @retval string 
+   */
+  private function normalize_iso18626($protocol) {
+    return ($protocol == '18626' ? 'iso18626' : $protocol);
+  }
+
   /** \brief get a priority list from some table
    *
    * @param string $agency 
    * @param string $table_name - must contain columns: bibliotek, vilse and prionr
-   * $retval array - of agencies
+   * @retval array - of agencies
    */
   private function get_prioritized_agency_list($agency, $table_name) {
     $oci = new Oci($this->config->get_value('agency_credentials','setup'));
