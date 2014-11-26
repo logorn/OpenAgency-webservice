@@ -2251,7 +2251,7 @@ class openAgency extends webServiceServer {
       $res->error->_value = 'authentication_error';
     else {
       $agency = self::strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_reqO_' . $this->config->get_inifile_hash() . $agency;
+      $cache_key = 'OA_shoO_' . $this->config->get_inifile_hash() . $agency;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
