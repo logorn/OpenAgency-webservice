@@ -451,7 +451,7 @@ class openAgency extends webServiceServer {
    * - error
    */
   public function getRegistryInfo($param) {
-    if (!$this->aaa->has_right('netpunkt.dk', 550))
+    if (!$this->aaa->has_right('netpunkt.dk', 500))
       $res->error->_value = 'authentication_error';
     else {
       $agency = self::strip_agency($param->agencyId->_value);
@@ -2049,6 +2049,9 @@ class openAgency extends webServiceServer {
                   }
                   else
                     $s->sourceSearchable->_value = '0';
+                  if ($kilde['CONTAINED_IN']) {
+                    $s->sourceContainedIn->_value = $kilde['CONTAINED_IN'];
+                  }
                   $s->sourceIdentifier->_value = str_replace('[agency]', $agency, $kilde['IDENTIFIER']);
                   if ($relations) {
                     foreach ($relations as $relation) {
