@@ -941,7 +941,7 @@ You should have received a copy of the GNU Affero General Public License along w
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="oa:sourceName"/>
-        <xs:element ref="oa:sourceSearchable"/>
+        <xs:element ref="oa:sourceSearchable" minOccurs="0"/>
         <xs:choice>
           <xs:sequence>
             <xs:element ref="oa:sourceIdentifier"/>
