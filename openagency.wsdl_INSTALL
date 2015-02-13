@@ -274,19 +274,19 @@ You should have received a copy of the GNU Affero General Public License along w
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="showOrder">
+      <soap:operation soapAction="http://oss.dbc.dk/ns/openAgency/ShowOrder" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
-  <wsdl:operation name="showOrder">
-    <soap:operation soapAction="http://oss.dbc.dk/ns/openAgency/ShowOrder" style="document"/>
-    <wsdl:input>
-      <soap:body use="literal"/>
-    </wsdl:input>
-    <wsdl:output>
-      <soap:body use="literal"/>
-    </wsdl:output>
-  </wsdl:operation>
   <wsdl:service name="OpenAgencyService">
     <wsdl:port name="OpenAgencyPortType" binding="oaw:OpenAgencyBinding">
-      <soap:address location="http://openagency.addi.dk/2.17/"/>
+      <soap:address location="http://openagency.addi.dk/2.18/"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
