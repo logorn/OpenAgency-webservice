@@ -1823,8 +1823,8 @@ class openAgency extends webServiceServer {
                                     vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil,
                                     vsn.cvr_nr, vsn.p_nr, vsn.ean_nummer
                             FROM vip_vsn vsn, vip v, vip_sup vs
-                            WHERE ' . $filter_delete_vsn . $filter_bib_type . '
-                              AND v.bib_nr = vs.bib_nr (+)
+                            WHERE ' . $filter_delete_vsn . ($filter_bib_type ? $filter_bib_type . ' AND ' : '') . '
+                                  v.bib_nr = vs.bib_nr (+)
                               AND v.kmd_nr = vsn.bib_nr
                             ORDER BY vsn.bib_nr';
             $oci->set_query($sql);
@@ -1882,8 +1882,8 @@ class openAgency extends webServiceServer {
                   WHERE v.kmd_nr IN (SELECT UNIQUE vsn.bib_nr
                                         FROM vip_vsn vsn, vip v, vip_sup vs
                                         WHERE ' . $filter_delete_vsn . '
-                                               v.kmd_nr = vsn.bib_nr
-                                          AND ' . $filter_bib_type . ' )
+                                               v.kmd_nr = vsn.bib_nr ' .
+                                          ($filter_bib_type ? ' AND ' . $filter_bib_type : '') . ')
                     ' . $filter_delete . '
                     ' . $filter_filial . '
                     AND v.bib_nr = vb.bib_nr (+)
