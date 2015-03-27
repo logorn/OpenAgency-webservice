@@ -9,15 +9,18 @@
 
 ; --------------
 ;version
-version = 2.18
+version = 2.18.1
 
 ; --------------
 ; set only_https to accept https call only
 ;only_https = 1
 
 ; --------------
-; wsdl for service
+; wsdl and service location for service. Used to replace __LOCATION__ in wsdl
 wsdl = openagency.wsdl
+
+;service location used as endpoint in the wsdl-file. If not set, the actual address/location is used
+;service_location = openagency.addi.dk/2.18.1/
 
 ; --------------
 ; in_house_domain may use ?ShowInfo and use create_sample form
@@ -82,6 +85,10 @@ dump_timer = openAgency(%s)
 
 ; --------------
 agency_credentials = some_user/some_pwd@some.server.dbc.dk
+
+; --------------
+; Change agencyType for a library
+agencyTypeOverride[700400] = Folkebibliotek
 
 ; --------------
 ; DBC target address for order-systems

@@ -808,7 +808,7 @@ class openAgency extends webServiceServer {
               $inf->agencyPhone->_value = $oa_row['VV.TLF_NR'];
               $inf->agencyFax->_value = $oa_row['VV.FAX_NR'];
               $inf->agencyEmail->_value = $oa_row['VV.EMAIL'];
-              $inf->agencyType->_value = $oa_row['VV.BIB_TYPE'];
+              $inf->agencyType->_value = self::set_agency_type($oa_row['VV.BIB_NR'], $oa_row['VV.BIB_TYPE']);
               $inf->agencyCatalogueUrl->_value = $oa_row['URL_BIB_KAT'];
               $inf->branchId->_value = self::normalize_agency($oa_row['V.BIB_NR']);
               $inf->branchName->_value = $oa_row['V.NAVN'];
@@ -979,15 +979,20 @@ class openAgency extends webServiceServer {
             case 'orsRecall':
               $orsR = &$res->orsRecall->_value;
               $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              $orsR->willReceive->_value = (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-              $orsR->synchronous->_value = 0;
-              $orsR->protocol->_value = self::normalize_iso18626($oa_row['RECALL']);
-              $orsR->address->_value = '';
-              $orsR->userId->_value = $oa_row['RECALL_Z3950_USER'];
-              $orsR->groupId->_value = $oa_row['RECALL_Z3950_GROUP'];
-              $orsR->passWord->_value = ($oa_row['RECALL'] == 'z3950' ? $oa_row['RECALL_Z3950_PASSWORD'] : $oa_row['RECALL_NCIP_AUTH']);
-              if ($oa_row['RECALL'] == 'z3950')
-                $orsR->address->_value = $oa_row['RECALL_Z3950_ADDRESS'];
+              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                self::fill_iso18626_protocol($orsR, $oa_row);
+              }
+              else {
+                $orsR->willReceive->_value = (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
+                $orsR->synchronous->_value = 0;
+                $orsR->protocol->_value = self::normalize_iso18626($oa_row['RECALL']);
+                $orsR->address->_value = '';
+                $orsR->userId->_value = $oa_row['RECALL_Z3950_USER'];
+                $orsR->groupId->_value = $oa_row['RECALL_Z3950_GROUP'];
+                $orsR->passWord->_value = ($oa_row['RECALL'] == 'z3950' ? $oa_row['RECALL_Z3950_PASSWORD'] : $oa_row['RECALL_NCIP_AUTH']);
+                if ($oa_row['RECALL'] == 'z3950')
+                  $orsR->address->_value = $oa_row['RECALL_Z3950_ADDRESS'];
+              }
               //var_dump($res->orsRecall->_value); die();
               break;
             case 'orsReceipt':
@@ -1908,7 +1913,7 @@ class openAgency extends webServiceServer {
               }
               if (empty($library)) {
                 $library->agencyId->_value = $this_vsn;
-                $library->agencyType->_value = $vsn[$this_vsn]['BIB_TYPE'];
+                $library->agencyType->_value = self::set_agency_type($this_vsn, $vsn[$this_vsn]['BIB_TYPE']);
                 $library->agencyName->_value = $vsn[$this_vsn]['NAVN'];
                 if ($vsn[$this_vsn]['TLF_NR']) $library->agencyPhone->_value = $vsn[$this_vsn]['TLF_NR'];
                 if ($vsn[$this_vsn]['EMAIL']) $library->agencyEmail->_value = $vsn[$this_vsn]['EMAIL'];
@@ -2419,7 +2424,7 @@ class openAgency extends webServiceServer {
     if (empty($pickupAgency)) {
       if (isset($row['VSN_NAVN'])) $pickupAgency->agencyName->_value = $row['VSN_NAVN'];
       if (isset($row['VSN_BIB_NR'])) $pickupAgency->agencyId->_value = self::normalize_agency($row['VSN_BIB_NR']);
-      if (isset($row['VSN_BIB_TYPE'])) $pickupAgency->agencyType->_value = $row['VSN_BIB_TYPE'];
+      if (isset($row['VSN_BIB_TYPE'])) $pickupAgency->agencyType->_value = self::set_agency_type($row['VSN_BIB_NR'], $row['VSN_BIB_TYPE']);
       if (isset($row['VSN_EMAIL'])) $pickupAgency->agencyEmail->_value = $row['VSN_EMAIL'];
       if (isset($row['VSN_TLF_NR'])) $pickupAgency->agencyPhone->_value = $row['VSN_TLF_NR'];
       if (isset($row['VSN_FAX_NR'])) $pickupAgency->agencyFax->_value = $row['VSN_FAX_NR'];
@@ -2523,6 +2528,20 @@ class openAgency extends webServiceServer {
     $pickupAgency->stateAndUniversityLibraryCopyService->_value = ($row['SB_KOPIBESTIL'] == 'J' ? '1' : '0');
 
     return;
+  }
+
+  /** \brief Check if agencyType should be replaced by ini setting
+   *
+   * @param agency_id (string)
+   * @param agency_type (string) - agency type as set in VIP base
+   * @return (string) - 
+   */
+  private function set_agency_type($agency_id, $agency_type) {
+    static $agency_type_override;
+    if (!isset($agency_type_override)) {
+      $agency_type_override = $this->config->get_value('agencyTypeOverride', 'setup');
+    }
+    return ($agency_type_override[$agency_id] ? $agency_type_override[$agency_id] : $agency_type);
   }
 
   /** \brief return an xs:boolean 
