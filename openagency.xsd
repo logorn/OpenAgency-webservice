@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2012 (http://www.altova.com) by DBC A/S (DBC A/S) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:oa="http://oss.dbc.dk/ns/openagency" targetNamespace="http://oss.dbc.dk/ns/openagency">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:oa="http://oss.dbc.dk/ns/openagency" targetNamespace="http://oss.dbc.dk/ns/openagency" elementFormDefault="qualified">
   <xs:annotation>
     <xs:documentation xml:lang="en">Open Agency service</xs:documentation>
     <xs:documentation xml:lang="en">This XML Schema describes the data and structure of data of the Open Agency service.</xs:documentation>
