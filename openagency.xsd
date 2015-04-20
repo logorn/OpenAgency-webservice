@@ -104,7 +104,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="findLibraryResponse">
     <xs:complexType>
       <xs:choice>
-        <xs:element ref="oa:pickupAgency" maxOccurs="unbounded"/>
+        <xs:element ref="oa:pickupAgency" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element ref="oa:error"/>
       </xs:choice>
     </xs:complexType>
@@ -168,6 +168,24 @@ You should have received a copy of the GNU Affero General Public License along w
     <xs:complexType>
       <xs:choice>
         <xs:element ref="oa:saouLicenseInfo"/>
+        <xs:element ref="oa:error"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="libraryTypeListRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="oa:authentication" minOccurs="0"/>
+        <xs:element ref="oa:callback" minOccurs="0"/>
+        <xs:element ref="oa:outputType" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="libraryTypeListResponse">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="oa:libraryTypeInfo" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element ref="oa:error"/>
       </xs:choice>
     </xs:complexType>
@@ -695,6 +713,13 @@ You should have received a copy of the GNU Affero General Public License along w
         </xs:sequence>
         <xs:element ref="oa:error"/>
       </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="libraryTypeInfo" type="oa:libraryTypeInfo"/>
+  <xs:complexType name="libraryTypeInfo">
+    <xs:sequence>
+      <xs:element ref="oa:agencyId"/>
+      <xs:element ref="oa:agencyType"/>
     </xs:sequence>
   </xs:complexType>
   <xs:element name="libraryLicenseInfo" type="oa:libraryLicenseInfo"/>
