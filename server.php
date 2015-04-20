@@ -1598,6 +1598,59 @@ class openAgency extends webServiceServer {
   }
 
 
+  /** \brief Fetch a list of library types
+   *
+   * Request:
+   * Response:
+   * - agency (see xsd for parameters)
+   * or
+   * - error
+   */
+  public function libraryTypeList($param) {
+    if (!$this->aaa->has_right('netpunkt.dk', 500))
+      $res->error->_value = 'authentication_error';
+    else {
+      $cache_key = 'OA_libTL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+      if ($ret = $this->cache->get($cache_key)) {
+        verbose::log(STAT, 'Cache hit');
+        return $ret;
+      }
+      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+      $oci->set_charset('UTF8');
+      try {
+        $oci->connect();
+      }
+      catch (ociException $e) {
+        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+        $res->error->_value = 'service_unavailable';
+      }
+      if (empty($res->error)) {
+        try {
+          $oci->set_query('SELECT bib_nr, bib_type FROM vip_vsn vsn');
+          while ($row = $oci->fetch_into_assoc()) {
+            $buf[self::normalize_agency($row['BIB_NR'])] = $row['BIB_TYPE'];
+          }
+          ksort($buf);
+          foreach ($buf as $lib => $type) {
+            $o->agencyId->_value = $lib;
+            $o->agencyType->_value = $type;
+            $res->libraryTypeInfo[]->_value = $o;
+            unset($o);
+          }
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+      }
+    }
+    $ret->libraryTypeListResponse->_value = $res;
+    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+    if (empty($res->error)) $this->cache->set($cache_key, $ret);
+    return $ret;
+  }
+
   /** \brief Fetch a list of libraries
    *
    * Request:
