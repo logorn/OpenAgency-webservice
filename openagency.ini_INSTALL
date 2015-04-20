@@ -41,6 +41,7 @@ soapAction[findLibrary] = findLibraryRequest
 soapAction[getCulrProfile] = getCulrProfileRequest
 soapAction[getRegistryInfo] = getRegistryInfoRequest
 soapAction[getSaouLicenseInfo] = getSaouLicenseInfoRequest
+soapAction[libraryTypeList] = libraryTypeListRequest
 soapAction[nameList] = nameListRequest
 soapAction[pickupAgencyList] = pickupAgencyListRequest
 soapAction[openSearchProfile] = openSearchProfileRequest
@@ -239,6 +240,13 @@ action[getSaouLicenseInfo][] = agencyId
 action[getSaouLicenseInfo][] = callback
 action[getSaouLicenseInfo][] = outputType
 action[getSaouLicenseInfo][] = trackingId
+
+action[libraryTypeList][authentication][] = groupIdAut
+action[libraryTypeList][authentication][] = passwordAut
+action[libraryTypeList][authentication][] = userIdAut
+action[libraryTypeList][] = callback
+action[libraryTypeList][] = outputType
+action[libraryTypeList][] = trackingId
 
 action[nameList][authentication][] = groupIdAut
 action[nameList][authentication][] = passwordAut
