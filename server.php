@@ -1627,14 +1627,17 @@ class openAgency extends webServiceServer {
       }
       if (empty($res->error)) {
         try {
-          $oci->set_query('SELECT bib_nr, bib_type FROM vip_vsn vsn');
+          $oci->set_query('SELECT vsn.bib_nr, vsn.bib_type, v.type
+                          FROM vip v, vip_vsn vsn
+                            WHERE v.bib_nr = vsn.bib_nr');
           while ($row = $oci->fetch_into_assoc()) {
-            $buf[self::normalize_agency($row['BIB_NR'])] = $row['BIB_TYPE'];
+            $buf[self::normalize_agency($row['BIB_NR'])] = $row;
           }
           ksort($buf);
-          foreach ($buf as $lib => $type) {
+          foreach ($buf as $lib => $row) {
             $o->agencyId->_value = $lib;
-            $o->agencyType->_value = $type;
+            $o->agencyType->_value = $row['BIB_TYPE'];
+            $o->branchType->_value = $row['TYPE'];
             $res->libraryTypeInfo[]->_value = $o;
             unset($o);
           }

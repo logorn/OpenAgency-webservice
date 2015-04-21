@@ -720,6 +720,7 @@ You should have received a copy of the GNU Affero General Public License along w
     <xs:sequence>
       <xs:element ref="oa:agencyId"/>
       <xs:element ref="oa:agencyType"/>
+      <xs:element ref="oa:branchType"/>
     </xs:sequence>
   </xs:complexType>
   <xs:element name="libraryLicenseInfo" type="oa:libraryLicenseInfo"/>
