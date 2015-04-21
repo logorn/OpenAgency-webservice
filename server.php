@@ -1637,6 +1637,7 @@ class openAgency extends webServiceServer {
           foreach ($buf as $lib => $row) {
             $o->agencyId->_value = $lib;
             $o->agencyType->_value = $row['BIB_TYPE'];
+            $o->branchId->_value = $lib;
             $o->branchType->_value = $row['TYPE'];
             $res->libraryTypeInfo[]->_value = $o;
             unset($o);
