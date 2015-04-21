@@ -1628,8 +1628,9 @@ class openAgency extends webServiceServer {
       if (empty($res->error)) {
         try {
           $oci->set_query('SELECT vsn.bib_nr vsn_bib_nr, vsn.bib_type, v.bib_nr, v.type
-                          FROM vip v, vip_vsn vsn
-                            WHERE v.kmd_nr = vsn.bib_nr');
+                             FROM vip v, vip_vsn vsn
+                            WHERE v.kmd_nr = vsn.bib_nr
+                              AND v.delete_mark is null');
           while ($row = $oci->fetch_into_assoc()) {
             $buf[self::normalize_agency($row['BIB_NR'])] = $row;
           }
@@ -1695,10 +1696,9 @@ class openAgency extends webServiceServer {
             }
             $oci->bind('bind_u', 'U');
             $oci->set_query('SELECT vsn.bib_nr, vsn.navn
-                            FROM vip v, vip_vsn vsn
-                            WHERE v.bib_nr = vsn.bib_nr
-                            AND (v.delete_mark is null or v.delete_mark = :bind_u)
-                            ' . $filter_bib_type);
+                               FROM vip v, vip_vsn vsn
+                              WHERE v.bib_nr = vsn.bib_nr
+                                AND (v.delete_mark is null OR v.delete_mark = :bind_u) ' . $filter_bib_type);
             while ($vv_row = $oci->fetch_into_assoc()) {
               $o->agencyId->_value = self::normalize_agency($vv_row['BIB_NR']);
               $o->agencyName->_value = $vv_row['NAVN'];
