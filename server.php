@@ -1627,10 +1627,11 @@ class openAgency extends webServiceServer {
       }
       if (empty($res->error)) {
         try {
+          $oci->bind('bind_u', 'U');
           $oci->set_query('SELECT vsn.bib_nr vsn_bib_nr, vsn.bib_type, v.bib_nr, v.type
                              FROM vip v, vip_vsn vsn
                             WHERE v.kmd_nr = vsn.bib_nr
-                              AND v.delete_mark is null');
+                              AND (v.delete_mark is null OR v.delete_mark = :bind_u)');
           while ($row = $oci->fetch_into_assoc()) {
             $buf[self::normalize_agency($row['BIB_NR'])] = $row;
           }
