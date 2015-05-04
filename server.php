@@ -1488,9 +1488,14 @@ class openAgency extends webServiceServer {
   // libraryType
       if ($val = $param->libraryType->_value
         && ($param->libraryType->_value == 'Folkebibliotek'
-          || $param->libraryType->_value == 'Forskningsbibliotek')) {
+          || $param->libraryType->_value == 'Forskningsbibliotek'
+          || $param->libraryType->_value == 'Skolebibliotek')) {
         $sqls[] = 'vsn.bib_type = :bind_bib_type';
         $oci->bind('bind_bib_type', $param->libraryType->_value);
+      }
+      else {
+        $sqls[] = 'vsn.bib_type != :bind_bib_type';
+        $oci->bind('bind_bib_type', 'Skolebibliotek');
       }
   // libraryStatus
       if ($param->libraryStatus->_value == 'usynlig') {
@@ -1826,7 +1831,8 @@ class openAgency extends webServiceServer {
         if (is_array($ora_par) ||
             $param->libraryType->_value == 'Alle' ||
             $param->libraryType->_value == 'Folkebibliotek' ||
-            $param->libraryType->_value == 'Forskningsbibliotek') {
+            $param->libraryType->_value == 'Forskningsbibliotek' ||
+            $param->libraryType->_value == 'Skolebibliotek') {
           try {
             if ($ora_par) {
               foreach ($ora_par as $key => $val) {
@@ -1856,7 +1862,7 @@ class openAgency extends webServiceServer {
                       $add_sql .= ' OR ' . $add_item;
                   }
                 }
-                if ($add_sql) $filter_bib_type .= $add_sql . ')';
+                if ($add_sql) $filter_bib_type[] = $add_sql . ')';
               }
             }
             if ($ora_par['agencyId']) {
@@ -1864,11 +1870,15 @@ class openAgency extends webServiceServer {
                 $agency_list .= ($agency_list ? ', ' : '') . ':bind_' . $agency;
                 $oci->bind('bind_' . $agency, $agency);
               }
-              $filter_bib_type .= ' v.bib_nr IN (' . $agency_list . ')';
+              $filter_bib_type[] = ' v.bib_nr IN (' . $agency_list . ')';
             }
             elseif (empty($ora_par) && $param->libraryType->_value <> 'Alle') {
-              $filter_bib_type .= ' bib_type = :bind_bib_type';
+              $filter_bib_type[] = ' vsn.bib_type = :bind_bib_type';
               $oci->bind('bind_bib_type', $param->libraryType->_value);
+            }
+            else {
+              $filter_bib_type[] = ' vsn.bib_type != :bind_bib_type';
+              $oci->bind('bind_bib_type', 'Skolebibliotek');
             }
 // 2do vip_beh.best_modt = $param->pickupAllowed->_value
             if ($param->libraryStatus->_value == 'alle') {
@@ -1886,7 +1896,7 @@ class openAgency extends webServiceServer {
                                     vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil,
                                     vsn.cvr_nr, vsn.p_nr, vsn.ean_nummer
                             FROM vip_vsn vsn, vip v, vip_sup vs
-                            WHERE ' . $filter_delete_vsn . ($filter_bib_type ? $filter_bib_type . ' AND ' : '') . '
+                            WHERE ' . $filter_delete_vsn . ($filter_bib_type ? implode(' AND ', $filter_bib_type) . ' AND ' : '') . '
                                   v.bib_nr = vs.bib_nr (+)
                               AND v.kmd_nr = vsn.bib_nr
                             ORDER BY vsn.bib_nr';
@@ -1910,12 +1920,15 @@ class openAgency extends webServiceServer {
             elseif (empty($ora_par) && $param->libraryType->_value <> 'Alle') {
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
+            else {
+              $oci->bind('bind_bib_type', 'Skolebibliotek');
+            }
             if (isset($param->pickupAllowed->_value)) {
               $oci->bind('bind_j', 'J');
               if (self::xs_boolean($param->pickupAllowed->_value))
-                $filter_bib_type .= ' AND vb.best_modt = :bind_j';
+                $filter_bib_type[] = 'vb.best_modt = :bind_j';
               else
-                $filter_bib_type .= ' AND vb.best_modt != :bind_j';
+                $filter_bib_type[] = 'vb.best_modt != :bind_j';
             }
             if ($param->libraryStatus->_value == 'alle') {
               $filter_delete = '';
@@ -1946,7 +1959,7 @@ class openAgency extends webServiceServer {
                                         FROM vip_vsn vsn, vip v, vip_sup vs
                                         WHERE ' . $filter_delete_vsn . '
                                                v.kmd_nr = vsn.bib_nr ' .
-                                          ($filter_bib_type ? ' AND ' . $filter_bib_type : '') . ')
+                                          ($filter_bib_type ? ' AND ' . implode(' AND ', $filter_bib_type) : '') . ')
                     ' . $filter_delete . '
                     ' . $filter_filial . '
                     AND v.bib_nr = vb.bib_nr (+)
