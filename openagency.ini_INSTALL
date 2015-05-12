@@ -89,7 +89,8 @@ agency_credentials = some_user/some_pwd@some.server.dbc.dk
 
 ; --------------
 ; Change agencyType for a library
-agencyTypeOverride[700400] = Folkebibliotek
+; as of 20150512, 700400 is Folkebibliotek som this is not neeeded any more
+;agencyTypeOverride[700400] = Folkebibliotek
 
 ; --------------
 ; DBC target address for order-systems
