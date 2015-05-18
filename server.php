@@ -532,7 +532,7 @@ class openAgency extends webServiceServer {
                         kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
                         kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn,
                         vd.mailbestil_via, vd.url_itemorder_bestil, vd.zbestil_groupid, vd.zbestil_userid, vd.zbestil_passw,
-                        vd.holdingsformat,
+                        vd.holdingsformat, vd.svar_email,
                         ors.shipping ors_shipping, ors.cancel ors_cancel, ors.answer ors_answer, 
                         ors.cancelreply ors_cancelreply, ors.cancel_answer_synchronic ors_cancel_answer_synchronic,
                         ors.renew ors_renew, ors.renewanswer ors_renewanswer, 
@@ -2522,6 +2522,7 @@ class openAgency extends webServiceServer {
       }
       $pickupAgency->branchPhone->_value = $row['TLF_NR'];
       $pickupAgency->branchEmail->_value = $row['EMAIL'];
+      if ($row['SVAR_EMAIL']) $pickupAgency->branchIllEmail->_value = $row['SVAR_EMAIL'];
       $pickupAgency->branchIsAgency->_value = ($row['FILIAL_VSN'] == 'J' ? 1 : 0);
       if ($row['BADR']) $pickupAgency->postalAddress->_value = $row['BADR'];
       if ($row['BPOSTNR']) $pickupAgency->postalCode->_value = $row['BPOSTNR'];
