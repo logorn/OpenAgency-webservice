@@ -9,7 +9,7 @@
 
 ; --------------
 ;version
-version = 2.20
+version = 2.21
 
 ; --------------
 ; set only_https to accept https call only
@@ -95,7 +95,7 @@ agency_credentials = some_user/some_pwd@some.server.dbc.dk
 ; --------------
 ; DBC target address for order-systems
 dbc_target[z3950][address] = z3950.dbc.dk:210/danbib
-dbc_target[iso18626][address] = dbc_iso18626_address
+dbc_target[iso18626][address] = http://oss-services.dbc.dk/copa-rs/app/iso18626/
 dbc_target[iso18626][password] = dbc_iso18626_password
 
 ; --------------
@@ -203,6 +203,7 @@ action[findLibrary][] = agencyName
 action[findLibrary][] = agencyAddress
 action[findLibrary][] = postalCode
 action[findLibrary][] = city
+action[findLibrary][] = stilNumber
 action[findLibrary][] = anyField
 action[findLibrary][] = libraryType
 action[findLibrary][] = libraryStatus

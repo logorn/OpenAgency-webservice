@@ -520,7 +520,7 @@ class openAgency extends webServiceServer {
           $filter_sql = implode(' AND ', $sqls);
           $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                         v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-                        v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt, v.p_nr,
+                        v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt, v.p_nr, v.uni_c_nr, 
                         TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                         vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                         vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
@@ -1414,6 +1414,7 @@ class openAgency extends webServiceServer {
                    self::stringiefy($param->agencyAddress) . '_' . 
                    self::stringiefy($param->postalCode) . '_' . 
                    self::stringiefy($param->city) . '_' . 
+                   self::stringiefy($param->stilNumber) . '_' . 
                    self::stringiefy($param->anyField) . '_' . 
                    self::stringiefy($param->libraryType) . '_' . 
                    self::stringiefy($param->libraryStatus) . '_' . 
@@ -1464,6 +1465,11 @@ class openAgency extends webServiceServer {
       if ($val = $param->city->_value) {
         $sqls[] = 'regexp_like(upper(v.bcity), upper(:bind_city))';
         $oci->bind('bind_city', self::build_regexp_like($val));
+      }
+  // stilNumber
+      if ($val = $param->stilNumber->_value) {
+        $sqls[] = 'v.uni_c_nr = :bind_uni_c_nr';
+        $oci->bind('bind_uni_c_nr', $val);
       }
   // anyField
       if ($val = $param->anyField->_value) {
@@ -1546,7 +1552,7 @@ class openAgency extends webServiceServer {
   
       $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                     v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-                    v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr,
+                    v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr, v.uni_c_nr,
                     TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                     vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                     vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
@@ -1946,7 +1952,7 @@ class openAgency extends webServiceServer {
               $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
             }
             $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr,
+                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr, v.uni_c_nr, 
                           vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                           txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
                           bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
@@ -2530,6 +2536,7 @@ class openAgency extends webServiceServer {
       if ($row['ISIL'] && ($row['BIB_NR'] >= 700000 && $row['BIB_NR'] <= 899999)) $pickupAgency->isil->_value = $row['ISIL'];
       if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = self::normalize_agency($row['KNUDEPUNKT']);
       if ($row['P_NR']) $pickupAgency->branchPNumber->_value = self::normalize_agency($row['P_NR']);
+      if ($row['UNI_C_NR']) $pickupAgency->branchStilNumber->_value = $row['UNI_C_NR'];
       if ($row['URL_BIB_KAT']) $pickupAgency->branchCatalogueUrl->_value = $row['URL_BIB_KAT'];
       if ($row['URL_VIDERESTIL']) $pickupAgency->lookupUrl->_value = $row['URL_VIDERESTIL'];
       if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];

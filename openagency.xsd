@@ -90,6 +90,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:agencyAddress" minOccurs="0"/>
         <xs:element ref="oa:postalCode" minOccurs="0"/>
         <xs:element ref="oa:city" minOccurs="0"/>
+        <xs:element ref="oa:stilNumber" minOccurs="0"/>
         <xs:element ref="oa:anyField" minOccurs="0"/>
         <xs:element ref="oa:libraryType" minOccurs="0"/>
         <xs:element ref="oa:libraryStatus" minOccurs="0"/>
@@ -499,6 +500,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="branchPhone" type="xs:string"/>
   <xs:element name="branchPNumber" type="xs:string"/>
   <xs:element name="branchStatus" type="xs:string"/>
+  <xs:element name="branchStilNumber" type="xs:string"/>
   <xs:element name="branchType" type="xs:string"/>
   <xs:element name="branchWebsiteUrl" type="xs:string"/>
   <xs:element name="callback" type="xs:string">
@@ -839,6 +841,7 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:isil" minOccurs="0"/>
       <xs:element ref="oa:junction" minOccurs="0"/>
       <xs:element ref="oa:branchPNumber" minOccurs="0"/>
+      <xs:element ref="oa:branchStilNumber" minOccurs="0"/>
       <xs:element ref="oa:branchCatalogueUrl" minOccurs="0"/>
       <xs:element ref="oa:lookupUrl" minOccurs="0"/>
       <xs:element ref="oa:branchWebsiteUrl" minOccurs="0"/>
@@ -965,6 +968,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="sourceOwner" type="xs:string"/>
   <xs:element name="sourceSearchable" type="xs:boolean"/>
   <xs:element name="stateAndUniversityLibraryCopyService" type="xs:boolean"/>
+  <xs:element name="stilNumber" type="xs:string"/>
   <xs:element name="subscription" type="oa:subscription"/>
   <xs:complexType name="subscription">
     <xs:sequence>
