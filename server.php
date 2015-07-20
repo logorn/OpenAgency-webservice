@@ -1373,6 +1373,7 @@ class openAgency extends webServiceServer {
    * - agencyAddress
    * - postalCode
    * - city
+   * - stilNumber
    * - anyField
    * - libraryType
    * - libraryStatus
@@ -1400,6 +1401,7 @@ class openAgency extends webServiceServer {
    * - - temporarilyClosed
    * - - temporarilyClosedReason
    * - - pickupAllowed *
+   * - - and more - see the xsd for all 
    * - or
    * - - error
    */
@@ -1410,7 +1412,7 @@ class openAgency extends webServiceServer {
       $cache_key = 'OA_FinL_' . 
                    $this->config->get_inifile_hash() . 
                    self::stringiefy($param->agencyId) . '_' . 
-                   self::stringiefy($param->agencyname) . '_' . 
+                   self::stringiefy($param->agencyName) . '_' . 
                    self::stringiefy($param->agencyAddress) . '_' . 
                    self::stringiefy($param->postalCode) . '_' . 
                    self::stringiefy($param->city) . '_' . 
@@ -1435,9 +1437,9 @@ class openAgency extends webServiceServer {
         $res->error->_value = 'service_unavailable';
       }
   // agencyId
-      if ($val = self::strip_agency($param->agencyId->_value)) {
+      if ($agency_id = self::strip_agency($param->agencyId->_value)) {
         $sqls[] = 'v.bib_nr = :bind_bib_nr';
-        $oci->bind('bind_bib_nr', $val);
+        $oci->bind('bind_bib_nr', $agency_id);
       }
   // agencyName
       if ($val = $param->agencyName->_value) {
@@ -1499,7 +1501,7 @@ class openAgency extends webServiceServer {
         $sqls[] = 'vsn.bib_type = :bind_bib_type';
         $oci->bind('bind_bib_type', $param->libraryType->_value);
       }
-      else {
+      elseif (empty($agency_id) && empty($param->stilNumber->_value)) {
         $sqls[] = 'vsn.bib_type != :bind_bib_type';
         $oci->bind('bind_bib_type', 'Skolebibliotek');
       }
@@ -1613,7 +1615,7 @@ class openAgency extends webServiceServer {
    *
    * Request:
    * Response:
-   * - agency (see xsd for parameters)
+   * - libraryType
    * or
    * - error
    */
