@@ -479,1230 +479,1239 @@ class openAgency extends webServiceServer {
       if (empty($res->error)) {
         try {
       // remove all libraries starting with 3, 5 or 6 - cannot be part of getRegistryInfo
-          $sqls[] = '(v.bib_nr < 300000 OR (v.bib_nr >= 400000 AND v.bib_nr < 500000) OR v.bib_nr >= 700000)';
-      // agencyId
-          if ($agency) {
-            $sqls[] = 'v.bib_nr = :bind_bib_nr';
+          //$sqls[] = '(v.bib_nr < 300000 OR (v.bib_nr >= 400000 AND v.bib_nr < 500000) OR v.bib_nr >= 700000)';
+      // remove all libraries starting with 5 or 6 - cannot be part of getRegistryInfo
+            $sqls[] = '(v.bib_nr < 500000 OR v.bib_nr >= 700000)';
+        // agencyId
+            if ($agency) {
+              $sqls[] = 'v.bib_nr = :bind_bib_nr';
+              $oci->bind('bind_bib_nr', $agency);
+            }
+        // agencyName
+            if ($val = $param->agencyName->_value) {
+              $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_navn))' .
+                        ' OR (regexp_like(upper(sup.tekst), upper(:bind_navn)) AND sup.type = :bind_n))';
+              $oci->bind('bind_navn', self::build_regexp_like($val));
+              $oci->bind('bind_n', 'N');
+            }
+        // lastUpdated
+            if ($val = $param->lastUpdated->_value) {
+              $sqls[] = '(v.dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\')' .
+                        ' OR v.bs_dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\')' .
+                        ' OR vsn.dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\'))' .
+              $oci->bind('bind_date', $val);
+            }
+        // libraryType
+            if ($val = $param->libraryType->_value
+              && ($param->libraryType->_value == 'Folkebibliotek'
+                || $param->libraryType->_value == 'Forskningsbibliotek'
+                || $param->libraryType->_value == 'Skolebibliotek')) {
+              $sqls[] = 'vsn.bib_type = :bind_bib_type';
+              $oci->bind('bind_bib_type', $param->libraryType->_value);
+            }
+            else {    // Alle or NULL
+              $sqls[] = '(vsn.bib_type = :bind_bib_type_1 OR vsn.bib_type = :bind_bib_type_2)';
+              $oci->bind('bind_bib_type_1', 'Folkebibliotek');
+              $oci->bind('bind_bib_type_2', 'Forskningsbibliotek');
+            }
+        // libraryStatus
+            if ($param->libraryStatus->_value == 'usynlig') {
+              $oci->bind('bind_u', 'U');
+              $sqls[] = 'v.delete_mark = :bind_u';
+            } elseif ($param->libraryStatus->_value == 'slettet') {
+              $oci->bind('bind_s', 'S');
+              $sqls[] = 'v.delete_mark = :bind_s';
+            } elseif ($param->libraryStatus->_value <> 'alle') {
+              $oci->bind('bind_u', 'U');
+              $sqls[] = '(v.delete_mark is null OR v.delete_mark = :bind_u)';
+            }
+            $filter_sql = implode(' AND ', $sqls);
+            $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
+                          v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt, v.p_nr, v.uni_c_nr, 
+                          TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
+                          vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
+                          vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
+                          TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, 
+                          vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
+                          vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                          txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
+                          bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
+                          kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
+                          kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn,
+                          vd.mailbestil_via, vd.url_itemorder_bestil, vd.zbestil_groupid, vd.zbestil_userid, vd.zbestil_passw,
+                          vd.holdingsformat, vd.svar_email,
+                          ors.shipping ors_shipping, ors.cancel ors_cancel, ors.answer ors_answer, 
+                          ors.cancelreply ors_cancelreply, ors.cancel_answer_synchronic ors_cancel_answer_synchronic,
+                          ors.renew ors_renew, ors.renewanswer ors_renewanswer, 
+                          ors.renew_answer_synchronic ors_renew_answer_synchronic,
+                          ors.iso18626_address, ors.iso18626_password
+                  FROM vip v, vip_vsn vsn, vip_danbib vd, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
+                       vip_sup sup, vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat, open_agency_ors ors
+                  WHERE 
+                    ' . $filter_sql . '
+                    AND v.kmd_nr = vsn.bib_nr (+)
+                    AND v.bib_nr = vd.bib_nr (+)
+                    AND v.bib_nr = vb.bib_nr (+)
+                    AND v.bib_nr = sup.bib_nr (+)
+                    AND v.bib_nr = txt.bib_nr (+)
+                    AND v.bib_nr = hold.bib_nr (+)
+                    AND v.bib_nr = eng.bib_nr (+)
+                    AND v.bib_nr = bestil.bib_nr (+)
+                    AND v.bib_nr = ors.bib_nr (+)
+                    AND v.bib_nr = kat.bib_nr (+)
+                  ORDER BY vsn.bib_nr ASC, v.bib_nr ASC';
+            $oci->set_query($sql);
+            while ($row = $oci->fetch_into_assoc()) {
+              if (empty($curr_bib)) {
+                $curr_bib = $row['BIB_NR'];
+              }
+              if ($curr_bib <> $row['BIB_NR']) {
+                $res->registryInfo[]->_value = $registryInfo;
+                unset($registryInfo);
+                $curr_bib = $row['BIB_NR'];
+              }
+              if ($row) {
+                self::fill_pickupAgency($registryInfo->pickupAgency->_value, $row);
+                if ($row['HOLDINGSFORMAT'] == 'B') {
+                  $dbc_target = $this->config->get_value('dbc_target', 'setup');
+                  self::use_dbc_as_z3950_target($row, $dbc_target['z3950'], $param->authentication->_value);
+                  self::use_dbc_as_iso18626_target($row, $dbc_target['iso18626']);
+                }
+                if ($row['MAILBESTIL_VIA'] == 'C') {
+                  self::set_z3950Ill($registryInfo, $row);
+                }
+                elseif ($row['MAILBESTIL_VIA'] == 'E') {
+                  self::set_iso18626($registryInfo, $row);
+                }
+              }
+            }
+            if ($registryInfo)
+              $res->registryInfo[]->_value = $registryInfo;
+          }
+          catch (ociException $e) {
+            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+            $res->error->_value = 'service_unavailable';
+          }
+        }
+      }
+      //var_dump($res); var_dump($param); die();
+      $ret->getRegistryInfoResponse->_value = $res;
+      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+      if (empty($res->error)) $this->cache->set($cache_key, $ret);
+      return $ret;
+    }
+
+    /** \brief Fetch SaouLicenseInfo
+     *
+     * Request:
+     * - agencyId
+     * Response:
+     * - saouLicenseInfo (see xsd for parameters)
+     * or
+     * - error
+     */
+    public function getSaouLicenseInfo($param) {
+      if (!$this->aaa->has_right('netpunkt.dk', 500))
+        $res->error->_value = 'authentication_error';
+      else {
+        $agency = self::strip_agency($param->agencyId->_value);
+        $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
+        self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+        if ($ret = $this->cache->get($cache_key)) {
+          verbose::log(STAT, 'Cache hit');
+          return $ret;
+        }
+        $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+        $oci->set_charset('UTF8');
+        try {
+          $oci->connect();
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+        if (empty($res->error)) {
+          try {
+            if ($agency) {
+              $oci->bind('bind_agency', $agency);
+              $where = 'ud.bib_nr = :bind_agency AND ';
+            }
+            $fb_licens = 'fb_licens';
+            $oci->bind('bind_fb_licens', $fb_licens);
+            $oci->set_query('SELECT ud.bib_nr, domain, proxyurl 
+                             FROM user_domains ud, licensguide lg
+                             WHERE ' . $where . '
+                                   origin_source = :bind_fb_licens
+                               AND ud.bib_nr = lg.bib_nr (+)
+                             ORDER BY bib_nr');
+            $last_bib = '';
+            while ($sl_row = $oci->fetch_into_assoc()) {
+              if ($last_lib != $sl_row['BIB_NR']) {
+                if ($last_lib) {
+                  $res->saouLicenseInfo[]->_value = $sl;
+                  unset($sl);
+                }
+                $last_lib = $sl_row['BIB_NR'];
+                $sl->agencyId->_value = $sl_row['BIB_NR'];
+                if ($sl_row['PROXYURL']) {
+                  $sl->proxyUrl->_value = $sl_row['PROXYURL'];
+                }
+              }
+              $sl->ipAddress[]->_value = $sl_row['DOMAIN'];
+            }
+            if ($sl) {
+              $res->saouLicenseInfo[]->_value = $sl;
+            }
+          }
+          catch (ociException $e) {
+            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+            $res->error->_value = 'service_unavailable';
+          }
+        }
+      }
+      //var_dump($res); var_dump($param); die();
+      $ret->getSaouLicenseInfoResponse->_value = $res;
+      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+      if (empty($res->error)) $this->cache->set($cache_key, $ret);
+      return $ret;
+    }
+
+    /** \brief Fetching different info for the ORS-system
+     *
+     * Request:
+     * - agencyId
+     * - service
+     * Response (depending on service):
+     * -  information - see xsd for parameters
+     * or orsAnswer - see xsd for parameters
+     * or orsCancel - see xsd for parameters
+     * or orsCancelReply - see xsd for parameters
+     * or orsCancelRequestUser - see xsd for parameters
+     * or orsEndUserRequest - see xsd for parameters
+     * or orsEndUserIllRequest - see xsd for parameters
+     * or orsItemRequest - see xsd for parameters
+     * or orsLookupUser - see xsd for parameters
+     * or orsRecall - see xsd for parameters
+     * or orsReceipt - see xsd for parameters
+     * or orsRenew - see xsd for parameters
+     * or orsRenewAnswer - see xsd for parameters
+     * or orsRenewItemUser - see xsd for parameters
+     * or orsShipping - see xsd for parameters
+     * or orsStatusRequest - see xsd for parameters
+     * or orsStatusResponse - see xsd for parameters
+     * or serverInformation - see xsd for parameters
+     * or userOrderParameters - see xsd for parameters
+     * or userParameters - see xsd for parameters
+     * or error
+     */
+    public function service($param) {
+      if (!$this->aaa->has_right('netpunkt.dk', 500))
+        $res->error->_value = 'authentication_error';
+      else {
+        $agency = self::strip_agency($param->agencyId->_value);
+        $cache_key = 'OA_ser_' . $this->config->get_inifile_hash() . $agency . $param->service->_value;
+        self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+        if ($ret = $this->cache->get($cache_key)) {
+          verbose::log(STAT, 'Cache hit');
+          return $ret;
+        }
+        $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+        $oci->set_charset('UTF8');
+        try {
+          $oci->connect();
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+        if (empty($res->error)) {
+          $tab_col['v'] = array('bib_nr', 'navn', 'tlf_nr', 'fax_nr', 'email', 'badr', 'bpostnr', 'bcity', 'type', '*');
+          $tab_col['vv'] = array('bib_nr', 'navn', 'tlf_nr', 'fax_nr', 'email', 'badr', 'bpostnr', 'bcity', 'bib_type', '*');
+          $tab_col['vb'] = array('bib_nr', '*');
+          $tab_col['vbst'] = array('bib_nr', 'ncip_address', '*');
+          $tab_col['vd'] = array('bib_nr', 'svar_fax', 'svar_email', '*');
+          $tab_col['vk'] = array('bib_nr', '*');
+          $tab_col['oao'] = array('bib_nr', '*');
+          foreach ($tab_col as $prefix => $arr) {
+            foreach ($arr as $col) {
+              $q .= (empty($q) ? '' : ', ') .
+                    $prefix . '.' . $col .
+                    ($col == '*' ? '' : ' "' . strtoupper($prefix . '.' . $col) . '"');
+            }
+          }
+          try {
             $oci->bind('bind_bib_nr', $agency);
+            $oci->set_query('SELECT ' . $q . '
+                            FROM vip v, vip_vsn vv, vip_beh vb, vip_bestil vbst, vip_danbib vd, vip_kat vk, open_agency_ors oao
+                            WHERE v.bib_nr = vd.bib_nr (+)
+                            AND v.kmd_nr = vv.bib_nr (+)
+                            AND v.bib_nr = vk.bib_nr (+)
+                            AND v.bib_nr = vb.bib_nr (+)
+                            AND v.bib_nr = vbst.bib_nr (+)
+                            AND v.bib_nr = oao.bib_nr (+)
+                            AND v.bib_nr = :bind_bib_nr');
+            $oa_row = $oci->fetch_into_assoc();
+            self::sanitize_array($oa_row);
+            if ($param->service->_value == 'information') {
+              $consortia = array();
+              if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
+                $help = $oa_row['KMD_NR'];
+              }
+              else {
+                $help = $agency;
+              }
+              $oci->bind('bind_bib_nr', $help);
+              $oci->set_query('SELECT *
+                               FROM vip_viderestil
+                              WHERE bib_nr = :bind_bib_nr');
+              while ($row = $oci->fetch_into_assoc()) {
+                $vv_row[$row['BIB_NR_VIDERESTIL']] = $row;
+              }
+              if ($vv_row) {
+                $oci->bind('bind_bib_nr', $help);
+                $oci->set_query('SELECT vilse 
+                                  FROM vip, laaneveje
+                                  WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
+                                    AND vip.bib_nr = :bind_bib_nr
+                                  ORDER BY prionr DESC');
+                while ($lv_row = $oci->fetch_into_assoc()) {
+                  if ($p = $vv_row[$lv_row['VILSE']])
+                  $consortia[] = $p;
+                }
+                if (count($vv_row) <> count($consortia)) {
+                  verbose::log(ERROR, 'OpenAgency('.__LINE__.'):: agency ' . $agency . 
+                                      ' has libraries in VIP_VIDERESTIL not found in LAANEVEJE');
+                }
+              }
+            }
+            if ($param->service->_value == 'userOrderParameters') {
+              if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
+                $oci->bind('bind_bib_nr', $oa_row['KMD_NR']);
+              }
+              else {
+                $oci->bind('bind_bib_nr', $agency);
+              }
+              $oci->set_query('SELECT fjernadgang.har_laanertjek fjernadgang_har_laanertjek, fjernadgang.*, 
+                                      fjernadgang_andre.*
+                               FROM fjernadgang, fjernadgang_andre
+                              WHERE fjernadgang.faust (+) = fjernadgang_andre.faust
+                                AND bib_nr = :bind_bib_nr');
+              $fjernadgang_rows = $oci->fetch_all_into_assoc();
+            }
           }
-      // agencyName
-          if ($val = $param->agencyName->_value) {
-            $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_navn))' .
-                      ' OR (regexp_like(upper(sup.tekst), upper(:bind_navn)) AND sup.type = :bind_n))';
-            $oci->bind('bind_navn', self::build_regexp_like($val));
-            $oci->bind('bind_n', 'N');
+          catch (ociException $e) {
+            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+            $res->error->_value = 'service_unavailable';
           }
-      // lastUpdated
-          if ($val = $param->lastUpdated->_value) {
-            $sqls[] = '(v.dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\')' .
-                      ' OR v.bs_dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\')' .
-                      ' OR vsn.dato >= TO_DATE(:bind_date, \'YYYY-MM-DD\'))' .
-            $oci->bind('bind_date', $val);
+          if (empty($oa_row))
+            $res->error->_value = 'agency_not_found';
+          if (empty($res->error)) {
+  //        verbose::log(TRACE, 'OpenAgency('.__LINE__.'):: action=service&agencyId=' . $param->agencyId->_value .  '&service=' . $param->service->_value);
+            switch ($param->service->_value) {
+              case 'information':
+                $inf = &$res->information->_value;
+                $inf->agencyId->_value = self::normalize_agency($oa_row['VV.BIB_NR']);
+                $inf->agencyName->_value = $oa_row['VV.NAVN'];
+                $inf->agencyPhone->_value = $oa_row['VV.TLF_NR'];
+                $inf->agencyFax->_value = $oa_row['VV.FAX_NR'];
+                $inf->agencyEmail->_value = $oa_row['VV.EMAIL'];
+                $inf->agencyType->_value = self::set_agency_type($oa_row['VV.BIB_NR'], $oa_row['VV.BIB_TYPE']);
+                $inf->agencyCatalogueUrl->_value = $oa_row['URL_BIB_KAT'];
+                $inf->branchId->_value = self::normalize_agency($oa_row['V.BIB_NR']);
+                $inf->branchName->_value = $oa_row['V.NAVN'];
+                $inf->branchPhone->_value = $oa_row['V.TLF_NR'];
+                $inf->branchFax->_value = $oa_row['VD.SVAR_FAX'];
+                $inf->branchEmail->_value = $oa_row['V.EMAIL'];
+                $inf->branchType->_value = $oa_row['V.TYPE'];
+                if ($oa_row['AFSAETNINGSBIBLIOTEK'])
+                  $inf->dropOffAgency->_value = $oa_row['AFSAETNINGSBIBLIOTEK'];
+                $inf->postalAddress->_value = $oa_row['V.BADR'];
+                $inf->postalCode->_value = $oa_row['V.BPOSTNR'];
+                $inf->city->_value = $oa_row['V.BCITY'];
+                $inf->isil->_value = $oa_row['ISIL'];
+                $inf->junction->_value = $oa_row['KNUDEPUNKT'];
+                $inf->kvik->_value = ($oa_row['KVIK'] == 'kvik' ? 'YES' : 'NO');
+                $inf->lookupUrl->_value = $oa_row['URL_VIDERESTIL'];
+                $inf->norfri->_value = ($oa_row['NORFRI'] == 'norfri' ? 'YES' : 'NO');
+                $inf->requestOrder->_value = $oa_row['USE_LAANEVEJ'];
+                if (is_null($inf->sender->_value = self::normalize_agency($oa_row['CHANGE_REQUESTER'])))
+                  $inf->sender->_value = self::normalize_agency($oa_row['V.BIB_NR']);
+                $inf->replyToEmail->_value = $oa_row['VD.SVAR_EMAIL'];
+                foreach ($consortia as $c_key => &$c) {
+                  $inf->consortia[$c_key]->_value->agencyId->_value = $c['BIB_NR_VIDERESTIL'];
+                  $inf->consortia[$c_key]->_value->lookupUrl->_value = $c['URL_VIDERESTIL'];
+                }
+                //print_r($oa_row); var_dump($res->information->_value); die();
+                break;
+              case 'orsAnswer':
+                $orsA = &$res->orsAnswer->_value;
+                $orsA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsA, $oa_row);
+                }
+                else {
+                  $orsA->willReceive->_value = (in_array($oa_row['ANSWER'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
+                  $orsA->synchronous->_value = 0;
+                  $orsA->protocol->_value = self::normalize_iso18626($oa_row['ANSWER']);
+                  if ($oa_row['ANSWER'] == 'z3950') {
+                    $orsA->address->_value = $oa_row['ANSWER_Z3950_ADDRESS'];
+                  }
+                  elseif ($oa_row['ANSWER'] == 'mail') {
+                    $orsA->address->_value = $oa_row['ANSWER_MAIL_ADDRESS'];
+                  }
+                  $orsA->userId->_value = $oa_row['ANSWER_Z3950_USER'];
+                  $orsA->groupId->_value = $oa_row['ANSWER_Z3950_GROUP'];
+                  $orsA->passWord->_value = ($oa_row['ANSWER'] == 'z3950' ? $oa_row['ANSWER_Z3950_PASSWORD'] : $oa_row['ANSWER_NCIP_AUTH']);
+                }
+                //var_dump($res->orsAnswer->_value); die();
+                break;
+              case 'orsCancelRequestUser':
+                $orsCRU = &$res->orsCancelRequestUser->_value;
+                $orsCRU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
+                $orsCRU->willReceive->_value = ($oa_row['NCIP_CANCEL'] == 'J' ? 'YES' : 'NO');
+                $orsCRU->synchronous->_value = 0;
+                $orsCRU->address->_value = $oa_row['NCIP_CANCEL_ADDRESS'];
+                $orsCRU->passWord->_value = $oa_row['NCIP_CANCEL_PASSWORD'];
+                //var_dump($res->orsCancelRequestUser->_value); die();
+                break;
+              case 'orsEndUserRequest':
+                $orsEUR = &$res->orsEndUserRequest->_value;
+                $orsEUR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
+                $orsEUR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
+                $orsEUR->synchronous->_value = 0;
+                switch ($oa_row['BESTIL_VIA']) {
+                  case 'A':
+                    $orsEUR->protocol->_value = 'mail';
+                    $orsEUR->address->_value = $oa_row['EMAIL_BESTIL'];
+                    $orsEUR->format->_value = 'text';
+                    break;
+                  case 'B':
+                    $orsEUR->protocol->_value = 'mail';
+                    $orsEUR->address->_value = $oa_row['EMAIL_BESTIL'];
+                    $orsEUR->format->_value = 'ill0';
+                    break;
+                  case 'C':
+                    $orsEUR->protocol->_value = 'ors';
+                    break;
+                  case 'D':
+                    $orsEUR->protocol->_value = 'ncip';
+                    $orsEUR->address->_value = $oa_row['VBST.NCIP_ADDRESS'];
+                    $orsEUR->passWord->_value = $oa_row['NCIP_PASSWORD'];
+                    break;
+                }
+                //var_dump($res->orsEndUserRequest->_value); die();
+                break;
+              case 'orsEndUserIllRequest':
+                $orsEUIR = &$res->orsEndUserIllRequest->_value;
+                $orsEUIR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
+                $orsEUIR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
+                $orsEUIR->synchronous->_value = 0;
+                switch ($oa_row['BESTIL_FJL_VIA']) {
+                  case 'A':
+                    $orsEUIR->protocol->_value = 'mail';
+                    $orsEUIR->address->_value = $oa_row['EMAIL_FJL_BESTIL'];
+                    $orsEUIR->format->_value = 'text';
+                    break;
+                  case 'B':
+                    $orsEUIR->protocol->_value = 'mail';
+                    $orsEUIR->address->_value = $oa_row['EMAIL_FJL_BESTIL'];
+                    $orsEUIR->format->_value = 'ill0';
+                    break;
+                  case 'C':
+                    $orsEUIR->protocol->_value = 'ors';
+                    break;
+                }
+                break;
+              case 'orsItemRequest':
+                $orsIR = &$res->orsItemRequest->_value;
+                $orsIR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
+                switch ($oa_row['MAILBESTIL_VIA']) {
+                  case 'A':
+                    $orsIR->willReceive->_value = 'YES';
+                    $orsIR->synchronous->_value = 0;
+                    $orsIR->protocol->_value = 'mail';
+                    $orsIR->address->_value = $oa_row['BEST_EMAIL'];
+                    break;
+                  case 'B':
+                    $orsIR->willReceive->_value = 'YES';
+                    $orsIR->synchronous->_value = 0;
+                    $orsIR->protocol->_value = 'ors';
+                    break;
+                  case 'C':
+                    $orsIR->willReceive->_value = 'YES';
+                    $orsIR->synchronous->_value = 0;
+                    $orsIR->protocol->_value = 'z3950';
+                    $orsIR->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
+                    break;
+                  case 'E':
+                    self::fill_iso18626_protocol($orsIR, $oa_row);
+                    break;
+                  case 'D':
+                  default:
+                    $orsIR->willReceive->_value = 'NO';
+                    if ($oa_row['BEST_TXT']) {
+                      $orsIR->reason = self::value_and_language($oa_row['BEST_TXT'], 'dan');
+                    }
+                    break;
+                }
+                if (in_array($orsIR->protocol->_value, array('mail', 'ors', 'z3950'))) {
+                  if ($oa_row['ZBESTIL_USERID'])
+                    $orsIR->userId->_value = $oa_row['ZBESTIL_USERID'];
+                  if ($oa_row['ZBESTIL_GROUPID'])
+                    $orsIR->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
+                  if ($oa_row['ZBESTIL_PASSW'])
+                    $orsIR->passWord->_value = $oa_row['ZBESTIL_PASSW'];
+                  if ($orsIR->protocol->_value == 'mail')
+                    switch ($oa_row['FORMAT_BEST']) {
+                      case 'illdanbest':
+                        $orsIR->format->_value = 'text';
+                        break;
+                      case 'ill0form':
+                      case 'ill5form':
+                        $orsIR->format->_value = 'ill0';
+                        break;
+                    }
+                }
+                //var_dump($res->orsItemRequest->_value); die();
+                break;
+              case 'orsLookupUser':
+                $orsLU = &$res->orsLookupUser->_value;
+                $orsLU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
+                $orsLU->willReceive->_value = ($oa_row['NCIP_LOOKUP_USER'] == 'J' ? 'YES' : 'NO');
+                $orsLU->synchronous->_value = 0;
+                $orsLU->address->_value = $oa_row['NCIP_LOOKUP_USER_ADDRESS'];
+                $orsLU->passWord->_value = $oa_row['NCIP_LOOKUP_USER_PASSWORD'];
+                //var_dump($res->orsLookupUser->_value); die();
+                break;
+              case 'orsRecall':
+                $orsR = &$res->orsRecall->_value;
+                $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsR, $oa_row);
+                }
+                else {
+                  $orsR->willReceive->_value = (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
+                  $orsR->synchronous->_value = 0;
+                  $orsR->protocol->_value = self::normalize_iso18626($oa_row['RECALL']);
+                  $orsR->address->_value = '';
+                  $orsR->userId->_value = $oa_row['RECALL_Z3950_USER'];
+                  $orsR->groupId->_value = $oa_row['RECALL_Z3950_GROUP'];
+                  $orsR->passWord->_value = ($oa_row['RECALL'] == 'z3950' ? $oa_row['RECALL_Z3950_PASSWORD'] : $oa_row['RECALL_NCIP_AUTH']);
+                  if ($oa_row['RECALL'] == 'z3950')
+                    $orsR->address->_value = $oa_row['RECALL_Z3950_ADDRESS'];
+                }
+                //var_dump($res->orsRecall->_value); die();
+                break;
+              case 'orsReceipt':
+                $orsR = &$res->orsReceipt->_value;
+                $orsR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
+                $orsR->willReceive->_value = (in_array($oa_row['MAILKVITTER_VIA'], array('A', 'B', 'C')) ? 'YES' : 'NO');
+                $orsR->synchronous->_value = 0;
+                if ($oa_row['MAILKVITTER_VIA'] == 'C') {
+                  $orsR->protocol->_value = 'https';
+                  $orsR->address->_value = $oa_row['OPENRECEIPT_URL'];
+                  $orsR->passWord->_value = $oa_row['OPENRECEIPT_PASSWORD'];
+                  $orsR->format->_value = 'xml';
+                }
+                else {
+                  if ($oa_row['MAILKVITTER_VIA'] == 'A') {
+                    $orsR->protocol->_value = 'mail';
+                  }
+                  elseif ($oa_row['MAILKVITTER_VIA'] == 'B') {
+                    $orsR->protocol->_value = 'ors';
+                  }
+                  else {
+                    $orsR->protocol->_value = '';
+                  }
+                  $orsR->address->_value = $oa_row['KVIT_EMAIL'];
+                  if ($oa_row['FORMAT_KVIT'] == 'ill0form') {
+                    $orsR->format->_value = 'ill0';
+                  }
+                  elseif ($oa_row['FORMAT_KVIT'] == 'ill5form') {
+                    $orsR->format->_value = 'ill0';
+                  }
+                  elseif ($oa_row['FORMAT_KVIT'] == 'illdanbest') {
+                    $orsR->format->_value = 'text';
+                  }
+                }
+                //var_dump($res->orsReceipt->_value); die();
+                break;
+              case 'orsRenew':
+                $orsR = &$res->orsRenew->_value;
+                $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsR, $oa_row);
+                }
+                else {
+                  if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
+                    $orsR->willReceive->_value = 'YES';
+                    $orsR->synchronous->_value = 0;
+                    $orsR->protocol->_value = self::normalize_iso18626($oa_row['RENEW']);
+                    if ($oa_row['RENEW'] == 'z3950') {
+                      $orsR->address->_value = $oa_row['RENEW_Z3950_ADDRESS'];
+                      $orsR->userId->_value = $oa_row['RENEW_Z3950_USER'];
+                      $orsR->groupId->_value = $oa_row['RENEW_Z3950_GROUP'];
+                      $orsR->passWord->_value = $oa_row['RENEW_Z3950_PASSWORD'];
+                    }
+                  }
+                  else {
+                    $orsR->willReceive->_value = 'NO';
+                    $orsR->synchronous->_value = 0;
+                  }
+                }
+                //var_dump($res->orsRenew->_value); die();
+                break;
+              case 'orsRenewAnswer':
+                $orsRA = &$res->orsRenewAnswer->_value;
+                $orsRA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsRA, $oa_row);
+                }
+                else {
+                  if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
+                    if ($oa_row['RENEWANSWER'] == 'z3950' || $oa_row['RENEWANSWER'] == 'ors') {
+                      $orsRA->willReceive->_value = 'YES';
+                      $orsRA->synchronous->_value = $oa_row['RENEW_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
+                      $orsRA->protocol->_value = self::normalize_iso18626($oa_row['RENEWANSWER']);
+                      if ($oa_row['RENEWANSWER'] == 'z3950') {
+                        $orsRA->address->_value = $oa_row['RENEWANSWER_Z3950_ADDRESS'];
+                        $orsRA->userId->_value = $oa_row['RENEWANSWER_Z3950_USER'];
+                        $orsRA->groupId->_value = $oa_row['RENEWANSWER_Z3950_GROUP'];
+                        $orsRA->passWord->_value = $oa_row['RENEWANSWER_Z3950_PASSWORD'];
+                      }
+                    }
+                    else {
+                      $orsRA->willReceive->_value = 'NO';
+                      $orsRA->synchronous->_value = 0;
+                    }
+                  }
+                }
+                //var_dump($res->orsRenewAnswer->_value); die();
+                break;
+              case 'orsCancel':
+                $orsC = &$res->orsCancel->_value;
+                $orsC->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsC, $oa_row);
+                }
+                else {
+                  if ($oa_row['CANCEL'] == 'z3950' || $oa_row['CANCEL'] == 'ors') {
+                    $orsC->willReceive->_value = 'YES';
+                    $orsC->synchronous->_value = 0;
+                    $orsC->protocol->_value = self::normalize_iso18626($oa_row['CANCEL']);
+                    if ($oa_row['CANCEL'] == 'z3950') {
+                      $orsC->address->_value = $oa_row['CANCEL_Z3950_ADDRESS'];
+                      $orsC->userId->_value = $oa_row['CANCEL_Z3950_USER'];
+                      $orsC->groupId->_value = $oa_row['CANCEL_Z3950_GROUP'];
+                      $orsC->passWord->_value = $oa_row['CANCEL_Z3950_PASSWORD'];
+                    }
+                  }
+                  else {
+                    $orsC->willReceive->_value = 'NO';
+                    $orsC->synchronous->_value = 0;
+                  }
+                }
+                //var_dump($res->orsCancel->_value); die();
+                break;
+              case 'orsCancelReply':
+                $orsCR = &$res->orsCancelReply->_value;
+                $orsCR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsCR, $oa_row);
+                }
+                else {
+                  if ($oa_row['CANCELREPLY'] == 'z3950' || $oa_row['CANCELREPLY'] == 'ors') {
+                    $orsCR->willReceive->_value = 'YES';
+                    $orsCR->synchronous->_value = $oa_row['CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
+                    $orsCR->protocol->_value = self::normalize_iso18626($oa_row['CANCELREPLY']);
+                    if ($oa_row['CANCELREPLY'] == 'z3950') {
+                      $orsCR->address->_value = $oa_row['CANCELREPLY_Z3950_ADDRESS'];
+                      $orsCR->userId->_value = $oa_row['CANCELREPLY_Z3950_USER'];
+                      $orsCR->groupId->_value = $oa_row['CANCELREPLY_Z3950_GROUP'];
+                      $orsCR->passWord->_value = $oa_row['CANCELREPLY_Z3950_PASSWORD'];
+                    }
+                  }
+                  else {
+                    $orsCR->willReceive->_value = 'NO';
+                    $orsCR->synchronous->_value = 0;
+                  }
+                }
+                //var_dump($res->orsCancelReply->_value); die();
+                break;
+              case 'orsRenewItemUser':
+                $orsRIU = &$res->orsRenewItemUser->_value;
+                $orsRIU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
+                $orsRIU->willReceive->_value = ($oa_row['NCIP_RENEW'] == 'J' ? 'YES' : 'NO');
+                $orsRIU->synchronous->_value = 0;
+                $orsRIU->address->_value = $oa_row['NCIP_RENEW_ADDRESS'];
+                $orsRIU->passWord->_value = $oa_row['NCIP_RENEW_PASSWORD'];
+                //var_dump($res->orsRenewItemUser->_value); die();
+                break;
+              case 'orsShipping':
+                $orsS = &$res->orsShipping->_value;
+                $orsS->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsS, $oa_row);
+                }
+                else {
+                  $orsS->willReceive->_value = (in_array($oa_row['SHIPPING'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
+                  $orsS->synchronous->_value = 0;
+                  $orsS->protocol->_value = self::normalize_iso18626($oa_row['SHIPPING']);
+                  $orsS->address->_value = '';
+                  $orsS->userId->_value = $oa_row['SHIPPING_Z3950_USER'];
+                  $orsS->groupId->_value = $oa_row['SHIPPING_Z3950_GROUP'];
+                  $orsS->passWord->_value = ($oa_row['SHIPPING'] == 'z3950' ? $oa_row['SHIPPING_Z3950_PASSWORD'] : $oa_row['SHIPPING_NCIP_AUTH']);
+                  if ($oa_row['SHIPPING'] == 'z3950')
+                    $orsS->address->_value = $oa_row['SHIPPING_Z3950_ADDRESS'];
+                }
+                //var_dump($res->orsShipping->_value); die();
+                break;
+              case 'orsStatusRequest':
+                $orsSR = &$res->orsStatusRequest->_value;
+                $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                $orsSR->willReceive->_value = '';
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsSR, $oa_row);
+                }
+                break;
+              case 'orsStatusResponse':
+                $orsSR = &$res->orsStatusResponse->_value;
+                $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                $orsSR->willReceive->_value = '';
+                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                  self::fill_iso18626_protocol($orsSR, $oa_row);
+                }
+                break;
+              case 'serverInformation':
+                $serI = &$res->serverInformation->_value;
+                $serI->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
+                $serI->isil->_value = $oa_row['ISIL'];
+                if ($oa_row['ISO20775_URL']) {
+                  $serI->protocol->_value = 'iso20775';
+                  $serI->address->_value = $oa_row['ISO20775_URL'];
+                  $serI->passWord->_value = $oa_row['ISO20775_PASSWORD'];
+                }
+                elseif ($oa_row['URL_ITEMORDER_BESTIL']) {
+                  $serI->protocol->_value = 'z3950';
+                  $serI->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
+                  $serI->userId->_value = $oa_row['ZBESTIL_USERID'];
+                  $serI->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
+                  $serI->passWord->_value = $oa_row['ZBESTIL_PASSW'];
+                }
+                else {
+                  $serI->protocol->_value = 'none';
+                }
+                //var_dump($res->serverInformation->_value); die();
+                break;
+              case 'userParameters':
+                $usrP = &$res->userParameters->_value;
+                $get_obl = array('LD_CPR' => 'cpr',
+                                 'LD_ID' => 'common',
+                                 'LD_LKST' => 'barcode',
+                                 'LD_KLNR' => 'cardno',
+                                 'LD_TXT' => 'optional');
+                $usrP->userIdType->_value = 'no_userid_selected';
+                foreach ($get_obl as $key => $val) {
+                  if (substr($oa_row[$key],0,1) == 'O') {
+                    $usrP->userIdType->_value = $val;
+                    break;
+                  }
+                }
+                break;
+              case 'userOrderParameters':
+                $usrOP = &$res->userOrderParameters->_value;
+                $u_fld = array('LD_CPR' => 'cpr', 
+                               'LD_ID' => 'userId',
+                               'LD_TXT' => 'customId',
+                               'LD_LKST' => 'barcode',
+                               'LD_KLNR' => 'cardno',
+                               'LD_PIN' => 'pincode',
+                               'LD_DATO' => 'userDateOfBirth',
+                               'LD_NAVN' => 'userName',
+                               'LD_ADR' => 'userAddress',
+                               'LD_EMAIL' => 'userMail',
+                               'LD_TLF' => 'userTelephone');
+                foreach ($u_fld as $vip_key => $res_key) {
+                  $sw = $oa_row[$vip_key][0];
+                  if (in_array($sw, array('J', 'O'))) {
+                    $f->userParameterType->_value = $res_key;
+                    $f->parameterRequired->_value = ($sw == 'O'? '1' : '0');
+                    $usrOP->userParameter[]->_value = $f;
+                    unset($f);
+                  }
+                }
+                if (in_array($oa_row['LD_ID'][0], array('J', 'O'))) {
+                  if ($oa_row['LD_ID_TXT']) {
+                    $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT'], 'dan');
+                  }
+                  if ($oa_row['LD_ID_TXT_ENG']) {
+                    $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT_ENG'], 'eng');
+                  }
+                }
+                if (in_array($oa_row['LD_TXT'][0], array('J', 'O'))) {
+                  if ($oa_row['LD_TXT2']) {
+                    $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2'], 'dan');
+                  }
+                  if ($oa_row['LD_TXT2_ENG']) {
+                    $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2_ENG'], 'eng');
+                  }
+                }
+                $per = array('PER_NR' => 'volume',
+                             'PER_HEFTE' => 'issue',
+                             'PER_AAR' => 'publicationDateOfComponent',
+                             'PER_SIDE' => 'pagination',
+                             'PER_FORFATTER' => 'authorOfComponent',
+                             'PER_TITEL' => 'titleOfComponent',
+                             'PER_KILDE' => 'userReferenceSource');
+                foreach ($per as $key => $val)
+                  $per_ill[$key . '_FJL'] = $val;
+                $avis = array('AVIS_DATO' => 'issue',
+                              'AVIS_AAR' => 'publicationDateOfComponent',
+                              'AVIS_FORFATTER' => 'authorOfComponent',
+                              'AVIS_TITEL' => 'titleOfComponent',
+                              'AVIS_KILDE' => 'userReferenceSource');
+                foreach ($avis as $key => $val)
+                  $avis_ill[$key . '_FJL'] = $val;
+                $m_fld = array('CDROM_BEST_MODT' => array('cdrom', 'local'),
+                               'CDROM_BEST_MODT_FJL' => array('cdrom', 'ill'),
+                               'MONO_BEST_MODT' => array('monograph', 'local'),
+                               'MONO_BEST_MODT_FJL' => array('monograph', 'ill'),
+                               'MUSIK_BEST_MODT' => array('music', 'local'),
+                               'MUSIK_BEST_MODT_FJL' => array('music', 'ill'),
+                               'AVIS_BEST_MODT' => array('newspaper', 'local', $avis),
+                               'AVIS_BEST_MODT_FJL' => array('newspaper', 'ill', $avis_ill),
+                               'PER_BEST_MODT' => array('journal', 'local', $per),
+                               'PER_BEST_MODT_FJL' => array('journal', 'ill', $per_ill),
+                               'VIDEO_BEST_MODT' => array('video', 'local'),
+                               'VIDEO_BEST_MODT_FJL' => array('video', 'ill'));
+                foreach ($m_fld as $vip_key => $res_key) {
+                  if (in_array($oa_row[$vip_key], array('J', 'B'))) {
+                    $f->orderMaterialType->_value = $res_key[0];
+                    $f->orderType->_value = $res_key[1];
+                    if (is_array($res_key[2])) {
+                      foreach ($res_key[2] as $elem_vip_key => $elem_res_key) {
+                        if (in_array($oa_row[$elem_vip_key], array('J', 'O'))) {
+                          $p->itemParameterType->_value = $elem_res_key;
+                          $p->parameterRequired->_value = ($oa_row[$elem_vip_key] == 'O'? '1' : '0');
+                          $f->itemParameter[]->_value = $p;
+                          unset($p);
+                        }
+                      }
+                    }
+                    $usrOP->orderParameters[]->_value = $f;
+                    unset($f);
+                  }
+                }
+                foreach ($fjernadgang_rows as $fjern) {
+                  $f->borrowerCheckSystem->_value = $fjern['NAVN'];
+                  $f->borrowerCheck->_value = $fjern['FJERNADGANG_HAR_LAANERTJEK'] == 1 ? '1' : '0';
+                  $bCP[]->_value = $f;
+                  unset($f);
+                }
+                $aP->borrowerCheckParameters = $bCP;
+                $aP->acceptOrderFromUnknownUser->_value = in_array($oa_row['BEST_UKENDT'], array('N', 'K'))? '1' : '0';
+                if ($oa_row['BEST_UKENDT_TXT']) {
+                  $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT'], 'dan');
+                }
+                if ($oa_row['BEST_UKENDT_TXT_ENG']) {
+                  $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT_ENG'], 'eng');
+                }
+                $aP->acceptOrderAgencyOffline->_value = $oa_row['LAANERTJEK_NORESPONSE'] == 'N' ? '0' : '1';
+                $aP->payForPostage->_value = $oa_row['PORTO_BETALING'] == 'N' ? '0' : '1';
+                $usrOP->agencyParameters->_value = $aP;
+  /*      <open:userOrderParameters>
+              <!--1 or more repetitions:-->
+              <open:userParameter>
+                 <open:userParameterType>?</open:userParameterType>
+                 <open:parameterRequired>?</open:parameterRequired>
+              </open:userParameter>
+              <!--Zero or more repetitions:-->
+              <open:customIdTxt open:language="?">?</open:customIdTxt>
+              <!--Zero or more repetitions:-->
+              <open:userIdTxt open:language="?">?</open:userIdTxt>
+              <!--1 or more repetitions:-->
+              <open:orderParameters>
+                 <open:orderMaterialType>?</open:orderMaterialType>
+                 <open:orderType>?</open:orderType>
+                 <!--1 or more repetitions:-->
+                 <open:itemParameter>
+                    <open:itemParameterType>?</open:itemParameterType>
+                    <open:parameterRequired>?</open:parameterRequired>
+                 </open:itemParameter>
+              </open:orderParameters>
+              <open:agencyParameters>
+                 <!--Zero or more repetitions:-->
+                 <open:borrowerCheckParameters>
+                    <open:borrowerCheckSystem>?</open:borrowerCheckSystem>
+                    <open:borrowerCheck>?</open:borrowerCheck>
+                 </open:borrowerCheckParameters>
+                 <open:acceptOrderFromUnknownUser>?</open:acceptOrderFromUnknownUser>
+                 <!--0 to 2 repetitions:-->
+                 <open:acceptOrderFromUnknownUserText open:language="?">?</open:acceptOrderFromUnknownUserText>
+                 <open:acceptOrderAgencyOffline>?</open:acceptOrderAgencyOffline>
+                 <open:payForPostage>?</open:payForPostage>
+              </open:agencyParameters>
+           </open:userOrderParameters>                        */
+
+      //print_r($oa_row); 
+      //var_dump($res); var_dump($param); die();
+                break;
+              default:
+                $res->error->_value = 'error_in_request';
+            }
           }
-      // libraryType
-          if ($val = $param->libraryType->_value
-            && ($param->libraryType->_value == 'Folkebibliotek'
-              || $param->libraryType->_value == 'Forskningsbibliotek')) {
-            $sqls[] = 'vsn.bib_type = :bind_bib_type';
-            $oci->bind('bind_bib_type', $param->libraryType->_value);
+        }
+      }
+
+
+      //var_dump($res); var_dump($param); die();
+      $ret->serviceResponse->_value = $res;
+      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+      if (empty($res->error)) $this->cache->set($cache_key, $ret);
+      return $ret;
+    }
+
+
+    /** \brief Fetch information about the library: name, address, ...
+     *
+     * Request:
+     * - agencyId
+     * - agencyName
+     * - agencyAddress
+     * - postalCode
+     * - city
+     * - stilNumber
+     * - anyField
+     * - libraryType
+     * - libraryStatus
+     * - pickupAllowed
+     * - sort
+
+     * Response:
+     * - pickupAgency
+     * - - agencyName
+     * - - branchId
+     * - - branchName
+     * - - branchPhone
+     * - - branchEmail
+     * - - postalAddress
+     * - - postalCode
+     * - - city
+     * - - isil
+     * - - branchWebsiteUrl *
+     * - - serviceDeclarationUrl *
+     * - - registrationFormUrl *
+     * - - paymentUrl *
+     * - - userStatusUrl *
+     * - - agencySubdivision
+     * - - openingHours
+     * - - temporarilyClosed
+     * - - temporarilyClosedReason
+     * - - pickupAllowed *
+     * - - and more - see the xsd for all 
+     * - or
+     * - - error
+     */
+    public function findLibrary($param) {
+      if (!$this->aaa->has_right('netpunkt.dk', 500))
+        $res->error->_value = 'authentication_error';
+      else {
+        $cache_key = 'OA_FinL_' . 
+                     $this->config->get_inifile_hash() . 
+                     self::stringiefy($param->agencyId) . '_' . 
+                     self::stringiefy($param->agencyName) . '_' . 
+                     self::stringiefy($param->agencyAddress) . '_' . 
+                     self::stringiefy($param->postalCode) . '_' . 
+                     self::stringiefy($param->city) . '_' . 
+                     self::stringiefy($param->stilNumber) . '_' . 
+                     self::stringiefy($param->anyField) . '_' . 
+                     self::stringiefy($param->libraryType) . '_' . 
+                     self::stringiefy($param->libraryStatus) . '_' . 
+                     self::stringiefy($param->pickupAllowed) . '_' . 
+                     self::stringiefy($param->sort);
+        self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+        if ($ret = $this->cache->get($cache_key)) {
+          verbose::log(STAT, 'Cache hit');
+          return $ret;
+        }
+        $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+        $oci->set_charset('UTF8');
+        try {
+          $oci->connect();
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+    // agencyId
+        if ($agency_id = self::strip_agency($param->agencyId->_value)) {
+          $sqls[] = 'v.bib_nr = :bind_bib_nr';
+          $oci->bind('bind_bib_nr', $agency_id);
+        }
+    // agencyName
+        if ($val = $param->agencyName->_value) {
+          $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_navn))' .
+                    ' OR (regexp_like(upper(sup.tekst), upper(:bind_navn)) AND sup.type = :bind_n))';
+          $oci->bind('bind_navn', self::build_regexp_like($val));
+          $oci->bind('bind_n', 'N');
+        }
+    // agencyAddress
+        if ($val = $param->agencyAddress->_value) {
+          $sqls[] = '(regexp_like(upper(v.badr), upper(:bind_addr))' . 
+                    ' OR (regexp_like(upper(sup.tekst), upper(:bind_addr)) AND sup.type = :bind_a)' .
+                    ' OR regexp_like(upper(vsn.badr), upper(:bind_addr)))';
+          $oci->bind('bind_addr', self::build_regexp_like($val));
+          $oci->bind('bind_a', 'A');
+        }
+    // postalCode
+        if ($val = $param->postalCode->_value) {
+          $sqls[] = '(regexp_like(upper(v.bpostnr), upper(:bind_postnr))' .
+                    ' OR (regexp_like(upper(sup.tekst), upper(:bind_postnr)) AND sup.type = :bind_p))';
+          $oci->bind('bind_postnr', self::build_regexp_like($val));
+          $oci->bind('bind_p', 'P');
+        }
+    // city
+        if ($val = $param->city->_value) {
+          $sqls[] = 'regexp_like(upper(v.bcity), upper(:bind_city))';
+          $oci->bind('bind_city', self::build_regexp_like($val));
+        }
+    // stilNumber
+        if ($val = $param->stilNumber->_value) {
+          $sqls[] = 'v.uni_c_nr = :bind_uni_c_nr';
+          $oci->bind('bind_uni_c_nr', $val);
+        }
+    // anyField
+        if ($val = $param->anyField->_value) {
+          $bib_nr = self::strip_agency($param->anyField->_value);
+          if (is_numeric($bib_nr) && (strlen($bib_nr) == 6)) {
+            $oci->bind('bind_bib_nr', $bib_nr);
+            $bibnr_sql = '(v.bib_nr = :bind_bib_nr) OR ';
           }
-      // libraryStatus
-          if ($param->libraryStatus->_value == 'usynlig') {
-            $oci->bind('bind_u', 'U');
-            $sqls[] = 'v.delete_mark = :bind_u';
-          } elseif ($param->libraryStatus->_value == 'slettet') {
-            $oci->bind('bind_s', 'S');
-            $sqls[] = 'v.delete_mark = :bind_s';
-          } elseif ($param->libraryStatus->_value <> 'alle') {
-            $oci->bind('bind_u', 'U');
-            $sqls[] = '(v.delete_mark is null OR v.delete_mark = :bind_u)';
+          $sqls[] = '(' . $bibnr_sql . 
+                    'regexp_like(upper(v.navn), upper(:bind_any))' .
+                    ' OR regexp_like(upper(v.badr), upper(:bind_any))' .
+                    ' OR regexp_like(upper(v.bpostnr), upper(:bind_any))' .
+                    ' OR regexp_like(upper(v.bcity), upper(:bind_any))' .
+                    ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_n)' .
+                    ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_a)' .
+                    ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_p))';
+          $oci->bind('bind_any', self::build_regexp_like($val));
+          $oci->bind('bind_a', 'A');
+          $oci->bind('bind_n', 'N');
+          $oci->bind('bind_p', 'P');
+        }
+    // libraryType
+        if ($val = $param->libraryType->_value
+          && ($param->libraryType->_value == 'Folkebibliotek'
+            || $param->libraryType->_value == 'Forskningsbibliotek'
+            || $param->libraryType->_value == 'Skolebibliotek')) {
+          $sqls[] = 'vsn.bib_type = :bind_bib_type';
+          $oci->bind('bind_bib_type', $param->libraryType->_value);
+        }
+        elseif (empty($agency_id) && empty($param->stilNumber->_value)) {
+          $sqls[] = 'vsn.bib_type != :bind_bib_type';
+          $oci->bind('bind_bib_type', 'Skolebibliotek');
+        }
+    // libraryStatus
+        if ($param->libraryStatus->_value == 'usynlig') {
+          $oci->bind('bind_u', 'U');
+          $sqls[] = 'v.delete_mark = :bind_u';
+        } elseif ($param->libraryStatus->_value == 'slettet') {
+          $oci->bind('bind_s', 'S');
+          $sqls[] = 'v.delete_mark = :bind_s';
+        } elseif ($param->libraryStatus->_value <> 'alle') {
+          $sqls[] = 'v.delete_mark is null';
+        }
+    // pickupAllowed
+        if (isset($param->pickupAllowed->_value)) {
+          $j = 'J';
+          $oci->bind('bind_j', $j);
+          if (self::xs_boolean($param->pickupAllowed->_value))
+            $sqls[] .= 'vb.best_modt = :bind_j';
+          else
+            $sqls[] .= 'vb.best_modt != :bind_j';
+        }
+        $filter_sql = implode(' AND ', $sqls);
+
+    // sort
+        if (isset($param->sort)) {
+          if (is_array($param->sort)) {
+            $sorts = $param->sort;
           }
-          $filter_sql = implode(' AND ', $sqls);
-          $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                        v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-                        v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt, v.p_nr, v.uni_c_nr, 
-                        TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
-                        vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
-                        vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
-                        TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, 
-                        vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
-                        vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
-                        txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
-                        bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
-                        kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
-                        kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn,
-                        vd.mailbestil_via, vd.url_itemorder_bestil, vd.zbestil_groupid, vd.zbestil_userid, vd.zbestil_passw,
-                        vd.holdingsformat, vd.svar_email,
-                        ors.shipping ors_shipping, ors.cancel ors_cancel, ors.answer ors_answer, 
-                        ors.cancelreply ors_cancelreply, ors.cancel_answer_synchronic ors_cancel_answer_synchronic,
-                        ors.renew ors_renew, ors.renewanswer ors_renewanswer, 
-                        ors.renew_answer_synchronic ors_renew_answer_synchronic,
-                        ors.iso18626_address, ors.iso18626_password
-                FROM vip v, vip_vsn vsn, vip_danbib vd, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
-                     vip_sup sup, vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat, open_agency_ors ors
-                WHERE 
-                  ' . $filter_sql . '
-                  AND v.kmd_nr = vsn.bib_nr (+)
-                  AND v.bib_nr = vd.bib_nr (+)
-                  AND v.bib_nr = vb.bib_nr (+)
-                  AND v.bib_nr = sup.bib_nr (+)
-                  AND v.bib_nr = txt.bib_nr (+)
-                  AND v.bib_nr = hold.bib_nr (+)
-                  AND v.bib_nr = eng.bib_nr (+)
-                  AND v.bib_nr = bestil.bib_nr (+)
-                  AND v.bib_nr = ors.bib_nr (+)
-                  AND v.bib_nr = kat.bib_nr (+)
-                ORDER BY vsn.bib_nr ASC, v.bib_nr ASC';
+          else {
+            $sorts = array($param->sort);
+          }
+          foreach ($sorts as $s) {
+            switch ($s->_value) {
+              case 'agencyId':      $sort_order[] = 'v.bib_nr'; break;
+              case 'agencyName':    $sort_order[] = 'v.navn'; break;
+              case 'agencyAddress': $sort_order[] = 'v.badr'; break;
+              case 'postalCode':    $sort_order[] = 'v.postnr'; break;
+              case 'city':          $sort_order[] = 'v.bcity'; break;
+              case 'libraryType':   $sort_order[] = 'vsn.bib_type'; break;
+            }
+          }
+        }
+        if (is_array($sort_order)) {
+          $order_by = implode(', ', $sort_order);
+        }
+        else {
+          $order_by = 'v.bib_nr';
+        }
+    
+        $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+                      v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
+                      v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr, v.uni_c_nr,
+                      TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
+                      vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
+                      vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
+                      TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, vsn.sb_kopibestil,
+                      vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
+                      vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                      txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
+                      bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
+                      kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
+                      kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, 
+                      kat.url_viderestil, kat.url_bib_kat
+              FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
+                   vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
+              WHERE 
+                ' . $filter_sql . '
+                AND v.kmd_nr = vsn.bib_nr (+)
+                AND v.bib_nr = vb.bib_nr (+)
+                AND v.bib_nr = sup.bib_nr (+)
+                AND v.bib_nr = txt.bib_nr (+)
+                AND v.bib_nr = hold.bib_nr (+)
+                AND v.bib_nr = eng.bib_nr (+)
+                AND v.bib_nr = bestil.bib_nr (+)
+                AND v.bib_nr = kat.bib_nr (+)
+              ORDER BY ' . $order_by;
+        try {
           $oci->set_query($sql);
           while ($row = $oci->fetch_into_assoc()) {
             if (empty($curr_bib)) {
               $curr_bib = $row['BIB_NR'];
             }
             if ($curr_bib <> $row['BIB_NR']) {
-              $res->registryInfo[]->_value = $registryInfo;
-              unset($registryInfo);
+              $res->pickupAgency[]->_value = $pickupAgency;
+              unset($pickupAgency);
               $curr_bib = $row['BIB_NR'];
             }
             if ($row) {
-              self::fill_pickupAgency($registryInfo->pickupAgency->_value, $row);
-              if ($row['HOLDINGSFORMAT'] == 'B') {
-                $dbc_target = $this->config->get_value('dbc_target', 'setup');
-                self::use_dbc_as_z3950_target($row, $dbc_target['z3950'], $param->authentication->_value);
-                self::use_dbc_as_iso18626_target($row, $dbc_target['iso18626']);
-              }
-              if ($row['MAILBESTIL_VIA'] == 'C') {
-                self::set_z3950Ill($registryInfo, $row);
-              }
-              elseif ($row['MAILBESTIL_VIA'] == 'E') {
-                self::set_iso18626($registryInfo, $row);
-              }
+              //$row['NAVN'] = $row['VSN_NAVN'];
+              self::fill_pickupAgency($pickupAgency, $row);
             }
           }
-          if ($registryInfo)
-            $res->registryInfo[]->_value = $registryInfo;
-        }
-        catch (ociException $e) {
-          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
-        }
-      }
-    }
-    //var_dump($res); var_dump($param); die();
-    $ret->getRegistryInfoResponse->_value = $res;
-    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
-    if (empty($res->error)) $this->cache->set($cache_key, $ret);
-    return $ret;
-  }
-
-  /** \brief Fetch SaouLicenseInfo
-   *
-   * Request:
-   * - agencyId
-   * Response:
-   * - saouLicenseInfo (see xsd for parameters)
-   * or
-   * - error
-   */
-  public function getSaouLicenseInfo($param) {
-    if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
-    else {
-      $agency = self::strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
-      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
-      if ($ret = $this->cache->get($cache_key)) {
-        verbose::log(STAT, 'Cache hit');
-        return $ret;
-      }
-      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
-      $oci->set_charset('UTF8');
-      try {
-        $oci->connect();
-      }
-      catch (ociException $e) {
-        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
-      }
-      if (empty($res->error)) {
-        try {
-          if ($agency) {
-            $oci->bind('bind_agency', $agency);
-            $where = 'ud.bib_nr = :bind_agency AND ';
-          }
-          $fb_licens = 'fb_licens';
-          $oci->bind('bind_fb_licens', $fb_licens);
-          $oci->set_query('SELECT ud.bib_nr, domain, proxyurl 
-                           FROM user_domains ud, licensguide lg
-                           WHERE ' . $where . '
-                                 origin_source = :bind_fb_licens
-                             AND ud.bib_nr = lg.bib_nr (+)
-                           ORDER BY bib_nr');
-          $last_bib = '';
-          while ($sl_row = $oci->fetch_into_assoc()) {
-            if ($last_lib != $sl_row['BIB_NR']) {
-              if ($last_lib) {
-                $res->saouLicenseInfo[]->_value = $sl;
-                unset($sl);
-              }
-              $last_lib = $sl_row['BIB_NR'];
-              $sl->agencyId->_value = $sl_row['BIB_NR'];
-              if ($sl_row['PROXYURL']) {
-                $sl->proxyUrl->_value = $sl_row['PROXYURL'];
-              }
-            }
-            $sl->ipAddress[]->_value = $sl_row['DOMAIN'];
-          }
-          if ($sl) {
-            $res->saouLicenseInfo[]->_value = $sl;
-          }
-        }
-        catch (ociException $e) {
-          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
-        }
-      }
-    }
-    //var_dump($res); var_dump($param); die();
-    $ret->getSaouLicenseInfoResponse->_value = $res;
-    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
-    if (empty($res->error)) $this->cache->set($cache_key, $ret);
-    return $ret;
-  }
-
-  /** \brief Fetching different info for the ORS-system
-   *
-   * Request:
-   * - agencyId
-   * - service
-   * Response (depending on service):
-   * -  information - see xsd for parameters
-   * or orsAnswer - see xsd for parameters
-   * or orsCancel - see xsd for parameters
-   * or orsCancelReply - see xsd for parameters
-   * or orsCancelRequestUser - see xsd for parameters
-   * or orsEndUserRequest - see xsd for parameters
-   * or orsEndUserIllRequest - see xsd for parameters
-   * or orsItemRequest - see xsd for parameters
-   * or orsLookupUser - see xsd for parameters
-   * or orsRecall - see xsd for parameters
-   * or orsReceipt - see xsd for parameters
-   * or orsRenew - see xsd for parameters
-   * or orsRenewAnswer - see xsd for parameters
-   * or orsRenewItemUser - see xsd for parameters
-   * or orsShipping - see xsd for parameters
-   * or orsStatusRequest - see xsd for parameters
-   * or orsStatusResponse - see xsd for parameters
-   * or serverInformation - see xsd for parameters
-   * or userOrderParameters - see xsd for parameters
-   * or userParameters - see xsd for parameters
-   * or error
-   */
-  public function service($param) {
-    if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
-    else {
-      $agency = self::strip_agency($param->agencyId->_value);
-      $cache_key = 'OA_ser_' . $this->config->get_inifile_hash() . $agency . $param->service->_value;
-      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
-      if ($ret = $this->cache->get($cache_key)) {
-        verbose::log(STAT, 'Cache hit');
-        return $ret;
-      }
-      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
-      $oci->set_charset('UTF8');
-      try {
-        $oci->connect();
-      }
-      catch (ociException $e) {
-        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
-      }
-      if (empty($res->error)) {
-        $tab_col['v'] = array('bib_nr', 'navn', 'tlf_nr', 'fax_nr', 'email', 'badr', 'bpostnr', 'bcity', 'type', '*');
-        $tab_col['vv'] = array('bib_nr', 'navn', 'tlf_nr', 'fax_nr', 'email', 'badr', 'bpostnr', 'bcity', 'bib_type', '*');
-        $tab_col['vb'] = array('bib_nr', '*');
-        $tab_col['vbst'] = array('bib_nr', 'ncip_address', '*');
-        $tab_col['vd'] = array('bib_nr', 'svar_fax', 'svar_email', '*');
-        $tab_col['vk'] = array('bib_nr', '*');
-        $tab_col['oao'] = array('bib_nr', '*');
-        foreach ($tab_col as $prefix => $arr) {
-          foreach ($arr as $col) {
-            $q .= (empty($q) ? '' : ', ') .
-                  $prefix . '.' . $col .
-                  ($col == '*' ? '' : ' "' . strtoupper($prefix . '.' . $col) . '"');
-          }
-        }
-        try {
-          $oci->bind('bind_bib_nr', $agency);
-          $oci->set_query('SELECT ' . $q . '
-                          FROM vip v, vip_vsn vv, vip_beh vb, vip_bestil vbst, vip_danbib vd, vip_kat vk, open_agency_ors oao
-                          WHERE v.bib_nr = vd.bib_nr (+)
-                          AND v.kmd_nr = vv.bib_nr (+)
-                          AND v.bib_nr = vk.bib_nr (+)
-                          AND v.bib_nr = vb.bib_nr (+)
-                          AND v.bib_nr = vbst.bib_nr (+)
-                          AND v.bib_nr = oao.bib_nr (+)
-                          AND v.bib_nr = :bind_bib_nr');
-          $oa_row = $oci->fetch_into_assoc();
-          self::sanitize_array($oa_row);
-          if ($param->service->_value == 'information') {
-            $consortia = array();
-            if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
-              $help = $oa_row['KMD_NR'];
-            }
-            else {
-              $help = $agency;
-            }
-            $oci->bind('bind_bib_nr', $help);
-            $oci->set_query('SELECT *
-                             FROM vip_viderestil
-                            WHERE bib_nr = :bind_bib_nr');
-            while ($row = $oci->fetch_into_assoc()) {
-              $vv_row[$row['BIB_NR_VIDERESTIL']] = $row;
-            }
-            if ($vv_row) {
-              $oci->bind('bind_bib_nr', $help);
-              $oci->set_query('SELECT vilse 
-                                FROM vip, laaneveje
-                                WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
-                                  AND vip.bib_nr = :bind_bib_nr
-                                ORDER BY prionr DESC');
-              while ($lv_row = $oci->fetch_into_assoc()) {
-                if ($p = $vv_row[$lv_row['VILSE']])
-                $consortia[] = $p;
-              }
-              if (count($vv_row) <> count($consortia)) {
-                verbose::log(ERROR, 'OpenAgency('.__LINE__.'):: agency ' . $agency . 
-                                    ' has libraries in VIP_VIDERESTIL not found in LAANEVEJE');
-              }
-            }
-          }
-          if ($param->service->_value == 'userOrderParameters') {
-            if ($oa_row['FILIAL_VSN'] <> 'J' && $oa_row['KMD_NR']) {
-              $oci->bind('bind_bib_nr', $oa_row['KMD_NR']);
-            }
-            else {
-              $oci->bind('bind_bib_nr', $agency);
-            }
-            $oci->set_query('SELECT fjernadgang.har_laanertjek fjernadgang_har_laanertjek, fjernadgang.*, 
-                                    fjernadgang_andre.*
-                             FROM fjernadgang, fjernadgang_andre
-                            WHERE fjernadgang.faust (+) = fjernadgang_andre.faust
-                              AND bib_nr = :bind_bib_nr');
-            $fjernadgang_rows = $oci->fetch_all_into_assoc();
-          }
-        }
-        catch (ociException $e) {
-          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
-        }
-        if (empty($oa_row))
-          $res->error->_value = 'agency_not_found';
-        if (empty($res->error)) {
-//        verbose::log(TRACE, 'OpenAgency('.__LINE__.'):: action=service&agencyId=' . $param->agencyId->_value .  '&service=' . $param->service->_value);
-          switch ($param->service->_value) {
-            case 'information':
-              $inf = &$res->information->_value;
-              $inf->agencyId->_value = self::normalize_agency($oa_row['VV.BIB_NR']);
-              $inf->agencyName->_value = $oa_row['VV.NAVN'];
-              $inf->agencyPhone->_value = $oa_row['VV.TLF_NR'];
-              $inf->agencyFax->_value = $oa_row['VV.FAX_NR'];
-              $inf->agencyEmail->_value = $oa_row['VV.EMAIL'];
-              $inf->agencyType->_value = self::set_agency_type($oa_row['VV.BIB_NR'], $oa_row['VV.BIB_TYPE']);
-              $inf->agencyCatalogueUrl->_value = $oa_row['URL_BIB_KAT'];
-              $inf->branchId->_value = self::normalize_agency($oa_row['V.BIB_NR']);
-              $inf->branchName->_value = $oa_row['V.NAVN'];
-              $inf->branchPhone->_value = $oa_row['V.TLF_NR'];
-              $inf->branchFax->_value = $oa_row['VD.SVAR_FAX'];
-              $inf->branchEmail->_value = $oa_row['V.EMAIL'];
-              $inf->branchType->_value = $oa_row['V.TYPE'];
-              if ($oa_row['AFSAETNINGSBIBLIOTEK'])
-                $inf->dropOffAgency->_value = $oa_row['AFSAETNINGSBIBLIOTEK'];
-              $inf->postalAddress->_value = $oa_row['V.BADR'];
-              $inf->postalCode->_value = $oa_row['V.BPOSTNR'];
-              $inf->city->_value = $oa_row['V.BCITY'];
-              $inf->isil->_value = $oa_row['ISIL'];
-              $inf->junction->_value = $oa_row['KNUDEPUNKT'];
-              $inf->kvik->_value = ($oa_row['KVIK'] == 'kvik' ? 'YES' : 'NO');
-              $inf->lookupUrl->_value = $oa_row['URL_VIDERESTIL'];
-              $inf->norfri->_value = ($oa_row['NORFRI'] == 'norfri' ? 'YES' : 'NO');
-              $inf->requestOrder->_value = $oa_row['USE_LAANEVEJ'];
-              if (is_null($inf->sender->_value = self::normalize_agency($oa_row['CHANGE_REQUESTER'])))
-                $inf->sender->_value = self::normalize_agency($oa_row['V.BIB_NR']);
-              $inf->replyToEmail->_value = $oa_row['VD.SVAR_EMAIL'];
-              foreach ($consortia as $c_key => &$c) {
-                $inf->consortia[$c_key]->_value->agencyId->_value = $c['BIB_NR_VIDERESTIL'];
-                $inf->consortia[$c_key]->_value->lookupUrl->_value = $c['URL_VIDERESTIL'];
-              }
-              //print_r($oa_row); var_dump($res->information->_value); die();
-              break;
-            case 'orsAnswer':
-              $orsA = &$res->orsAnswer->_value;
-              $orsA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsA, $oa_row);
-              }
-              else {
-                $orsA->willReceive->_value = (in_array($oa_row['ANSWER'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-                $orsA->synchronous->_value = 0;
-                $orsA->protocol->_value = self::normalize_iso18626($oa_row['ANSWER']);
-                if ($oa_row['ANSWER'] == 'z3950') {
-                  $orsA->address->_value = $oa_row['ANSWER_Z3950_ADDRESS'];
-                }
-                elseif ($oa_row['ANSWER'] == 'mail') {
-                  $orsA->address->_value = $oa_row['ANSWER_MAIL_ADDRESS'];
-                }
-                $orsA->userId->_value = $oa_row['ANSWER_Z3950_USER'];
-                $orsA->groupId->_value = $oa_row['ANSWER_Z3950_GROUP'];
-                $orsA->passWord->_value = ($oa_row['ANSWER'] == 'z3950' ? $oa_row['ANSWER_Z3950_PASSWORD'] : $oa_row['ANSWER_NCIP_AUTH']);
-              }
-              //var_dump($res->orsAnswer->_value); die();
-              break;
-            case 'orsCancelRequestUser':
-              $orsCRU = &$res->orsCancelRequestUser->_value;
-              $orsCRU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
-              $orsCRU->willReceive->_value = ($oa_row['NCIP_CANCEL'] == 'J' ? 'YES' : 'NO');
-              $orsCRU->synchronous->_value = 0;
-              $orsCRU->address->_value = $oa_row['NCIP_CANCEL_ADDRESS'];
-              $orsCRU->passWord->_value = $oa_row['NCIP_CANCEL_PASSWORD'];
-              //var_dump($res->orsCancelRequestUser->_value); die();
-              break;
-            case 'orsEndUserRequest':
-              $orsEUR = &$res->orsEndUserRequest->_value;
-              $orsEUR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
-              $orsEUR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
-              $orsEUR->synchronous->_value = 0;
-              switch ($oa_row['BESTIL_VIA']) {
-                case 'A':
-                  $orsEUR->protocol->_value = 'mail';
-                  $orsEUR->address->_value = $oa_row['EMAIL_BESTIL'];
-                  $orsEUR->format->_value = 'text';
-                  break;
-                case 'B':
-                  $orsEUR->protocol->_value = 'mail';
-                  $orsEUR->address->_value = $oa_row['EMAIL_BESTIL'];
-                  $orsEUR->format->_value = 'ill0';
-                  break;
-                case 'C':
-                  $orsEUR->protocol->_value = 'ors';
-                  break;
-                case 'D':
-                  $orsEUR->protocol->_value = 'ncip';
-                  $orsEUR->address->_value = $oa_row['VBST.NCIP_ADDRESS'];
-                  $orsEUR->passWord->_value = $oa_row['NCIP_PASSWORD'];
-                  break;
-              }
-              //var_dump($res->orsEndUserRequest->_value); die();
-              break;
-            case 'orsEndUserIllRequest':
-              $orsEUIR = &$res->orsEndUserIllRequest->_value;
-              $orsEUIR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
-              $orsEUIR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
-              $orsEUIR->synchronous->_value = 0;
-              switch ($oa_row['BESTIL_FJL_VIA']) {
-                case 'A':
-                  $orsEUIR->protocol->_value = 'mail';
-                  $orsEUIR->address->_value = $oa_row['EMAIL_FJL_BESTIL'];
-                  $orsEUIR->format->_value = 'text';
-                  break;
-                case 'B':
-                  $orsEUIR->protocol->_value = 'mail';
-                  $orsEUIR->address->_value = $oa_row['EMAIL_FJL_BESTIL'];
-                  $orsEUIR->format->_value = 'ill0';
-                  break;
-                case 'C':
-                  $orsEUIR->protocol->_value = 'ors';
-                  break;
-              }
-              break;
-            case 'orsItemRequest':
-              $orsIR = &$res->orsItemRequest->_value;
-              $orsIR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
-              switch ($oa_row['MAILBESTIL_VIA']) {
-                case 'A':
-                  $orsIR->willReceive->_value = 'YES';
-                  $orsIR->synchronous->_value = 0;
-                  $orsIR->protocol->_value = 'mail';
-                  $orsIR->address->_value = $oa_row['BEST_EMAIL'];
-                  break;
-                case 'B':
-                  $orsIR->willReceive->_value = 'YES';
-                  $orsIR->synchronous->_value = 0;
-                  $orsIR->protocol->_value = 'ors';
-                  break;
-                case 'C':
-                  $orsIR->willReceive->_value = 'YES';
-                  $orsIR->synchronous->_value = 0;
-                  $orsIR->protocol->_value = 'z3950';
-                  $orsIR->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
-                  break;
-                case 'E':
-                  self::fill_iso18626_protocol($orsIR, $oa_row);
-                  break;
-                case 'D':
-                default:
-                  $orsIR->willReceive->_value = 'NO';
-                  if ($oa_row['BEST_TXT']) {
-                    $orsIR->reason = self::value_and_language($oa_row['BEST_TXT'], 'dan');
-                  }
-                  break;
-              }
-              if (in_array($orsIR->protocol->_value, array('mail', 'ors', 'z3950'))) {
-                if ($oa_row['ZBESTIL_USERID'])
-                  $orsIR->userId->_value = $oa_row['ZBESTIL_USERID'];
-                if ($oa_row['ZBESTIL_GROUPID'])
-                  $orsIR->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
-                if ($oa_row['ZBESTIL_PASSW'])
-                  $orsIR->passWord->_value = $oa_row['ZBESTIL_PASSW'];
-                if ($orsIR->protocol->_value == 'mail')
-                  switch ($oa_row['FORMAT_BEST']) {
-                    case 'illdanbest':
-                      $orsIR->format->_value = 'text';
-                      break;
-                    case 'ill0form':
-                    case 'ill5form':
-                      $orsIR->format->_value = 'ill0';
-                      break;
-                  }
-              }
-              //var_dump($res->orsItemRequest->_value); die();
-              break;
-            case 'orsLookupUser':
-              $orsLU = &$res->orsLookupUser->_value;
-              $orsLU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
-              $orsLU->willReceive->_value = ($oa_row['NCIP_LOOKUP_USER'] == 'J' ? 'YES' : 'NO');
-              $orsLU->synchronous->_value = 0;
-              $orsLU->address->_value = $oa_row['NCIP_LOOKUP_USER_ADDRESS'];
-              $orsLU->passWord->_value = $oa_row['NCIP_LOOKUP_USER_PASSWORD'];
-              //var_dump($res->orsLookupUser->_value); die();
-              break;
-            case 'orsRecall':
-              $orsR = &$res->orsRecall->_value;
-              $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsR, $oa_row);
-              }
-              else {
-                $orsR->willReceive->_value = (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-                $orsR->synchronous->_value = 0;
-                $orsR->protocol->_value = self::normalize_iso18626($oa_row['RECALL']);
-                $orsR->address->_value = '';
-                $orsR->userId->_value = $oa_row['RECALL_Z3950_USER'];
-                $orsR->groupId->_value = $oa_row['RECALL_Z3950_GROUP'];
-                $orsR->passWord->_value = ($oa_row['RECALL'] == 'z3950' ? $oa_row['RECALL_Z3950_PASSWORD'] : $oa_row['RECALL_NCIP_AUTH']);
-                if ($oa_row['RECALL'] == 'z3950')
-                  $orsR->address->_value = $oa_row['RECALL_Z3950_ADDRESS'];
-              }
-              //var_dump($res->orsRecall->_value); die();
-              break;
-            case 'orsReceipt':
-              $orsR = &$res->orsReceipt->_value;
-              $orsR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
-              $orsR->willReceive->_value = (in_array($oa_row['MAILKVITTER_VIA'], array('A', 'B', 'C')) ? 'YES' : 'NO');
-              $orsR->synchronous->_value = 0;
-              if ($oa_row['MAILKVITTER_VIA'] == 'C') {
-                $orsR->protocol->_value = 'https';
-                $orsR->address->_value = $oa_row['OPENRECEIPT_URL'];
-                $orsR->passWord->_value = $oa_row['OPENRECEIPT_PASSWORD'];
-                $orsR->format->_value = 'xml';
-              }
-              else {
-                if ($oa_row['MAILKVITTER_VIA'] == 'A') {
-                  $orsR->protocol->_value = 'mail';
-                }
-                elseif ($oa_row['MAILKVITTER_VIA'] == 'B') {
-                  $orsR->protocol->_value = 'ors';
-                }
-                else {
-                  $orsR->protocol->_value = '';
-                }
-                $orsR->address->_value = $oa_row['KVIT_EMAIL'];
-                if ($oa_row['FORMAT_KVIT'] == 'ill0form') {
-                  $orsR->format->_value = 'ill0';
-                }
-                elseif ($oa_row['FORMAT_KVIT'] == 'ill5form') {
-                  $orsR->format->_value = 'ill0';
-                }
-                elseif ($oa_row['FORMAT_KVIT'] == 'illdanbest') {
-                  $orsR->format->_value = 'text';
-                }
-              }
-              //var_dump($res->orsReceipt->_value); die();
-              break;
-            case 'orsRenew':
-              $orsR = &$res->orsRenew->_value;
-              $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsR, $oa_row);
-              }
-              else {
-                if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
-                  $orsR->willReceive->_value = 'YES';
-                  $orsR->synchronous->_value = 0;
-                  $orsR->protocol->_value = self::normalize_iso18626($oa_row['RENEW']);
-                  if ($oa_row['RENEW'] == 'z3950') {
-                    $orsR->address->_value = $oa_row['RENEW_Z3950_ADDRESS'];
-                    $orsR->userId->_value = $oa_row['RENEW_Z3950_USER'];
-                    $orsR->groupId->_value = $oa_row['RENEW_Z3950_GROUP'];
-                    $orsR->passWord->_value = $oa_row['RENEW_Z3950_PASSWORD'];
-                  }
-                }
-                else {
-                  $orsR->willReceive->_value = 'NO';
-                  $orsR->synchronous->_value = 0;
-                }
-              }
-              //var_dump($res->orsRenew->_value); die();
-              break;
-            case 'orsRenewAnswer':
-              $orsRA = &$res->orsRenewAnswer->_value;
-              $orsRA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsRA, $oa_row);
-              }
-              else {
-                if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
-                  if ($oa_row['RENEWANSWER'] == 'z3950' || $oa_row['RENEWANSWER'] == 'ors') {
-                    $orsRA->willReceive->_value = 'YES';
-                    $orsRA->synchronous->_value = $oa_row['RENEW_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                    $orsRA->protocol->_value = self::normalize_iso18626($oa_row['RENEWANSWER']);
-                    if ($oa_row['RENEWANSWER'] == 'z3950') {
-                      $orsRA->address->_value = $oa_row['RENEWANSWER_Z3950_ADDRESS'];
-                      $orsRA->userId->_value = $oa_row['RENEWANSWER_Z3950_USER'];
-                      $orsRA->groupId->_value = $oa_row['RENEWANSWER_Z3950_GROUP'];
-                      $orsRA->passWord->_value = $oa_row['RENEWANSWER_Z3950_PASSWORD'];
-                    }
-                  }
-                  else {
-                    $orsRA->willReceive->_value = 'NO';
-                    $orsRA->synchronous->_value = 0;
-                  }
-                }
-              }
-              //var_dump($res->orsRenewAnswer->_value); die();
-              break;
-            case 'orsCancel':
-              $orsC = &$res->orsCancel->_value;
-              $orsC->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsC, $oa_row);
-              }
-              else {
-                if ($oa_row['CANCEL'] == 'z3950' || $oa_row['CANCEL'] == 'ors') {
-                  $orsC->willReceive->_value = 'YES';
-                  $orsC->synchronous->_value = 0;
-                  $orsC->protocol->_value = self::normalize_iso18626($oa_row['CANCEL']);
-                  if ($oa_row['CANCEL'] == 'z3950') {
-                    $orsC->address->_value = $oa_row['CANCEL_Z3950_ADDRESS'];
-                    $orsC->userId->_value = $oa_row['CANCEL_Z3950_USER'];
-                    $orsC->groupId->_value = $oa_row['CANCEL_Z3950_GROUP'];
-                    $orsC->passWord->_value = $oa_row['CANCEL_Z3950_PASSWORD'];
-                  }
-                }
-                else {
-                  $orsC->willReceive->_value = 'NO';
-                  $orsC->synchronous->_value = 0;
-                }
-              }
-              //var_dump($res->orsCancel->_value); die();
-              break;
-            case 'orsCancelReply':
-              $orsCR = &$res->orsCancelReply->_value;
-              $orsCR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsCR, $oa_row);
-              }
-              else {
-                if ($oa_row['CANCELREPLY'] == 'z3950' || $oa_row['CANCELREPLY'] == 'ors') {
-                  $orsCR->willReceive->_value = 'YES';
-                  $orsCR->synchronous->_value = $oa_row['CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                  $orsCR->protocol->_value = self::normalize_iso18626($oa_row['CANCELREPLY']);
-                  if ($oa_row['CANCELREPLY'] == 'z3950') {
-                    $orsCR->address->_value = $oa_row['CANCELREPLY_Z3950_ADDRESS'];
-                    $orsCR->userId->_value = $oa_row['CANCELREPLY_Z3950_USER'];
-                    $orsCR->groupId->_value = $oa_row['CANCELREPLY_Z3950_GROUP'];
-                    $orsCR->passWord->_value = $oa_row['CANCELREPLY_Z3950_PASSWORD'];
-                  }
-                }
-                else {
-                  $orsCR->willReceive->_value = 'NO';
-                  $orsCR->synchronous->_value = 0;
-                }
-              }
-              //var_dump($res->orsCancelReply->_value); die();
-              break;
-            case 'orsRenewItemUser':
-              $orsRIU = &$res->orsRenewItemUser->_value;
-              $orsRIU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
-              $orsRIU->willReceive->_value = ($oa_row['NCIP_RENEW'] == 'J' ? 'YES' : 'NO');
-              $orsRIU->synchronous->_value = 0;
-              $orsRIU->address->_value = $oa_row['NCIP_RENEW_ADDRESS'];
-              $orsRIU->passWord->_value = $oa_row['NCIP_RENEW_PASSWORD'];
-              //var_dump($res->orsRenewItemUser->_value); die();
-              break;
-            case 'orsShipping':
-              $orsS = &$res->orsShipping->_value;
-              $orsS->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsS, $oa_row);
-              }
-              else {
-                $orsS->willReceive->_value = (in_array($oa_row['SHIPPING'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-                $orsS->synchronous->_value = 0;
-                $orsS->protocol->_value = self::normalize_iso18626($oa_row['SHIPPING']);
-                $orsS->address->_value = '';
-                $orsS->userId->_value = $oa_row['SHIPPING_Z3950_USER'];
-                $orsS->groupId->_value = $oa_row['SHIPPING_Z3950_GROUP'];
-                $orsS->passWord->_value = ($oa_row['SHIPPING'] == 'z3950' ? $oa_row['SHIPPING_Z3950_PASSWORD'] : $oa_row['SHIPPING_NCIP_AUTH']);
-                if ($oa_row['SHIPPING'] == 'z3950')
-                  $orsS->address->_value = $oa_row['SHIPPING_Z3950_ADDRESS'];
-              }
-              //var_dump($res->orsShipping->_value); die();
-              break;
-            case 'orsStatusRequest':
-              $orsSR = &$res->orsStatusRequest->_value;
-              $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              $orsSR->willReceive->_value = '';
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsSR, $oa_row);
-              }
-              break;
-            case 'orsStatusResponse':
-              $orsSR = &$res->orsStatusResponse->_value;
-              $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-              $orsSR->willReceive->_value = '';
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
-                self::fill_iso18626_protocol($orsSR, $oa_row);
-              }
-              break;
-            case 'serverInformation':
-              $serI = &$res->serverInformation->_value;
-              $serI->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
-              $serI->isil->_value = $oa_row['ISIL'];
-              if ($oa_row['ISO20775_URL']) {
-                $serI->protocol->_value = 'iso20775';
-                $serI->address->_value = $oa_row['ISO20775_URL'];
-                $serI->passWord->_value = $oa_row['ISO20775_PASSWORD'];
-              }
-              elseif ($oa_row['URL_ITEMORDER_BESTIL']) {
-                $serI->protocol->_value = 'z3950';
-                $serI->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
-                $serI->userId->_value = $oa_row['ZBESTIL_USERID'];
-                $serI->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
-                $serI->passWord->_value = $oa_row['ZBESTIL_PASSW'];
-              }
-              else {
-                $serI->protocol->_value = 'none';
-              }
-              //var_dump($res->serverInformation->_value); die();
-              break;
-            case 'userParameters':
-              $usrP = &$res->userParameters->_value;
-              $get_obl = array('LD_CPR' => 'cpr',
-                               'LD_ID' => 'common',
-                               'LD_LKST' => 'barcode',
-                               'LD_KLNR' => 'cardno',
-                               'LD_TXT' => 'optional');
-              $usrP->userIdType->_value = 'no_userid_selected';
-              foreach ($get_obl as $key => $val) {
-                if (substr($oa_row[$key],0,1) == 'O') {
-                  $usrP->userIdType->_value = $val;
-                  break;
-                }
-              }
-              break;
-            case 'userOrderParameters':
-              $usrOP = &$res->userOrderParameters->_value;
-              $u_fld = array('LD_CPR' => 'cpr', 
-                             'LD_ID' => 'userId',
-                             'LD_TXT' => 'customId',
-                             'LD_LKST' => 'barcode',
-                             'LD_KLNR' => 'cardno',
-                             'LD_PIN' => 'pincode',
-                             'LD_DATO' => 'userDateOfBirth',
-                             'LD_NAVN' => 'userName',
-                             'LD_ADR' => 'userAddress',
-                             'LD_EMAIL' => 'userMail',
-                             'LD_TLF' => 'userTelephone');
-              foreach ($u_fld as $vip_key => $res_key) {
-                $sw = $oa_row[$vip_key][0];
-                if (in_array($sw, array('J', 'O'))) {
-                  $f->userParameterType->_value = $res_key;
-                  $f->parameterRequired->_value = ($sw == 'O'? '1' : '0');
-                  $usrOP->userParameter[]->_value = $f;
-                  unset($f);
-                }
-              }
-              if (in_array($oa_row['LD_ID'][0], array('J', 'O'))) {
-                if ($oa_row['LD_ID_TXT']) {
-                  $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT'], 'dan');
-                }
-                if ($oa_row['LD_ID_TXT_ENG']) {
-                  $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT_ENG'], 'eng');
-                }
-              }
-              if (in_array($oa_row['LD_TXT'][0], array('J', 'O'))) {
-                if ($oa_row['LD_TXT2']) {
-                  $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2'], 'dan');
-                }
-                if ($oa_row['LD_TXT2_ENG']) {
-                  $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2_ENG'], 'eng');
-                }
-              }
-              $per = array('PER_NR' => 'volume',
-                           'PER_HEFTE' => 'issue',
-                           'PER_AAR' => 'publicationDateOfComponent',
-                           'PER_SIDE' => 'pagination',
-                           'PER_FORFATTER' => 'authorOfComponent',
-                           'PER_TITEL' => 'titleOfComponent',
-                           'PER_KILDE' => 'userReferenceSource');
-              foreach ($per as $key => $val)
-                $per_ill[$key . '_FJL'] = $val;
-              $avis = array('AVIS_DATO' => 'issue',
-                            'AVIS_AAR' => 'publicationDateOfComponent',
-                            'AVIS_FORFATTER' => 'authorOfComponent',
-                            'AVIS_TITEL' => 'titleOfComponent',
-                            'AVIS_KILDE' => 'userReferenceSource');
-              foreach ($avis as $key => $val)
-                $avis_ill[$key . '_FJL'] = $val;
-              $m_fld = array('CDROM_BEST_MODT' => array('cdrom', 'local'),
-                             'CDROM_BEST_MODT_FJL' => array('cdrom', 'ill'),
-                             'MONO_BEST_MODT' => array('monograph', 'local'),
-                             'MONO_BEST_MODT_FJL' => array('monograph', 'ill'),
-                             'MUSIK_BEST_MODT' => array('music', 'local'),
-                             'MUSIK_BEST_MODT_FJL' => array('music', 'ill'),
-                             'AVIS_BEST_MODT' => array('newspaper', 'local', $avis),
-                             'AVIS_BEST_MODT_FJL' => array('newspaper', 'ill', $avis_ill),
-                             'PER_BEST_MODT' => array('journal', 'local', $per),
-                             'PER_BEST_MODT_FJL' => array('journal', 'ill', $per_ill),
-                             'VIDEO_BEST_MODT' => array('video', 'local'),
-                             'VIDEO_BEST_MODT_FJL' => array('video', 'ill'));
-              foreach ($m_fld as $vip_key => $res_key) {
-                if (in_array($oa_row[$vip_key], array('J', 'B'))) {
-                  $f->orderMaterialType->_value = $res_key[0];
-                  $f->orderType->_value = $res_key[1];
-                  if (is_array($res_key[2])) {
-                    foreach ($res_key[2] as $elem_vip_key => $elem_res_key) {
-                      if (in_array($oa_row[$elem_vip_key], array('J', 'O'))) {
-                        $p->itemParameterType->_value = $elem_res_key;
-                        $p->parameterRequired->_value = ($oa_row[$elem_vip_key] == 'O'? '1' : '0');
-                        $f->itemParameter[]->_value = $p;
-                        unset($p);
-                      }
-                    }
-                  }
-                  $usrOP->orderParameters[]->_value = $f;
-                  unset($f);
-                }
-              }
-              foreach ($fjernadgang_rows as $fjern) {
-                $f->borrowerCheckSystem->_value = $fjern['NAVN'];
-                $f->borrowerCheck->_value = $fjern['FJERNADGANG_HAR_LAANERTJEK'] == 1 ? '1' : '0';
-                $bCP[]->_value = $f;
-                unset($f);
-              }
-              $aP->borrowerCheckParameters = $bCP;
-              $aP->acceptOrderFromUnknownUser->_value = in_array($oa_row['BEST_UKENDT'], array('N', 'K'))? '1' : '0';
-              if ($oa_row['BEST_UKENDT_TXT']) {
-                $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT'], 'dan');
-              }
-              if ($oa_row['BEST_UKENDT_TXT_ENG']) {
-                $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT_ENG'], 'eng');
-              }
-              $aP->acceptOrderAgencyOffline->_value = $oa_row['LAANERTJEK_NORESPONSE'] == 'N' ? '0' : '1';
-              $aP->payForPostage->_value = $oa_row['PORTO_BETALING'] == 'N' ? '0' : '1';
-              $usrOP->agencyParameters->_value = $aP;
-/*      <open:userOrderParameters>
-            <!--1 or more repetitions:-->
-            <open:userParameter>
-               <open:userParameterType>?</open:userParameterType>
-               <open:parameterRequired>?</open:parameterRequired>
-            </open:userParameter>
-            <!--Zero or more repetitions:-->
-            <open:customIdTxt open:language="?">?</open:customIdTxt>
-            <!--Zero or more repetitions:-->
-            <open:userIdTxt open:language="?">?</open:userIdTxt>
-            <!--1 or more repetitions:-->
-            <open:orderParameters>
-               <open:orderMaterialType>?</open:orderMaterialType>
-               <open:orderType>?</open:orderType>
-               <!--1 or more repetitions:-->
-               <open:itemParameter>
-                  <open:itemParameterType>?</open:itemParameterType>
-                  <open:parameterRequired>?</open:parameterRequired>
-               </open:itemParameter>
-            </open:orderParameters>
-            <open:agencyParameters>
-               <!--Zero or more repetitions:-->
-               <open:borrowerCheckParameters>
-                  <open:borrowerCheckSystem>?</open:borrowerCheckSystem>
-                  <open:borrowerCheck>?</open:borrowerCheck>
-               </open:borrowerCheckParameters>
-               <open:acceptOrderFromUnknownUser>?</open:acceptOrderFromUnknownUser>
-               <!--0 to 2 repetitions:-->
-               <open:acceptOrderFromUnknownUserText open:language="?">?</open:acceptOrderFromUnknownUserText>
-               <open:acceptOrderAgencyOffline>?</open:acceptOrderAgencyOffline>
-               <open:payForPostage>?</open:payForPostage>
-            </open:agencyParameters>
-         </open:userOrderParameters>                        */
-
-    //print_r($oa_row); 
-    //var_dump($res); var_dump($param); die();
-              break;
-            default:
-              $res->error->_value = 'error_in_request';
-          }
-        }
-      }
-    }
-
-
-    //var_dump($res); var_dump($param); die();
-    $ret->serviceResponse->_value = $res;
-    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
-    if (empty($res->error)) $this->cache->set($cache_key, $ret);
-    return $ret;
-  }
-
-
-  /** \brief Fetch information about the library: name, address, ...
-   *
-   * Request:
-   * - agencyId
-   * - agencyName
-   * - agencyAddress
-   * - postalCode
-   * - city
-   * - stilNumber
-   * - anyField
-   * - libraryType
-   * - libraryStatus
-   * - pickupAllowed
-   * - sort
-
-   * Response:
-   * - pickupAgency
-   * - - agencyName
-   * - - branchId
-   * - - branchName
-   * - - branchPhone
-   * - - branchEmail
-   * - - postalAddress
-   * - - postalCode
-   * - - city
-   * - - isil
-   * - - branchWebsiteUrl *
-   * - - serviceDeclarationUrl *
-   * - - registrationFormUrl *
-   * - - paymentUrl *
-   * - - userStatusUrl *
-   * - - agencySubdivision
-   * - - openingHours
-   * - - temporarilyClosed
-   * - - temporarilyClosedReason
-   * - - pickupAllowed *
-   * - - and more - see the xsd for all 
-   * - or
-   * - - error
-   */
-  public function findLibrary($param) {
-    if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
-    else {
-      $cache_key = 'OA_FinL_' . 
-                   $this->config->get_inifile_hash() . 
-                   self::stringiefy($param->agencyId) . '_' . 
-                   self::stringiefy($param->agencyName) . '_' . 
-                   self::stringiefy($param->agencyAddress) . '_' . 
-                   self::stringiefy($param->postalCode) . '_' . 
-                   self::stringiefy($param->city) . '_' . 
-                   self::stringiefy($param->stilNumber) . '_' . 
-                   self::stringiefy($param->anyField) . '_' . 
-                   self::stringiefy($param->libraryType) . '_' . 
-                   self::stringiefy($param->libraryStatus) . '_' . 
-                   self::stringiefy($param->pickupAllowed) . '_' . 
-                   self::stringiefy($param->sort);
-      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
-      if ($ret = $this->cache->get($cache_key)) {
-        verbose::log(STAT, 'Cache hit');
-        return $ret;
-      }
-      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
-      $oci->set_charset('UTF8');
-      try {
-        $oci->connect();
-      }
-      catch (ociException $e) {
-        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
-      }
-  // agencyId
-      if ($agency_id = self::strip_agency($param->agencyId->_value)) {
-        $sqls[] = 'v.bib_nr = :bind_bib_nr';
-        $oci->bind('bind_bib_nr', $agency_id);
-      }
-  // agencyName
-      if ($val = $param->agencyName->_value) {
-        $sqls[] = '(regexp_like(upper(v.navn), upper(:bind_navn))' .
-                  ' OR (regexp_like(upper(sup.tekst), upper(:bind_navn)) AND sup.type = :bind_n))';
-        $oci->bind('bind_navn', self::build_regexp_like($val));
-        $oci->bind('bind_n', 'N');
-      }
-  // agencyAddress
-      if ($val = $param->agencyAddress->_value) {
-        $sqls[] = '(regexp_like(upper(v.badr), upper(:bind_addr))' . 
-                  ' OR (regexp_like(upper(sup.tekst), upper(:bind_addr)) AND sup.type = :bind_a)' .
-                  ' OR regexp_like(upper(vsn.badr), upper(:bind_addr)))';
-        $oci->bind('bind_addr', self::build_regexp_like($val));
-        $oci->bind('bind_a', 'A');
-      }
-  // postalCode
-      if ($val = $param->postalCode->_value) {
-        $sqls[] = '(regexp_like(upper(v.bpostnr), upper(:bind_postnr))' .
-                  ' OR (regexp_like(upper(sup.tekst), upper(:bind_postnr)) AND sup.type = :bind_p))';
-        $oci->bind('bind_postnr', self::build_regexp_like($val));
-        $oci->bind('bind_p', 'P');
-      }
-  // city
-      if ($val = $param->city->_value) {
-        $sqls[] = 'regexp_like(upper(v.bcity), upper(:bind_city))';
-        $oci->bind('bind_city', self::build_regexp_like($val));
-      }
-  // stilNumber
-      if ($val = $param->stilNumber->_value) {
-        $sqls[] = 'v.uni_c_nr = :bind_uni_c_nr';
-        $oci->bind('bind_uni_c_nr', $val);
-      }
-  // anyField
-      if ($val = $param->anyField->_value) {
-        $bib_nr = self::strip_agency($param->anyField->_value);
-        if (is_numeric($bib_nr) && (strlen($bib_nr) == 6)) {
-          $oci->bind('bind_bib_nr', $bib_nr);
-          $bibnr_sql = '(v.bib_nr = :bind_bib_nr) OR ';
-        }
-        $sqls[] = '(' . $bibnr_sql . 
-                  'regexp_like(upper(v.navn), upper(:bind_any))' .
-                  ' OR regexp_like(upper(v.badr), upper(:bind_any))' .
-                  ' OR regexp_like(upper(v.bpostnr), upper(:bind_any))' .
-                  ' OR regexp_like(upper(v.bcity), upper(:bind_any))' .
-                  ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_n)' .
-                  ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_a)' .
-                  ' OR (regexp_like(upper(sup.tekst), upper(:bind_any)) AND sup.type = :bind_p))';
-        $oci->bind('bind_any', self::build_regexp_like($val));
-        $oci->bind('bind_a', 'A');
-        $oci->bind('bind_n', 'N');
-        $oci->bind('bind_p', 'P');
-      }
-  // libraryType
-      if ($val = $param->libraryType->_value
-        && ($param->libraryType->_value == 'Folkebibliotek'
-          || $param->libraryType->_value == 'Forskningsbibliotek'
-          || $param->libraryType->_value == 'Skolebibliotek')) {
-        $sqls[] = 'vsn.bib_type = :bind_bib_type';
-        $oci->bind('bind_bib_type', $param->libraryType->_value);
-      }
-      elseif (empty($agency_id) && empty($param->stilNumber->_value)) {
-        $sqls[] = 'vsn.bib_type != :bind_bib_type';
-        $oci->bind('bind_bib_type', 'Skolebibliotek');
-      }
-  // libraryStatus
-      if ($param->libraryStatus->_value == 'usynlig') {
-        $oci->bind('bind_u', 'U');
-        $sqls[] = 'v.delete_mark = :bind_u';
-      } elseif ($param->libraryStatus->_value == 'slettet') {
-        $oci->bind('bind_s', 'S');
-        $sqls[] = 'v.delete_mark = :bind_s';
-      } elseif ($param->libraryStatus->_value <> 'alle') {
-        $sqls[] = 'v.delete_mark is null';
-      }
-  // pickupAllowed
-      if (isset($param->pickupAllowed->_value)) {
-        $j = 'J';
-        $oci->bind('bind_j', $j);
-        if (self::xs_boolean($param->pickupAllowed->_value))
-          $sqls[] .= 'vb.best_modt = :bind_j';
-        else
-          $sqls[] .= 'vb.best_modt != :bind_j';
-      }
-      $filter_sql = implode(' AND ', $sqls);
-
-  // sort
-      if (isset($param->sort)) {
-        if (is_array($param->sort)) {
-          $sorts = $param->sort;
-        }
-        else {
-          $sorts = array($param->sort);
-        }
-        foreach ($sorts as $s) {
-          switch ($s->_value) {
-            case 'agencyId':      $sort_order[] = 'v.bib_nr'; break;
-            case 'agencyName':    $sort_order[] = 'v.navn'; break;
-            case 'agencyAddress': $sort_order[] = 'v.badr'; break;
-            case 'postalCode':    $sort_order[] = 'v.postnr'; break;
-            case 'city':          $sort_order[] = 'v.bcity'; break;
-            case 'libraryType':   $sort_order[] = 'vsn.bib_type'; break;
-          }
-        }
-      }
-      if (is_array($sort_order)) {
-        $order_by = implode(', ', $sort_order);
-      }
-      else {
-        $order_by = 'v.bib_nr';
-      }
-  
-      $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                    v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-                    v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr, v.uni_c_nr,
-                    TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
-                    vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
-                    vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
-                    TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, vsn.sb_kopibestil,
-                    vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
-                    vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
-                    txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
-                    bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
-                    kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
-                    kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, 
-                    kat.url_viderestil, kat.url_bib_kat
-            FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
-                 vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
-            WHERE 
-              ' . $filter_sql . '
-              AND v.kmd_nr = vsn.bib_nr (+)
-              AND v.bib_nr = vb.bib_nr (+)
-              AND v.bib_nr = sup.bib_nr (+)
-              AND v.bib_nr = txt.bib_nr (+)
-              AND v.bib_nr = hold.bib_nr (+)
-              AND v.bib_nr = eng.bib_nr (+)
-              AND v.bib_nr = bestil.bib_nr (+)
-              AND v.bib_nr = kat.bib_nr (+)
-            ORDER BY ' . $order_by;
-      try {
-        $oci->set_query($sql);
-        while ($row = $oci->fetch_into_assoc()) {
-          if (empty($curr_bib)) {
-            $curr_bib = $row['BIB_NR'];
-          }
-          if ($curr_bib <> $row['BIB_NR']) {
+          if ($pickupAgency)
             $res->pickupAgency[]->_value = $pickupAgency;
-            unset($pickupAgency);
-            $curr_bib = $row['BIB_NR'];
-          }
-          if ($row) {
-            //$row['NAVN'] = $row['VSN_NAVN'];
-            self::fill_pickupAgency($pickupAgency, $row);
-          }
-        }
-        if ($pickupAgency)
-          $res->pickupAgency[]->_value = $pickupAgency;
-      }
-      catch (ociException $e) {
-        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
-      }
-    }
-    //var_dump($res); var_dump($param); die();
-    $ret->findLibraryResponse->_value = $res;
-    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
-    if (empty($res->error)) $this->cache->set($cache_key, $ret);
-    return $ret;
-  }
-
-
-  /** \brief Fetch a list of library types
-   *
-   * Request:
-   * Response:
-   * - libraryType
-   * or
-   * - error
-   */
-  public function libraryTypeList($param) {
-    if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
-    else {
-      $cache_key = 'OA_libTL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
-      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
-      if ($ret = $this->cache->get($cache_key)) {
-        verbose::log(STAT, 'Cache hit');
-        return $ret;
-      }
-      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
-      $oci->set_charset('UTF8');
-      try {
-        $oci->connect();
-      }
-      catch (ociException $e) {
-        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
-      }
-      if (empty($res->error)) {
-        try {
-          $oci->bind('bind_u', 'U');
-          $oci->set_query('SELECT vsn.bib_nr vsn_bib_nr, vsn.bib_type, v.bib_nr, v.type
-                             FROM vip v, vip_vsn vsn
-                            WHERE v.kmd_nr = vsn.bib_nr
-                              AND (v.delete_mark is null OR v.delete_mark = :bind_u)');
-          while ($row = $oci->fetch_into_assoc()) {
-            $buf[self::normalize_agency($row['BIB_NR'])] = $row;
-          }
-          ksort($buf);
-          foreach ($buf as $lib => $row) {
-            $o->agencyId->_value = self::normalize_agency($row['VSN_BIB_NR']);
-            $o->agencyType->_value = $row['BIB_TYPE'];
-            $o->branchId->_value = $lib;
-            $o->branchType->_value = $row['TYPE'];
-            $res->libraryTypeInfo[]->_value = $o;
-            unset($o);
-          }
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
           $res->error->_value = 'service_unavailable';
         }
       }
+      //var_dump($res); var_dump($param); die();
+      $ret->findLibraryResponse->_value = $res;
+      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+      if (empty($res->error)) $this->cache->set($cache_key, $ret);
+      return $ret;
     }
-    $ret->libraryTypeListResponse->_value = $res;
-    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
-    if (empty($res->error)) $this->cache->set($cache_key, $ret);
-    return $ret;
-  }
 
-  /** \brief Fetch a list of libraries
-   *
-   * Request:
-   * - libraryType
-   * Response:
-   * - agency (see xsd for parameters)
-   * or
-   * - error
-   */
-  public function nameList($param) {
-    if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
-    else {
-      //var_dump($this->aaa->get_rights()); die();
-      $cache_key = 'OA_namL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
-      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
-      if ($ret = $this->cache->get($cache_key)) {
-        verbose::log(STAT, 'Cache hit');
-        return $ret;
+
+    /** \brief Fetch a list of library types
+     *
+     * Request:
+     * Response:
+     * - libraryType
+     * or
+     * - error
+     */
+    public function libraryTypeList($param) {
+      if (!$this->aaa->has_right('netpunkt.dk', 500))
+        $res->error->_value = 'authentication_error';
+      else {
+        $cache_key = 'OA_libTL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
+        self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+        if ($ret = $this->cache->get($cache_key)) {
+          verbose::log(STAT, 'Cache hit');
+          return $ret;
+        }
+        $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+        $oci->set_charset('UTF8');
+        try {
+          $oci->connect();
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+        if (empty($res->error)) {
+          try {
+            $oci->bind('bind_u', 'U');
+            $oci->set_query('SELECT vsn.bib_nr vsn_bib_nr, vsn.bib_type, v.bib_nr, v.type
+                               FROM vip v, vip_vsn vsn
+                              WHERE v.kmd_nr = vsn.bib_nr
+                                AND (v.delete_mark is null OR v.delete_mark = :bind_u)');
+            while ($row = $oci->fetch_into_assoc()) {
+              $buf[self::normalize_agency($row['BIB_NR'])] = $row;
+            }
+            ksort($buf);
+            foreach ($buf as $lib => $row) {
+              $o->agencyId->_value = self::normalize_agency($row['VSN_BIB_NR']);
+              $o->agencyType->_value = $row['BIB_TYPE'];
+              $o->branchId->_value = $lib;
+              $o->branchType->_value = $row['TYPE'];
+              $res->libraryTypeInfo[]->_value = $o;
+              unset($o);
+            }
+          }
+          catch (ociException $e) {
+            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+            $res->error->_value = 'service_unavailable';
+          }
+        }
       }
-      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
-      $oci->set_charset('UTF8');
-      try {
-        $oci->connect();
-      }
-      catch (ociException $e) {
-        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
-      }
-      if (empty($res->error)) {
-        if ($param->libraryType->_value == 'Alle' ||
-            $param->libraryType->_value == 'Folkebibliotek' ||
-            $param->libraryType->_value == 'Forskningsbibliotek') {
+      $ret->libraryTypeListResponse->_value = $res;
+      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+      if (empty($res->error)) $this->cache->set($cache_key, $ret);
+      return $ret;
+    }
+
+    /** \brief Fetch a list of libraries
+     *
+     * Request:
+     * - libraryType
+     * Response:
+     * - agency (see xsd for parameters)
+     * or
+     * - error
+     */
+    public function nameList($param) {
+      if (!$this->aaa->has_right('netpunkt.dk', 500))
+        $res->error->_value = 'authentication_error';
+      else {
+        //var_dump($this->aaa->get_rights()); die();
+        $cache_key = 'OA_namL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
+        self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+        if ($ret = $this->cache->get($cache_key)) {
+          verbose::log(STAT, 'Cache hit');
+          return $ret;
+        }
+        $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+        $oci->set_charset('UTF8');
+        try {
+          $oci->connect();
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+        if (empty($res->error)) {
+          if ($param->libraryType->_value == 'Alle' ||
+              $param->libraryType->_value == 'Folkebibliotek' ||
+              $param->libraryType->_value == 'Forskningsbibliotek' ||
+              $param->libraryType->_value == 'Skolebibliotek') {
           try {
             if ($param->libraryType->_value <> 'Alle') {
               $filter_bib_type = 'AND vsn.bib_type = :bind_bib_type';
