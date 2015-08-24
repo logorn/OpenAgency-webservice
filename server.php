@@ -1386,6 +1386,10 @@ class openAgency extends webServiceServer {
      * - libraryType
      * - libraryStatus
      * - pickupAllowed
+     * - geolocation->latitude
+     * - geolocation->longitude
+     * - geolocation->longitude
+     * - geolocation->distanceInMeter
      * - sort
 
      * Response:
@@ -1417,6 +1421,9 @@ class openAgency extends webServiceServer {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
         $res->error->_value = 'authentication_error';
       else {
+        if ($geoloc = $param->geolocation->_value) {
+          $geo_cache = $geoloc->latitude->_value . '_' . $geoloc->longitude->_value . '_' . $geoloc->distanceInMeter->_value;
+        }
         $cache_key = 'OA_FinL_' . 
                      $this->config->get_inifile_hash() . 
                      self::stringiefy($param->agencyId) . '_' . 
@@ -1429,6 +1436,7 @@ class openAgency extends webServiceServer {
                      self::stringiefy($param->libraryType) . '_' . 
                      self::stringiefy($param->libraryStatus) . '_' . 
                      self::stringiefy($param->pickupAllowed) . '_' . 
+                     $geo_cache . '_' . 
                      self::stringiefy($param->sort);
         self::set_cache_expire($this->cache_expire[__FUNCTION__]);
         if ($ret = $this->cache->get($cache_key)) {
@@ -1552,6 +1560,21 @@ class openAgency extends webServiceServer {
               case 'libraryType':   $sort_order[] = 'vsn.bib_type'; break;
             }
           }
+          if ((count($sorts) == 1) && ($sorts[0]->_value == 'distance') && isset($geoloc->latitude->_value) && isset($geoloc->latitude->_value)) {
+            if (!$distance = intval($geoloc->distanceInMeter->_value)) {
+              $distance = 500000;
+            }
+            $sort_order[] = 'distance asc';
+            $deg2rad = 0.0174532925;
+            $rad2deg = 57.2957795;
+            $deg2meter = 111045;
+            $latitude = $geoloc->latitude->_value;
+            $longitude = $geoloc->longitude->_value;
+            // Flat earth society: 
+            //$distance_sql = "$deg2meter * SQRT(POWER(v.latitude-$latitude,2) + POWER(v.longitude-$longitude,2)) distance, ";
+            // Haversine: https://en.wikipedia.org/wiki/Haversine_formula
+            $distance_sql = "$deg2meter * $rad2deg * (ACOS(COS($deg2rad*$latitude) * COS($deg2rad*v.latitude) * COS($deg2rad*($longitude-v.longitude)) + SIN($deg2rad*$latitude) * SIN($deg2rad*v.latitude))) distance, ";
+          }
         }
         if (is_array($sort_order)) {
           $order_by = implode(', ', $sort_order);
@@ -1560,10 +1583,11 @@ class openAgency extends webServiceServer {
           $order_by = 'v.bib_nr';
         }
     
-        $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+        $sql ='SELECT ' . $distance_sql . 'v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                       v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
                       v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr, v.uni_c_nr,
                       TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
+                      v.latitude, v.longitude,
                       vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                       vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
                       TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, vsn.sb_kopibestil,
@@ -1587,6 +1611,7 @@ class openAgency extends webServiceServer {
                 AND v.bib_nr = bestil.bib_nr (+)
                 AND v.bib_nr = kat.bib_nr (+)
               ORDER BY ' . $order_by;
+//var_dump($geoloc); var_dump($sorts); var_dump($distance_sql); die($sql);
         try {
           $oci->set_query($sql);
           while ($row = $oci->fetch_into_assoc()) {
@@ -1594,11 +1619,12 @@ class openAgency extends webServiceServer {
               $curr_bib = $row['BIB_NR'];
             }
             if ($curr_bib <> $row['BIB_NR']) {
-              $res->pickupAgency[]->_value = $pickupAgency;
+              if ($pickupAgency)
+                $res->pickupAgency[]->_value = $pickupAgency;
               unset($pickupAgency);
               $curr_bib = $row['BIB_NR'];
             }
-            if ($row) {
+            if ($row && (empty($distance_sql) || ($row['DISTANCE'] && ($row['DISTANCE'] <= $distance)))) {
               //$row['NAVN'] = $row['VSN_NAVN'];
               self::fill_pickupAgency($pickupAgency, $row);
             }
@@ -2616,7 +2642,14 @@ class openAgency extends webServiceServer {
       $pickupAgency->lastUpdated->_value = $last_date;
     $pickupAgency->isOclcRsLibrary->_value = ($row['OCLC_SYMBOL'] == 'J' ? '1' : '0');
     $pickupAgency->stateAndUniversityLibraryCopyService->_value = ($row['SB_KOPIBESTIL'] == 'J' ? '1' : '0');
-
+    if ($row['LATITUDE'] || $row['LONGITUDE']) {
+      $pickupAgency->geolocation->_value->latitude->_value = str_replace(',', '.', $row['LATITUDE']);
+      $pickupAgency->geolocation->_value->longitude->_value = str_replace(',', '.', $row['LONGITUDE']);
+      if ($row['DISTANCE']) {
+        $pickupAgency->geolocation->_value->distanceInMeter->_value = round(floatval(str_replace(',', '.', $row['DISTANCE'])));
+      }
+    }
+  
     return;
   }
 
