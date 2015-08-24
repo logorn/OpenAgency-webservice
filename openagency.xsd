@@ -95,6 +95,7 @@ You should have received a copy of the GNU Affero General Public License along w
         <xs:element ref="oa:libraryType" minOccurs="0"/>
         <xs:element ref="oa:libraryStatus" minOccurs="0"/>
         <xs:element ref="oa:pickupAllowed" minOccurs="0"/>
+        <xs:element ref="oa:geolocation" minOccurs="0"/>
         <xs:element ref="oa:sort" minOccurs="0" maxOccurs="6"/>
         <xs:element ref="oa:callback" minOccurs="0"/>
         <xs:element ref="oa:outputType" minOccurs="0"/>
@@ -585,6 +586,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="DeleteAccountId" type="xs:boolean"/>
   <xs:element name="DeletePatronId" type="xs:boolean"/>
   <xs:element name="DeleteProviderId" type="xs:boolean"/>
+  <xs:element name="distanceInMeter" type="xs:integer"/>
   <xs:element name="dropOffAgency" type="xs:string"/>
   <xs:element name="dropOffBranch" type="xs:string"/>
   <xs:element name="dropOffName" type="xs:string"/>
@@ -603,6 +605,14 @@ You should have received a copy of the GNU Affero General Public License along w
   </xs:complexType>
   <xs:element name="error" type="oa:errorType"/>
   <xs:element name="format" type="xs:string"/>
+  <xs:element name="geolocation" type="oa:geolocation"/>
+  <xs:complexType name="geolocation">
+    <xs:sequence>
+      <xs:element ref="oa:latitude"/>
+      <xs:element ref="oa:longitude"/>
+      <xs:element ref="oa:distanceInMeter" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
   <xs:element name="GetAccountIdsByAccountId" type="xs:boolean"/>
   <xs:element name="GetAccountIdsByPatronId" type="xs:boolean"/>
   <xs:element name="GetAccountIdsByProviderId" type="xs:boolean"/>
@@ -695,6 +705,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="key" type="xs:string"/>
   <xs:element name="kvik" type="xs:string"/>
   <xs:element name="lastUpdated" type="xs:date"/>
+  <xs:element name="latitude" type="xs:decimal"/>
   <xs:element name="library" type="oa:library"/>
   <xs:complexType name="library">
     <xs:sequence>
@@ -747,6 +758,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="librarydkSupportEmail" type="xs:string"/>
   <xs:element name="librarydkSupportPhone" type="xs:string"/>
   <xs:element name="libraryType" type="oa:libraryTypeType"/>
+  <xs:element name="longitude" type="xs:decimal"/>
   <xs:element name="lookupUrl" type="xs:string"/>
   <xs:element name="materialType" type="xs:integer"/>
   <xs:element name="MergePatronIds" type="xs:boolean"/>
@@ -871,6 +883,7 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:lastUpdated" minOccurs="0"/>
       <xs:element ref="oa:isOclcRsLibrary" minOccurs="0"/>
       <xs:element ref="oa:stateAndUniversityLibraryCopyService" minOccurs="0"/>
+      <xs:element ref="oa:geolocation" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:element name="pickupAllowed" type="xs:boolean">
@@ -1206,6 +1219,7 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:enumeration value="agencyId"/>
       <xs:enumeration value="agencyName"/>
       <xs:enumeration value="agencyAddress"/>
+      <xs:enumeration value="distance"/>
       <xs:enumeration value="postalCode"/>
       <xs:enumeration value="city"/>
       <xs:enumeration value="libraryType"/>
