@@ -1679,6 +1679,7 @@ class openAgency extends webServiceServer {
               $where = ' WHERE bib_nr = :bind_bib_nr';
             }
             $oci->set_query('SELECT * FROM vip_library_rules' . $where);
+            $buf = array();
             while ($row = $oci->fetch_into_assoc()) {
               $buf[self::normalize_agency($row['BIB_NR'])] = $row;
             }
