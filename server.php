@@ -1644,6 +1644,70 @@ class openAgency extends webServiceServer {
       return $ret;
     }
 
+    /** \brief Fetch Rules for a given library
+     *
+     * Request:
+     * Response:
+     * - libraryRules
+     * or
+     * - error
+     */
+    public function libraryRules($param) {
+      if (!$this->aaa->has_right('netpunkt.dk', 500))
+        $res->error->_value = 'authentication_error';
+      else {
+        $cache_key = 'OA_libRu_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
+        self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+        if ($ret = $this->cache->get($cache_key)) {
+          verbose::log(STAT, 'Cache hit');
+          return $ret;
+        }
+        $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+        $oci->set_charset('UTF8');
+        try {
+          $oci->connect();
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
+        }
+        if (empty($res->error)) {
+          $agency = self::strip_agency($param->agencyId->_value);
+          try {
+            if ($agency) {
+              $oci->bind('bind_bib_nr', $agency);
+              $where = ' WHERE bib_nr = :bind_bib_nr';
+            }
+            $oci->set_query('SELECT * FROM vip_library_rules' . $where);
+            while ($row = $oci->fetch_into_assoc()) {
+              $buf[self::normalize_agency($row['BIB_NR'])] = $row;
+            }
+            ksort($buf);
+            foreach ($buf as $lib => $row) {
+              $o->agencyId->_value = self::normalize_agency($row['BIB_NR']);
+              foreach ($row as $name => $value) {
+                if ($name != 'BIB_NR') {
+                  $r->name->_value = strtolower($name);
+                  $r->bool->_value = ($value == 'Y' ? '1' : '0');
+                  $o->libraryRule[]->_value = $r;
+                  unset($r);
+                }
+              }
+              $res->libraryRules[]->_value = $o;
+              unset($o);
+            }
+          }
+          catch (ociException $e) {
+            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+            $res->error->_value = 'service_unavailable';
+          }
+        }
+      }
+      $ret->libraryRulesResponse->_value = $res;
+      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+      if (empty($res->error)) $this->cache->set($cache_key, $ret);
+      return $ret;
+    }
 
     /** \brief Fetch a list of library types
      *
