@@ -956,10 +956,8 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:complexType name="registryInfo">
     <xs:sequence>
       <xs:element ref="oa:pickupAgency"/>
-      <xs:choice>
-        <xs:element ref="oa:iso18626" minOccurs="0"/>
-        <xs:element ref="oa:z3950Ill" minOccurs="0"/>
-      </xs:choice>
+      <xs:element ref="oa:iso18626" minOccurs="0"/>
+      <xs:element ref="oa:z3950Ill" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:element name="relation" type="oa:relation"/>
@@ -1116,15 +1114,15 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:z3950GroupId" minOccurs="0"/>
       <xs:element ref="oa:z3950UserId" minOccurs="0"/>
       <xs:element ref="oa:z3950Password" minOccurs="0"/>
-      <xs:element ref="oa:illRequest"/>
-      <xs:element ref="oa:illAnswer"/>
-      <xs:element ref="oa:illShipped"/>
-      <xs:element ref="oa:illCancel"/>
-      <xs:element ref="oa:illCancelReply"/>
-      <xs:element ref="oa:illCancelReplySynchronous"/>
-      <xs:element ref="oa:illRenew"/>
-      <xs:element ref="oa:illRenewAnswer"/>
-      <xs:element ref="oa:illRenewAnswerSynchronous"/>
+      <xs:element ref="oa:illRequest" minOccurs="0"/>
+      <xs:element ref="oa:illAnswer" minOccurs="0"/>
+      <xs:element ref="oa:illShipped" minOccurs="0"/>
+      <xs:element ref="oa:illCancel" minOccurs="0"/>
+      <xs:element ref="oa:illCancelReply" minOccurs="0"/>
+      <xs:element ref="oa:illCancelReplySynchronous" minOccurs="0"/>
+      <xs:element ref="oa:illRenew" minOccurs="0"/>
+      <xs:element ref="oa:illRenewAnswer" minOccurs="0"/>
+      <xs:element ref="oa:illRenewAnswerSynchronous" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:element name="z3950Password" type="xs:string"/>
