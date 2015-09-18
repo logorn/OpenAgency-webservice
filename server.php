@@ -573,8 +573,8 @@ class openAgency extends webServiceServer {
               }
               if ($row) {
                 self::fill_pickupAgency($registryInfo->pickupAgency->_value, $row);
+                $dbc_target = $this->config->get_value('dbc_target', 'setup');
                 if ($row['HOLDINGSFORMAT'] == 'B') {
-                  $dbc_target = $this->config->get_value('dbc_target', 'setup');
                   self::use_dbc_as_z3950_target($row, $dbc_target['z3950'], $param->authentication->_value);
                   self::use_dbc_as_iso18626_target($row, $dbc_target['iso18626']);
                 }
@@ -583,6 +583,8 @@ class openAgency extends webServiceServer {
                 }
                 elseif ($row['MAILBESTIL_VIA'] == 'E') {
                   self::set_iso18626($registryInfo, $row);
+                  self::use_dbc_as_z3950_target($row, $dbc_target['z3950'], $param->authentication->_value);
+                  self::set_z3950Ill($registryInfo, $row, FALSE);
                 }
               }
             }
@@ -2562,21 +2564,23 @@ class openAgency extends webServiceServer {
    * @param buf (object) - structure for the result
    * @param row (array) - one result array from the DB
    */
-  private function set_z3950Ill(&$buf, $row) {
+  private function set_z3950Ill(&$buf, $row, $all_fields = TRUE) {
     $val = &$buf->z3950Ill->_value;
     if ($row['URL_ITEMORDER_BESTIL']) $val->z3950Address->_value = $row['URL_ITEMORDER_BESTIL'];
     if ($row['ZBESTIL_GROUPID']) $val->z3950GroupId->_value = $row['ZBESTIL_GROUPID'];
     if ($row['ZBESTIL_USERID']) $val->z3950UserId->_value = $row['ZBESTIL_USERID'];
     if ($row['ZBESTIL_PASSW']) $val->z3950Password->_value = $row['ZBESTIL_PASSW'];
-    $val->illRequest->_value = 1;    // AHP dok?
-    $val->illAnswer->_value = ($row['ORS_ANSWER'] == 'z3950' ? '1' : '0');
-    $val->illShipped->_value = ($row['ORS_SHIPPING'] == 'z3950' ? '1' : '0');
-    $val->illCancel->_value = ($row['ORS_CANCEL'] == 'z3950' ? '1' : '0');
-    $val->illCancelReply->_value = ($row['ORS_CANCELREPLY'] == 'z3950' ? '1' : '0');
-    $val->illCancelReplySynchronous->_value = ($row['ORS_CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
-    $val->illRenew->_value = ($row['ORS_RENEW'] == 'z3950' ? '1' : '0');
-    $val->illRenewAnswer->_value = ($row['ORS_RENEWANSWER'] == 'z3950' ? '1' : '0');
-    $val->illRenewAnswerSynchronous->_value = ($row['ORS_RENEW_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
+    if ($all_fields) {
+      $val->illRequest->_value = 1;    // AHP dok?
+      $val->illAnswer->_value = ($row['ORS_ANSWER'] == 'z3950' ? '1' : '0');
+      $val->illShipped->_value = ($row['ORS_SHIPPING'] == 'z3950' ? '1' : '0');
+      $val->illCancel->_value = ($row['ORS_CANCEL'] == 'z3950' ? '1' : '0');
+      $val->illCancelReply->_value = ($row['ORS_CANCELREPLY'] == 'z3950' ? '1' : '0');
+      $val->illCancelReplySynchronous->_value = ($row['ORS_CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
+      $val->illRenew->_value = ($row['ORS_RENEW'] == 'z3950' ? '1' : '0');
+      $val->illRenewAnswer->_value = ($row['ORS_RENEWANSWER'] == 'z3950' ? '1' : '0');
+      $val->illRenewAnswerSynchronous->_value = ($row['ORS_RENEW_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
+    }
   }
 
   /** \brief parse status and status_eget from vip_fjernlaan 
