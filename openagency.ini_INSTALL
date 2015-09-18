@@ -244,13 +244,13 @@ action[getSaouLicenseInfo][] = callback
 action[getSaouLicenseInfo][] = outputType
 action[getSaouLicenseInfo][] = trackingId
 
-action[libraryRule][authentication][] = groupIdAut
-action[libraryRule][authentication][] = passwordAut
-action[libraryRule][authentication][] = userIdAut
-action[libraryRule][] = agencyId
-action[libraryRule][] = callback
-action[libraryRule][] = outputType
-action[libraryRule][] = trackingId
+action[libraryRules][authentication][] = groupIdAut
+action[libraryRules][authentication][] = passwordAut
+action[libraryRules][authentication][] = userIdAut
+action[libraryRules][] = agencyId
+action[libraryRules][] = callback
+action[libraryRules][] = outputType
+action[libraryRules][] = trackingId
 
 action[libraryTypeList][authentication][] = groupIdAut
 action[libraryTypeList][authentication][] = passwordAut
