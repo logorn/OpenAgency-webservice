@@ -740,6 +740,7 @@ class openAgency extends webServiceServer {
               AND broendprofil_to_kilder.profil_id IS NOT NULL
               AND broend_to_profiler.id_nr = broendprofil_to_kilder.profil_id (+)' . $sql_add);
           $profil_res = $oci->fetch_all_into_assoc();
+          $profiles = array();
           foreach ($profil_res as $pr) {
             if ($pr['PROFIL_ID'] && $pr['BROENDKILDE_ID']) {
               $profiles[$pr['BIB_NR']][$pr['PROFIL_ID']][$pr['NAME']][] = $pr['BROENDKILDE_ID'];
@@ -749,7 +750,7 @@ class openAgency extends webServiceServer {
             foreach ($agency_profiles as $profile) {
               foreach ($profile as $profile_name => $kilde_ids) {
                 foreach ($kilde_ids as $kilde_id) {
-                  if (empty($kilder[$kilde_id]['ACCESS_FOR']) || strpos($kilder[$kilde_id]['ACCESS_FOR'], $agency) !== FALSE) {
+                  if ($kilder[$kilde_id] && (empty($kilder[$kilde_id]['ACCESS_FOR']) || strpos($kilder[$kilde_id]['ACCESS_FOR'], $agency) !== FALSE)) {
                     $s->sourceName->_value = $kilder[$kilde_id]['NAME'];
                     $s->sourceIdentifier->_value = str_replace('[agency]', $agency, $kilder[$kilde_id]['IDENTIFIER']);
                     $source[]->_value = $s;
@@ -772,6 +773,9 @@ class openAgency extends webServiceServer {
               unset($a);
               unset($res_profile);
             }
+          }
+          if (empty($res)) {
+            $res->error->_value = 'profile_not_found';
           }
         }
         catch (ociException $e) {
