@@ -1771,7 +1771,7 @@ class openAgency extends webServiceServer {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
         $res->error->_value = 'authentication_error';
       else {
-        $cache_key = 'OA_libRu_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
+        $cache_key = 'OA_libRu_' . $this->config->get_inifile_hash() . $param->agencyId->_value;
         self::set_cache_expire($this->cache_expire[__FUNCTION__]);
         if ($ret = $this->cache->get($cache_key)) {
           verbose::log(STAT, 'Cache hit');
