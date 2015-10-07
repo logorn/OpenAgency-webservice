@@ -48,6 +48,7 @@ soapAction[pickupAgencyList] = pickupAgencyListRequest
 soapAction[openSearchProfile] = openSearchProfileRequest
 soapAction[remoteAccess] = remoteAccessRequest
 soapAction[requestOrder] = requestOrderRequest
+soapAction[searchCollection] = searchCollectionRequest
 soapAction[service] = serviceRequest
 soapAction[showOrder] = showOrderRequest
 ;soapAction[proxyDomains] = proxyDomainsRequest
@@ -307,6 +308,14 @@ action[requestOrder][] = agencyId
 action[requestOrder][] = callback
 action[requestOrder][] = outputType
 action[requestOrder][] = trackingId
+
+action[searchCollection][authentication][] = groupIdAut
+action[searchCollection][authentication][] = passwordAut
+action[searchCollection][authentication][] = userIdAut
+action[searchCollection][] = agencyId
+action[searchCollection][] = callback
+action[searchCollection][] = outputType
+action[searchCollection][] = trackingId
 
 action[service][authentication][] = groupIdAut
 action[service][authentication][] = passwordAut
