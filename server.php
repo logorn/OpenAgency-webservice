@@ -679,6 +679,115 @@ class openAgency extends webServiceServer {
       return $ret;
     }
 
+  /** \brief Fetch search profiles for the openSearch service
+   *
+   * Request:
+   * - agencyId
+   * Response:
+   * - searchCollection
+   * - - agencyId
+   * - - profile
+   * - - - profileName
+   * - - - source
+   * - - - - sourceName
+   * - - - - sourceIdentifier
+   * - - - - 1 above or 2 below
+   * - - - - sourceOwner
+   * - - - - sourceFormat
+   */
+  public function searchCollection($param) {
+    if (!$this->aaa->has_right('netpunkt.dk', 500))
+      $res->error->_value = 'authentication_error';
+    else {
+      $agency = self::strip_agency($param->agencyId->_value);
+      $cache_key = 'OA_opeSC_' . $this->config->get_inifile_hash() . $agency;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+      if ($ret = $this->cache->get($cache_key)) {
+        verbose::log(STAT, 'Cache hit');
+        return $ret;
+      }
+      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+      $oci->set_charset('UTF8');
+      try {
+        $oci->connect();
+      }
+      catch (ociException $e) {
+        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+        $res->error->_value = 'service_unavailable';
+      }
+      if (empty($res->error)) {
+        try {
+          // hent alle broend_to_kilder med searchable == "Y" og loop over dem.
+          // find de kilder som profilen kender:
+          // Søgbarheden (sourceSearchable) gives hvis den findes i den givne profil (broendkilde_id findes)
+          // Søgbargeden kan evt. begrænses af broend_to_kilder.access_for
+          $oci->bind('bind_y', 'Y');
+          $oci->set_query('SELECT DISTINCT *
+              FROM broend_to_kilder
+              WHERE searchable = :bind_y
+              ORDER BY upper(name)');
+          $kilder_res = $oci->fetch_all_into_assoc();
+          foreach ($kilder_res as $kilde) {
+            $kilder[$kilde['ID_NR']] = $kilde;
+          }
+          if ($agency) {
+            $oci->bind('bind_agency', $agency);
+            $sql_add = ' AND broend_to_profiler.bib_nr = :bind_agency';
+          }
+          $oci->set_query('SELECT broendkilde_id, profil_id, name, broend_to_profiler.bib_nr
+              FROM broendprofil_to_kilder, broend_to_profiler
+              WHERE broendprofil_to_kilder.broendkilde_id IS NOT NULL
+              AND broendprofil_to_kilder.profil_id IS NOT NULL
+              AND broend_to_profiler.id_nr = broendprofil_to_kilder.profil_id (+)' . $sql_add);
+          $profil_res = $oci->fetch_all_into_assoc();
+          foreach ($profil_res as $pr) {
+            if ($pr['PROFIL_ID'] && $pr['BROENDKILDE_ID']) {
+              $profiles[$pr['BIB_NR']][$pr['PROFIL_ID']][$pr['NAME']][] = $pr['BROENDKILDE_ID'];
+            }
+          }
+          foreach ($profiles as $agency => $agency_profiles) {
+            foreach ($agency_profiles as $profile) {
+              foreach ($profile as $profile_name => $kilde_ids) {
+                foreach ($kilde_ids as $kilde_id) {
+                  if (empty($kilder[$kilde_id]['ACCESS_FOR']) || strpos($kilder[$kilde_id]['ACCESS_FOR'], $agency) !== FALSE) {
+                    $s->sourceName->_value = $kilder[$kilde_id]['NAME'];
+                    $s->sourceIdentifier->_value = str_replace('[agency]', $agency, $kilder[$kilde_id]['IDENTIFIER']);
+                    $source[]->_value = $s;
+                    unset($s);
+                  }
+                }
+                if ($source) {
+                  $p->profileName->_value = $profile_name;
+                  $p->source = $source;
+                  $res_profile[]->_value = $p;
+                  unset($p);
+                  unset($source);
+                } 
+              } 
+            }
+            if ($res_profile) {
+              $a->agencyId->_value = $agency;
+              $a->profile = $res_profile;
+              $res->searchCollection[]->_value = $a;
+              unset($a);
+              unset($res_profile);
+            }
+          }
+        }
+        catch (ociException $e) {
+            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+            $res->error->_value = 'service_unavailable';
+          }
+        }
+      }
+      //var_dump($res); var_dump($param); die();
+      $ret->searchCollectionResponse->_value = $res;
+      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+      if (empty($res->error)) $this->cache->set($cache_key, $ret);
+      return $ret;
+    }
+
+
     /** \brief Fetching different info for the ORS-system
      *
      * Request:

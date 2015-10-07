@@ -97,6 +97,12 @@ You should have received a copy of the GNU Affero General Public License along w
   <wsdl:message name="requestOrderResponse">
     <wsdl:part name="parameters" element="oa:requestOrderResponse"/>
   </wsdl:message>
+  <wsdl:message name="searchCollectionRequest">
+    <wsdl:part name="parameters" element="oa:searchCollectionRequest"/>
+  </wsdl:message>
+  <wsdl:message name="searchCollectionResponse">
+    <wsdl:part name="parameters" element="oa:searchCollectionResponse"/>
+  </wsdl:message>
   <wsdl:message name="serviceRequest">
     <wsdl:part name="parameters" element="oa:serviceRequest"/>
   </wsdl:message>
@@ -165,6 +171,10 @@ You should have received a copy of the GNU Affero General Public License along w
     <wsdl:operation name="requestOrder">
       <wsdl:input message="oaw:requestOrderRequest"/>
       <wsdl:output message="oaw:requestOrderResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="searchCollection">
+      <wsdl:input message="oaw:searchCollectionRequest"/>
+      <wsdl:output message="oaw:searchCollectionResponse"/>
     </wsdl:operation>
     <wsdl:operation name="service">
       <wsdl:input message="oaw:serviceRequest"/>
@@ -296,6 +306,15 @@ You should have received a copy of the GNU Affero General Public License along w
     </wsdl:operation>
     <wsdl:operation name="requestOrder">
       <soap:operation soapAction="http://oss.dbc.dk/ns/openAgency/RequestOrder" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="searchCollection">
+      <soap:operation soapAction="http://oss.dbc.dk/ns/openAgency/SearchCollection" style="document"/>
       <wsdl:input>
         <soap:body use="literal"/>
       </wsdl:input>

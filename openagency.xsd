@@ -328,6 +328,25 @@ You should have received a copy of the GNU Affero General Public License along w
       </xs:choice>
     </xs:complexType>
   </xs:element>
+  <xs:element name="searchCollectionRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="oa:authentication" minOccurs="0"/>
+        <xs:element ref="oa:agencyId" minOccurs="0"/>
+        <xs:element ref="oa:callback" minOccurs="0"/>
+        <xs:element ref="oa:outputType" minOccurs="0"/>
+        <xs:element ref="oa:trackingId" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="searchCollectionResponse">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="oa:searchCollection" maxOccurs="unbounded"/>
+        <xs:element ref="oa:error"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="serviceRequest">
     <xs:complexType>
       <xs:sequence>
@@ -928,6 +947,13 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="postalAddress" type="xs:string"/>
   <xs:element name="postalCode" type="xs:string"/>
   <xs:element name="protocol" type="xs:string"/>
+  <xs:element name="searchCollection" type="oa:searchCollection"/>
+  <xs:complexType name="searchCollection">
+    <xs:sequence>
+      <xs:element ref="oa:agencyId"/>
+      <xs:element ref="oa:profile" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
   <xs:element name="profile" type="oa:profile"/>
   <xs:complexType name="profile">
     <xs:sequence>
