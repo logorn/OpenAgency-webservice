@@ -113,6 +113,17 @@ class TestOfAgency extends WebTestCase {
             'pars' => array('agencyId' => 'DK-710100'),
             'text' => array('710100'),
             'pattern' => array('/agencyId.*requestOrderResponse/'));
+  // searchCollection
+    $this->test_cases[] = 
+      array('action' => array('post' => 'searchCollectionRequest', 'get' => 'searchCollection'),
+            'pars' => array('agencyId' => 'DK-710100'),
+            'text' => array('710100'),
+            'pattern' => array('/agencyId/'));
+    $this->test_cases[] = 
+      array('action' => array('post' => 'searchCollectionRequest', 'get' => 'searchCollection'),
+            'pars' => array('agencyId' => 'DK-710100'),
+            'text' => array('test'),
+            'pattern' => array('/profile.*profileName/'));
   // service
     $this->test_cases[] = 
       array('action' => array('post' => 'serviceRequest', 'get' => 'service'),
