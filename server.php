@@ -1762,6 +1762,7 @@ class openAgency extends webServiceServer {
     /** \brief Fetch Rules for a given library
      *
      * Request:
+     * - agencyId
      * Response:
      * - libraryRules
      * or
