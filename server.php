@@ -962,7 +962,7 @@ class openAgency extends webServiceServer {
               case 'orsAnswer':
                 $orsA = &$res->orsAnswer->_value;
                 $orsA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsA, $oa_row);
                 }
                 else {
@@ -1180,7 +1180,7 @@ class openAgency extends webServiceServer {
               case 'orsRenewAnswer':
                 $orsRA = &$res->orsRenewAnswer->_value;
                 $orsRA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsRA, $oa_row);
                 }
                 else {
@@ -1232,7 +1232,7 @@ class openAgency extends webServiceServer {
               case 'orsCancelReply':
                 $orsCR = &$res->orsCancelReply->_value;
                 $orsCR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsCR, $oa_row);
                 }
                 else {
@@ -1266,7 +1266,7 @@ class openAgency extends webServiceServer {
               case 'orsShipping':
                 $orsS = &$res->orsShipping->_value;
                 $orsS->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsS, $oa_row);
                 }
                 else {
@@ -1294,7 +1294,7 @@ class openAgency extends webServiceServer {
                 $orsSR = &$res->orsStatusResponse->_value;
                 $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
                 $orsSR->willReceive->_value = '';
-                if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+                if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsSR, $oa_row);
                 }
                 break;
