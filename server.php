@@ -583,22 +583,24 @@ class openAgency extends webServiceServer {
                 }
                 elseif ($row['MAILBESTIL_VIA'] == 'E') {
                   self::set_iso18626($registryInfo, $row);
-                  self::use_dbc_as_z3950_target($row, $dbc_target['z3950'], $param->authentication->_value);
+                  if (empty($row['URL_ITEMORDER_BESTIL']) || !in_array($row['HOLDINGSFORMAT'], array('A', '', NULL))) {
+                    self::use_dbc_as_z3950_target($row, $dbc_target['z3950'], $param->authentication->_value);
+                  }
                   self::set_z3950Ill($registryInfo, $row, FALSE);
                 }
               }
             }
             if ($registryInfo)
               $res->registryInfo[]->_value = $registryInfo;
-          }
-          catch (ociException $e) {
-            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
-          }
+        }
+        catch (ociException $e) {
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+          $res->error->_value = 'service_unavailable';
         }
       }
-      //var_dump($res); var_dump($param); die();
-      $ret->getRegistryInfoResponse->_value = $res;
+    }
+    //var_dump($res); var_dump($param); die();
+    $ret->getRegistryInfoResponse->_value = $res;
       $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
       if (empty($res->error)) $this->cache->set($cache_key, $ret);
       return $ret;
