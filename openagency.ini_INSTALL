@@ -9,7 +9,7 @@
 
 ; --------------
 ;version
-version = 2.23
+version = 2.24
 
 ; --------------
 ; set only_https to accept https call only
@@ -358,13 +358,15 @@ action[showOrder][] = trackingId
 ; __var__ will be replace by the corresponding ini-file setting - if it exists
 ; __var.section__ will be replace by the corresponding ini-file setting from section [section]
 ; this will only work if the user from in_house_domain - see above
-;showinfo[] = <pre>
-;showinfo[] = version:            __version.setup__
+showinfo[] = <pre>
+showinfo[] = version:            __version.setup__
 ;showinfo[] = logfile:            __logfile.setup__
-;showinfo[] = verbose:            __verbose__
+showinfo[] = verbose:            __verbose__
 ;showinfo[] = aaa_credentials:    __aaa_credentials__
-;showinfo[] = show_samples:       __show_samples__
-;showinfo[] = </pre>
+showinfo[] = show_samples:       __show_samples__
+showinfo[] = cache_expire:       __cache_expire__
+showinfo[] = cache_operation_expire: __cache_operation_expire__
+showinfo[] = </pre>
 
 ; ==============
 
