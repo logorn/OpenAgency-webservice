@@ -1156,25 +1156,25 @@ class openAgency extends webServiceServer {
                 break;
               case 'orsRenew':
                 $orsR = &$res->orsRenew->_value;
-                $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                Object::set_object_value($orsR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                   self::fill_iso18626_protocol($orsR, $oa_row);
                 }
                 else {
                   if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
-                    $orsR->willReceive->_value = 'YES';
-                    $orsR->synchronous->_value = 0;
-                    $orsR->protocol->_value = self::normalize_iso18626($oa_row['RENEW']);
+                    Object::set_object_value($orsR, 'willReceive', 'YES');
+                    Object::set_object_value($orsR, 'synchronous', '0');
+                    Object::set_object_value($orsR, 'protocol', self::normalize_iso18626($oa_row['RENEW']));
                     if ($oa_row['RENEW'] == 'z3950') {
-                      $orsR->address->_value = $oa_row['RENEW_Z3950_ADDRESS'];
-                      $orsR->userId->_value = $oa_row['RENEW_Z3950_USER'];
-                      $orsR->groupId->_value = $oa_row['RENEW_Z3950_GROUP'];
-                      $orsR->passWord->_value = $oa_row['RENEW_Z3950_PASSWORD'];
+                      Object::set_object_value($orsR, 'address', $oa_row['RENEW_Z3950_ADDRESS']);
+                      Object::set_object_value($orsR, 'userId', $oa_row['RENEW_Z3950_USER']);
+                      Object::set_object_value($orsR, 'groupId', $oa_row['RENEW_Z3950_GROUP']);
+                      Object::set_object_value($orsR, 'passWord', $oa_row['RENEW_Z3950_PASSWORD']);
                     }
                   }
                   else {
-                    $orsR->willReceive->_value = 'NO';
-                    $orsR->synchronous->_value = 0;
+                    Object::set_object_value($orsR, 'willReceive', 'NO');
+                    Object::set_object_value($orsR, 'synchronous', '0');
                   }
                 }
                 //var_dump($res->orsRenew->_value); die();
@@ -1483,7 +1483,7 @@ class openAgency extends webServiceServer {
 
 
       //var_dump($res); var_dump($param); die();
-      $ret->serviceResponse->_value = $res;
+      Object::set_object_value($ret, 'serviceResponse', $res);
       $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
       if (empty($res->error)) $this->cache->set($cache_key, $ret);
       return $ret;
