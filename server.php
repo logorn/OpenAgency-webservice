@@ -1181,7 +1181,7 @@ class openAgency extends webServiceServer {
                 break;
               case 'orsRenewAnswer':
                 $orsRA = &$res->orsRenewAnswer->_value;
-                $orsRA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                Object::set_object_value($orsRA, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsRA, $oa_row);
                 }
@@ -2655,11 +2655,11 @@ class openAgency extends webServiceServer {
    * @param row (array) - one result array from the DB
    */
   private function fill_iso18626_protocol(&$buf, $row) {
-    $buf->willReceive->_value = 'YES';
-    $buf->synchronous->_value = 0;
-    $buf->protocol->_value = 'iso18626';
-    $buf->address->_value = $row['ISO18626_ADDRESS'];
-    $buf->passWord->_value = $row['ISO18626_PASSWORD'];
+    Object::set_object_value($buf, 'willReceive', 'YES');
+    Object::set_object_value($buf, 'synchronous', 0);
+    Object::set_object_value($buf, 'protocol', 'iso18626');
+    Object::set_object_value($buf, 'address', $row['ISO18626_ADDRESS']);
+    Object::set_object_value($buf, 'passWord', $row['ISO18626_PASSWORD']);
   }
 
   /** \brief add iso18626 data to result
