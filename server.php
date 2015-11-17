@@ -59,7 +59,7 @@ class openAgency extends webServiceServer {
    **/
   public function automation($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_aut_' . $this->config->get_inifile_hash() . $agency . $param->autService->_value . $param->materialType->_value;
@@ -75,7 +75,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         switch ($param->autService->_value) {
@@ -91,7 +91,7 @@ class openAgency extends webServiceServer {
             }
             catch (ociException $e) {
               verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-              $res->error->_value = 'service_unavailable';
+              Object::set_value($res, 'error', 'service_unavailable');
             }
             if (empty($res->error)) {
               if ($vf_row['VALG'] == 'a') {
@@ -103,14 +103,14 @@ class openAgency extends webServiceServer {
                                   WHERE materiale_id = :bind_materiale_id
                                   AND status = :bind_status');    // ??? NULL og DISTINCT
                   $ap = &$res->autPotential->_value;
-                  $ap->materialType->_value = $param->materialType->_value;
+                  Object::set_value($ap, 'materialType', $param->materialType->_value);
                   while ($vf_row = $oci->fetch_into_assoc())
                     if ($vf_row['LAANGIVER'])
-                      $ap->responder[]->_value = $vf_row['LAANGIVER'];
+                      Object::set_array_value($ap, 'responder', $vf_row['LAANGIVER']);
                 }
                 catch (ociException $e) {
                   verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-                  $res->error->_value = 'service_unavailable';
+                  Object::set_value($res, 'error', 'service_unavailable');
                 }
               }
               elseif ($vf_row['VALG'] == 'l') {
@@ -120,17 +120,17 @@ class openAgency extends webServiceServer {
                                   FROM vip_fjernlaan_bibliotek
                                   WHERE fjernlaan_id = :bind_fjernlaan_id');
                   $ap = &$res->autPotential->_value;
-                  $ap->materialType->_value = $param->materialType->_value;
+                  Object::set_value($ap, 'materialType', $param->materialType->_value);
                   while ($vfb_row = $oci->fetch_into_assoc())
-                    $ap->responder[]->_value = self::normalize_agency($vfb_row['BIB_NR']);
+                    Object::set_array_value($ap, 'responder', self::normalize_agency($vfb_row['BIB_NR']));
                 }
                 catch (ociException $e) {
                   verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-                  $res->error->_value = 'service_unavailable';
+                  Object::set_value($res, 'error', 'service_unavailable');
                 }
               }
               else {
-                $res->error->_value = 'no_agencies_found';
+                Object::set_value($res, 'error', 'no_agencies_found');
               }
             }
             break;
@@ -158,7 +158,7 @@ class openAgency extends webServiceServer {
             }
             catch (ociException $e) {
               verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-              $res->error->_value = 'service_unavailable';
+              Object::set_value($res, 'error', 'service_unavailable');
             }
             break;
           case 'autProvider':
@@ -182,16 +182,16 @@ class openAgency extends webServiceServer {
             }
             catch (ociException $e) {
               verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-              $res->error->_value = 'service_unavailable';
+              Object::set_value($res, 'error', 'service_unavailable');
             }
             break;
           default:
-            $res->error->_value = 'error_in_request';
+            Object::set_value($res, 'error', 'error_in_request');
         }
       }
     }
-    //var_dump($res); var_dump($param); die();
-    $ret->automationResponse->_value = $res;
+    //print_r($res); var_dump($param); die();
+    @ $ret->automationResponse->_value = $res;
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -215,7 +215,7 @@ class openAgency extends webServiceServer {
    */
   public function encryption($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $cache_key = 'OA_enc_' . $this->config->get_inifile_hash() . $param->email->_value;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
@@ -230,7 +230,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         try {
@@ -251,7 +251,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
       }
     }
@@ -278,7 +278,7 @@ class openAgency extends webServiceServer {
    */
   public function endUserOrderPolicy($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $mat_type = strtolower($param->orderMaterialType->_value);
@@ -295,7 +295,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         $assoc['cdrom']     = array('CDROM_BEST_MODT', 'BEST_TEKST_CDROM');
@@ -331,14 +331,14 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
         else
-          $res->error->_value = 'error_in_request';
+          Object::set_value($res, 'error', 'error_in_request');
       }
       if (empty($res))
-        $res->error->_value = 'no_agencies_found';
+        Object::set_value($res, 'error', 'no_agencies_found');
     }
 
     //var_dump($res); var_dump($param); die();
@@ -362,7 +362,7 @@ class openAgency extends webServiceServer {
    */
   public function getCulrProfile($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 551))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $profile_name = $param->profileName->_value;
@@ -380,7 +380,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         try {
@@ -421,12 +421,12 @@ class openAgency extends webServiceServer {
             unset($cp);
           }
           if (empty($res)) {
-            $res->error->_value = 'profile_not_found';
+            Object::set_value($res, 'error', 'profile_not_found');
           }
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
       }
     }
@@ -452,7 +452,7 @@ class openAgency extends webServiceServer {
    */
   public function getRegistryInfo($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_getRI' . 
@@ -474,7 +474,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         try {
@@ -595,7 +595,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
       }
     }
@@ -617,7 +617,7 @@ class openAgency extends webServiceServer {
      */
     public function getSaouLicenseInfo($param) {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
-        $res->error->_value = 'authentication_error';
+        Object::set_value($res, 'error', 'authentication_error');
       else {
         $agency = self::strip_agency($param->agencyId->_value);
         $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
@@ -633,7 +633,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
         if (empty($res->error)) {
           try {
@@ -670,7 +670,7 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
       }
@@ -699,7 +699,7 @@ class openAgency extends webServiceServer {
    */
   public function searchCollection($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_opeSC_' . $this->config->get_inifile_hash() . $agency;
@@ -715,7 +715,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         try {
@@ -777,12 +777,12 @@ class openAgency extends webServiceServer {
             }
           }
           if (empty($res)) {
-            $res->error->_value = 'profile_not_found';
+            Object::set_value($res, 'error', 'profile_not_found');
           }
         }
         catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
       }
@@ -824,7 +824,7 @@ class openAgency extends webServiceServer {
      */
     public function service($param) {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
-        $res->error->_value = 'authentication_error';
+        Object::set_value($res, 'error', 'authentication_error');
       else {
         $agency = self::strip_agency($param->agencyId->_value);
         $cache_key = 'OA_ser_' . $this->config->get_inifile_hash() . $agency . $param->service->_value;
@@ -840,7 +840,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
         if (empty($res->error)) {
           $tab_col['v'] = array('bib_nr', 'navn', 'tlf_nr', 'fax_nr', 'email', 'badr', 'bpostnr', 'bcity', 'type', '*');
@@ -919,10 +919,10 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
           if (empty($oa_row))
-            $res->error->_value = 'agency_not_found';
+            Object::set_value($res, 'error', 'agency_not_found');
           if (empty($res->error)) {
   //        verbose::log(TRACE, 'OpenAgency('.__LINE__.'):: action=service&agencyId=' . $param->agencyId->_value .  '&service=' . $param->service->_value);
             switch ($param->service->_value) {
@@ -1156,32 +1156,32 @@ class openAgency extends webServiceServer {
                 break;
               case 'orsRenew':
                 $orsR = &$res->orsRenew->_value;
-                Object::set_object_value($orsR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
+                Object::set_value($orsR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                   self::fill_iso18626_protocol($orsR, $oa_row);
                 }
                 else {
                   if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
-                    Object::set_object_value($orsR, 'willReceive', 'YES');
-                    Object::set_object_value($orsR, 'synchronous', '0');
-                    Object::set_object_value($orsR, 'protocol', self::normalize_iso18626($oa_row['RENEW']));
+                    Object::set_value($orsR, 'willReceive', 'YES');
+                    Object::set_value($orsR, 'synchronous', '0');
+                    Object::set_value($orsR, 'protocol', self::normalize_iso18626($oa_row['RENEW']));
                     if ($oa_row['RENEW'] == 'z3950') {
-                      Object::set_object_value($orsR, 'address', $oa_row['RENEW_Z3950_ADDRESS']);
-                      Object::set_object_value($orsR, 'userId', $oa_row['RENEW_Z3950_USER']);
-                      Object::set_object_value($orsR, 'groupId', $oa_row['RENEW_Z3950_GROUP']);
-                      Object::set_object_value($orsR, 'passWord', $oa_row['RENEW_Z3950_PASSWORD']);
+                      Object::set_value($orsR, 'address', $oa_row['RENEW_Z3950_ADDRESS']);
+                      Object::set_value($orsR, 'userId', $oa_row['RENEW_Z3950_USER']);
+                      Object::set_value($orsR, 'groupId', $oa_row['RENEW_Z3950_GROUP']);
+                      Object::set_value($orsR, 'passWord', $oa_row['RENEW_Z3950_PASSWORD']);
                     }
                   }
                   else {
-                    Object::set_object_value($orsR, 'willReceive', 'NO');
-                    Object::set_object_value($orsR, 'synchronous', '0');
+                    Object::set_value($orsR, 'willReceive', 'NO');
+                    Object::set_value($orsR, 'synchronous', '0');
                   }
                 }
                 //var_dump($res->orsRenew->_value); die();
                 break;
               case 'orsRenewAnswer':
                 $orsRA = &$res->orsRenewAnswer->_value;
-                Object::set_object_value($orsRA, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
+                Object::set_value($orsRA, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsRA, $oa_row);
                 }
@@ -1475,7 +1475,7 @@ class openAgency extends webServiceServer {
       //var_dump($res); var_dump($param); die();
                 break;
               default:
-                $res->error->_value = 'error_in_request';
+                Object::set_value($res, 'error', 'error_in_request');
             }
           }
         }
@@ -1483,7 +1483,7 @@ class openAgency extends webServiceServer {
 
 
       //var_dump($res); var_dump($param); die();
-      Object::set_object_value($ret, 'serviceResponse', $res);
+      Object::set_value($ret, 'serviceResponse', $res);
       $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
       if (empty($res->error)) $this->cache->set($cache_key, $ret);
       return $ret;
@@ -1536,7 +1536,7 @@ class openAgency extends webServiceServer {
      */
     public function findLibrary($param) {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
-        $res->error->_value = 'authentication_error';
+        Object::set_value($res, 'error', 'authentication_error');
       else {
         if ($geoloc = $param->geolocation->_value) {
           $geo_cache = $geoloc->latitude->_value . '_' . $geoloc->longitude->_value . '_' . $geoloc->distanceInMeter->_value;
@@ -1567,7 +1567,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
     // agencyId
         if ($agency_id = self::strip_agency($param->agencyId->_value)) {
@@ -1751,7 +1751,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
       }
       //var_dump($res); var_dump($param); die();
@@ -1772,7 +1772,7 @@ class openAgency extends webServiceServer {
      */
     public function libraryRules($param) {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
-        $res->error->_value = 'authentication_error';
+        Object::set_value($res, 'error', 'authentication_error');
       else {
         $cache_key = 'OA_libRu_' . $this->config->get_inifile_hash() . $param->agencyId->_value;
         self::set_cache_expire($this->cache_expire[__FUNCTION__]);
@@ -1787,7 +1787,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
         if (empty($res->error)) {
           $agency = self::strip_agency($param->agencyId->_value);
@@ -1818,7 +1818,7 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
       }
@@ -1838,7 +1838,7 @@ class openAgency extends webServiceServer {
      */
     public function libraryTypeList($param) {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
-        $res->error->_value = 'authentication_error';
+        Object::set_value($res, 'error', 'authentication_error');
       else {
         $cache_key = 'OA_libTL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
         self::set_cache_expire($this->cache_expire[__FUNCTION__]);
@@ -1853,7 +1853,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
         if (empty($res->error)) {
           try {
@@ -1877,7 +1877,7 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
       }
@@ -1898,7 +1898,7 @@ class openAgency extends webServiceServer {
      */
     public function nameList($param) {
       if (!$this->aaa->has_right('netpunkt.dk', 500))
-        $res->error->_value = 'authentication_error';
+        Object::set_value($res, 'error', 'authentication_error');
       else {
         //var_dump($this->aaa->get_rights()); die();
         $cache_key = 'OA_namL_' . $this->config->get_inifile_hash() . $param->libraryType->_value;
@@ -1914,7 +1914,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
         if (empty($res->error)) {
           if ($param->libraryType->_value == 'Alle' ||
@@ -1940,11 +1940,11 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
         else
-          $res->error->_value = 'error_in_request';
+          Object::set_value($res, 'error', 'error_in_request');
       }
     }
     //var_dump($res); var_dump($param); die();
@@ -2001,7 +2001,7 @@ class openAgency extends webServiceServer {
    */
   public function pickupAgencyList($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       foreach (array('agencyId', 'agencyName', 'agencyAddress', 'postalCode', 'city', 'anyField') as $par) {
         if (is_array($param->$par)) {
@@ -2051,7 +2051,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         if (is_array($ora_par) ||
@@ -2243,16 +2243,16 @@ class openAgency extends webServiceServer {
                 }
               }
             } else {
-              $res->error->_value = 'no_agencies_found';
+              Object::set_value($res, 'error', 'no_agencies_found');
             }
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
         else
-          $res->error->_value = 'error_in_request';
+          Object::set_value($res, 'error', 'error_in_request');
       }
     }
     //var_dump($res); var_dump($param); die();
@@ -2284,7 +2284,7 @@ class openAgency extends webServiceServer {
    */
   public function openSearchProfile($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_opeSP_' . $this->config->get_inifile_hash() . $agency . $param->profileName->_value . $param->profileVersion->_value;
@@ -2300,7 +2300,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         if ($param->profileVersion->_value == 3) {
@@ -2375,7 +2375,7 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         } else {
           $oci->bind('bind_agency', $agency);
@@ -2401,7 +2401,7 @@ class openAgency extends webServiceServer {
           }
           catch (ociException $e) {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            $res->error->_value = 'service_unavailable';
+            Object::set_value($res, 'error', 'service_unavailable');
           }
         }
       }
@@ -2428,7 +2428,7 @@ class openAgency extends webServiceServer {
    */
   public function remoteAccess($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 550))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_remA_' . $this->config->get_inifile_hash() . $agency;
@@ -2444,7 +2444,7 @@ class openAgency extends webServiceServer {
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
       if (empty($res->error)) {
         try {
@@ -2500,7 +2500,7 @@ class openAgency extends webServiceServer {
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          $res->error->_value = 'service_unavailable';
+          Object::set_value($res, 'error', 'service_unavailable');
         }
       }
     }
@@ -2523,7 +2523,7 @@ class openAgency extends webServiceServer {
    */
   public function requestOrder($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_reqO_' . $this->config->get_inifile_hash() . $agency;
@@ -2553,7 +2553,7 @@ class openAgency extends webServiceServer {
    */
   public function showOrder($param) {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
-      $res->error->_value = 'authentication_error';
+      Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
       $cache_key = 'OA_shoO_' . $this->config->get_inifile_hash() . $agency;
@@ -2601,7 +2601,7 @@ class openAgency extends webServiceServer {
     }
     catch (ociException $e) {
       verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
-      $res->error->_value = 'service_unavailable';
+      Object::set_value($res, 'error', 'service_unavailable');
     }
     if (empty($res->error)) {
       try {
@@ -2616,11 +2616,11 @@ class openAgency extends webServiceServer {
           $res->agencyId[]->_value = $s_row['VILSE'];
         }
         if (empty($res->agencyId))
-          $res->error->_value = 'no_agencies_found';
+          Object::set_value($res, 'error', 'no_agencies_found');
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-        $res->error->_value = 'service_unavailable';
+        Object::set_value($res, 'error', 'service_unavailable');
       }
     }
     return $res;
@@ -2655,11 +2655,11 @@ class openAgency extends webServiceServer {
    * @param row (array) - one result array from the DB
    */
   private function fill_iso18626_protocol(&$buf, $row) {
-    Object::set_object_value($buf, 'willReceive', 'YES');
-    Object::set_object_value($buf, 'synchronous', 0);
-    Object::set_object_value($buf, 'protocol', 'iso18626');
-    Object::set_object_value($buf, 'address', $row['ISO18626_ADDRESS']);
-    Object::set_object_value($buf, 'passWord', $row['ISO18626_PASSWORD']);
+    Object::set_value($buf, 'willReceive', 'YES');
+    Object::set_value($buf, 'synchronous', 0);
+    Object::set_value($buf, 'protocol', 'iso18626');
+    Object::set_value($buf, 'address', $row['ISO18626_ADDRESS']);
+    Object::set_value($buf, 'passWord', $row['ISO18626_PASSWORD']);
   }
 
   /** \brief add iso18626 data to result
