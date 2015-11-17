@@ -143,18 +143,18 @@ class openAgency extends webServiceServer {
                               WHERE laantager = :bind_laantager
                               AND materiale_id = :bind_materiale_id');
               $ar = &$res->autRequester->_value;
-              $ar->requester->_value = $agency;
-              $ar->materialType->_value = $param->materialType->_value;
+              Object::set_value($ar, 'requester', $agency);
+              Object::set_value($ar, 'materialType', $param->materialType->_value);
               if ($vf_row = $oci->fetch_into_assoc()) {
-                $ar->willSend->_value = self::parse_will_send($vf_row['STATUS']);
-                $ar->willSendOwn->_value = self::parse_will_send($vf_row['STATUS_EGET']);
-                $ar->autPeriod->_value = $vf_row['PERIODE'];
-                $ar->autId->_value = $vf_row['ID_NR'];
-                $ar->autChoice->_value = $vf_row['VALG'];
-                $ar->autRes->_value = ($vf_row['RESERVERING'] == 'J' ? 'YES' : 'NO');
+                Object::set_value($ar, 'willSend', self::parse_will_send($vf_row['STATUS']));
+                Object::set_value($ar, 'willSendOwn', self::parse_will_send($vf_row['STATUS_EGET']));
+                Object::set_value($ar, 'autPeriod', $vf_row['PERIODE']);
+                Object::set_value($ar, 'autId', $vf_row['ID_NR']);
+                Object::set_value($ar, 'autChoice', $vf_row['VALG']);
+                Object::set_value($ar, 'autRes', ($vf_row['RESERVERING'] == 'J' ? 'YES' : 'NO'));
               }
               else
-                $ar->willSend->_value = 'NO';
+                Object::set_value($ar, 'willSend', 'NO');
             }
             catch (ociException $e) {
               verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -170,15 +170,15 @@ class openAgency extends webServiceServer {
                               WHERE laangiver = :bind_laangiver
                               AND materiale_id = :bind_materiale_id');
               $ap = &$res->autProvider->_value;
-              $ap->provider->_value = $agency;
-              $ap->materialType->_value = $param->materialType->_value;
+              Object::set_value($ap, 'provider', $agency);
+              Object::set_value($ap, 'materialType', $param->materialType->_value);
               if ($vf_row = $oci->fetch_into_assoc()) {
-                $ap->willReceive->_value = ($vf_row['STATUS'] == 'J' ? 'YES' : 'NO');
-                $ap->autPeriod->_value = $vf_row['PERIODE'];
-                $ap->autId->_value = $vf_row['ID_NR'];
+                Object::set_value($ap, 'willReceive',  ($vf_row['STATUS'] == 'J' ? 'YES' : 'NO'));
+                Object::set_value($ap, 'autPeriod',  $vf_row['PERIODE']);
+                Object::set_value($ap, 'autId',  $vf_row['ID_NR']);
               }
               else
-                $ap->willReceive->_value = 'NO';
+                Object::set_value($ap, 'willSend', 'NO');
             }
             catch (ociException $e) {
               verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -237,17 +237,18 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_email', $param->email->_value);
           $oci->set_query('SELECT * FROM vip_krypt WHERE email = :bind_email');
           while ($vk_row = $oci->fetch_into_assoc()) {
-            $o->encrypt->_value = 'YES';
-            $o->email->_value = $param->email->_value;
-            $o->agencyId->_value = $vk_row['BIBLIOTEK'];;
-            $o->key->_value = $vk_row['KEY'];
-            $o->base64->_value = ($vk_row['NOTBASE64'] == 'ja' ? 'NO' : 'YES');
-            $o->date->_value = $vk_row['UDL_DATO'];
-            $res->encryption[]->_value = $o;
+            Object::set_value($o, 'encrypt', 'YES');
+            Object::set_value($o, 'email', $param->email->_value);
+            Object::set_value($o, 'agencyId', $vk_row['BIBLIOTEK']);
+            Object::set_value($o, 'key', $vk_row['KEY']);
+            Object::set_value($o, 'base64', ($vk_row['NOTBASE64'] == 'ja' ? 'NO' : 'YES'));
+            Object::set_value($o, 'date', $vk_row['UDL_DATO']);
+            Object::set_array_value($res, 'encryption', $o);
             unset($o);
           }
           if (empty($res))
-            $res->encryption[]->_value->encrypt->_value = 'NO';
+            Object::set_value($o, 'encrypt', 'NO');
+            Object::set_array_value($res, 'encryption', $o);
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -257,7 +258,7 @@ class openAgency extends webServiceServer {
     }
 
     //var_dump($res); var_dump($param); die();
-    $ret->encryptionResponse->_value = $res;
+    Object::set_value($ret, 'encryptionResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
