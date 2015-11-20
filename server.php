@@ -321,8 +321,8 @@ class openAgency extends webServiceServer {
                             AND vb.bib_nr = vt.bib_nr (+)
                             AND vb.bib_nr = vte.bib_nr (+)');
             if ($vb_row = $oci->fetch_into_assoc()) {
-              $res->willReceive->_value =
-                ($vb_row['BEST_MODT'] == 'J' && ($vb_row['WR'] == 'J' || $vb_row['WR'] == 'B') ? 1 : 0);
+              Object::set_value($res, 'willReceive',
+                ($vb_row['BEST_MODT'] == 'J' && ($vb_row['WR'] == 'J' || $vb_row['WR'] == 'B') ? 1 : 0));
               if ($vb_row['WR'] == 'B') {
                 $col = $assoc[$mat_type][1] . $fjernl;
                 $res->condition[] = self::value_and_language($vb_row[$col], 'dan');
@@ -343,7 +343,7 @@ class openAgency extends webServiceServer {
     }
 
     //var_dump($res); var_dump($param); die();
-    $ret->endUserOrderPolicyResponse->_value = $res;
+    Object::set_value($ret, 'endUserOrderPolicyResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -2881,8 +2881,9 @@ class openAgency extends webServiceServer {
    *
    */
   private function value_and_language($val, $lang) {
+    $ret = new stdClass();
     $ret->_value = $val;
-    $ret->_attributes->language->_value = $lang;
+    Object::set_value($ret->_attributes, 'language', $lang);
     return $ret;
   }
 
