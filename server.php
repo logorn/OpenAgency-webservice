@@ -391,34 +391,34 @@ class openAgency extends webServiceServer {
                            WHERE bib_nr = :bind_agency 
                              AND profilename = :bind_profile_name');
           while ($cp_row = $oci->fetch_into_assoc()) {
-            $cp->agencyId->_value = self::normalize_agency($cp_row['BIB_NR']);
-            $cp->profileName->_value = $cp_row['PROFILENAME'];
-            $cp->typeOfClient->_value = $cp_row['TYPEOFCLIENT'];
-            $cp->contactTechName->_value = $cp_row['CONTACT_TECH_NAME'];
-            $cp->contactTechMail->_value = $cp_row['CONTACT_TECH_EMAIL'];
-            $cp->contactTechPhone->_value = $cp_row['CONTACT_TECH_PHONE'];
-            $cp->contactAdmName->_value = $cp_row['CONTACT_ADM_NAME'];
-            $cp->contactAdmMail->_value = $cp_row['CONTACT_ADM_EMAIL'];
-            $cp->contactAdmPhone->_value = $cp_row['CONTACT_ADM_PHONE'];
-            $cp->CreateAccountId->_value = self::J_is_true($cp_row['CREATEACCOUNTID']);
-            $cp->CreatePatronId->_value = self::J_is_true($cp_row['CREATEPATRONID']);
-            $cp->CreateProviderId->_value = $trusted_ip ? self::J_is_true($cp_row['CREATEPROVIDERID']) : '0';
-            $cp->DeleteAccountId->_value = self::J_is_true($cp_row['DELETEACCOUNTID']);
-            $cp->DeletePatronId->_value = self::J_is_true($cp_row['DELETEPATRONID']);
-            $cp->DeleteProviderId->_value = $trusted_ip ? self::J_is_true($cp_row['DELETEPROVIDERID']) : '0';
-            $cp->GetAccountIdsByAccountId->_value = self::J_is_true($cp_row['GETACCOUNTIDSBYACCOUNTID']);
-            $cp->GetAccountIdsByPatronId->_value = self::J_is_true($cp_row['GETACCOUNTIDSBYPATRONID']);
-            $cp->GetAccountIdsByProviderId->_value = self::J_is_true($cp_row['GETACCOUNTIDSBYPROVIDERID']);
-            $cp->GetMunicipalityNoByAccountId->_value = self::J_is_true($cp_row['GETMUNICIPALITYNOBYACCOUNTID']);
-            $cp->GetMunicipalityNoByPatronId->_value = self::J_is_true($cp_row['GETMUNICIPALITYNOBYPATRONID']);
-            $cp->GetPatronIdsByAccountId->_value = self::J_is_true($cp_row['GETPATRONIDSBYACCOUNTID']);
-            $cp->GetPatronIdsByProviderId->_value = self::J_is_true($cp_row['GETPATRONIDSBYPROVIDERID']);
-            $cp->GetProviderIdsByAccountId->_value = self::J_is_true($cp_row['GETPROVIDERIDSBYACCOUNTID']);
-            $cp->GetProviderIdsByPatronId->_value = self::J_is_true($cp_row['GETPROVIDERIDSBYPATRONID']);
-            $cp->MergePatronIds->_value = self::J_is_true($cp_row['MERGEPATRONIDS']);
-            $cp->UnrelatePatronIdAndAccountId->_value = self::J_is_true($cp_row['UNRELATEPATRONIDANDACCOUNTID']);
-            $cp->UpdateAccountId->_value = self::J_is_true($cp_row['UPDATEACCOUNTID']);
-            $res->culrProfile[]->_value = $cp;
+            Object::set_value($cp, 'agencyId', self::normalize_agency($cp_row['BIB_NR']));
+            Object::set_value($cp, 'profileName', $cp_row['PROFILENAME']);
+            Object::set_value($cp, 'typeOfClient', $cp_row['TYPEOFCLIENT']);
+            Object::set_value($cp, 'contactTechName', $cp_row['CONTACT_TECH_NAME']);
+            Object::set_value($cp, 'contactTechMail', $cp_row['CONTACT_TECH_EMAIL']);
+            Object::set_value($cp, 'contactTechPhone', $cp_row['CONTACT_TECH_PHONE']);
+            Object::set_value($cp, 'contactAdmName', $cp_row['CONTACT_ADM_NAME']);
+            Object::set_value($cp, 'contactAdmMail', $cp_row['CONTACT_ADM_EMAIL']);
+            Object::set_value($cp, 'contactAdmPhone', $cp_row['CONTACT_ADM_PHONE']);
+            Object::set_value($cp, 'CreateAccountId', self::J_is_true($cp_row['CREATEACCOUNTID']));
+            Object::set_value($cp, 'CreatePatronId', self::J_is_true($cp_row['CREATEPATRONID']));
+            Object::set_value($cp, 'CreateProviderId', $trusted_ip ? self::J_is_true($cp_row['CREATEPROVIDERID']) : '0');
+            Object::set_value($cp, 'DeleteAccountId', self::J_is_true($cp_row['DELETEACCOUNTID']));
+            Object::set_value($cp, 'DeletePatronId', self::J_is_true($cp_row['DELETEPATRONID']));
+            Object::set_value($cp, 'DeleteProviderId', $trusted_ip ? self::J_is_true($cp_row['DELETEPROVIDERID']) : '0');
+            Object::set_value($cp, 'GetAccountIdsByAccountId', self::J_is_true($cp_row['GETACCOUNTIDSBYACCOUNTID']));
+            Object::set_value($cp, 'GetAccountIdsByPatronId', self::J_is_true($cp_row['GETACCOUNTIDSBYPATRONID']));
+            Object::set_value($cp, 'GetAccountIdsByProviderId', self::J_is_true($cp_row['GETACCOUNTIDSBYPROVIDERID']));
+            Object::set_value($cp, 'GetMunicipalityNoByAccountId', self::J_is_true($cp_row['GETMUNICIPALITYNOBYACCOUNTID']));
+            Object::set_value($cp, 'GetMunicipalityNoByPatronId', self::J_is_true($cp_row['GETMUNICIPALITYNOBYPATRONID']));
+            Object::set_value($cp, 'GetPatronIdsByAccountId', self::J_is_true($cp_row['GETPATRONIDSBYACCOUNTID']));
+            Object::set_value($cp, 'GetPatronIdsByProviderId', self::J_is_true($cp_row['GETPATRONIDSBYPROVIDERID']));
+            Object::set_value($cp, 'GetProviderIdsByAccountId', self::J_is_true($cp_row['GETPROVIDERIDSBYACCOUNTID']));
+            Object::set_value($cp, 'GetProviderIdsByPatronId', self::J_is_true($cp_row['GETPROVIDERIDSBYPATRONID']));
+            Object::set_value($cp, 'MergePatronIds', self::J_is_true($cp_row['MERGEPATRONIDS']));
+            Object::set_value($cp, 'UnrelatePatronIdAndAccountId', self::J_is_true($cp_row['UNRELATEPATRONIDANDACCOUNTID']));
+            Object::set_value($cp, 'UpdateAccountId', self::J_is_true($cp_row['UPDATEACCOUNTID']));
+            Object::set_array_value($res, 'culrProfile', $cp);
             unset($cp);
           }
           if (empty($res)) {
@@ -432,7 +432,7 @@ class openAgency extends webServiceServer {
       }
     }
     //var_dump($res); var_dump($param); die();
-    $ret->getCulrProfileResponse->_value = $res;
+    Object::set_value($ret, 'getCulrProfileResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -568,7 +568,7 @@ class openAgency extends webServiceServer {
                 $curr_bib = $row['BIB_NR'];
               }
               if ($curr_bib <> $row['BIB_NR']) {
-                $res->registryInfo[]->_value = $registryInfo;
+                Object::set_array_value($res, 'registryInfo', $registryInfo);
                 unset($registryInfo);
                 $curr_bib = $row['BIB_NR'];
               }
@@ -592,7 +592,7 @@ class openAgency extends webServiceServer {
               }
             }
             if ($registryInfo)
-              $res->registryInfo[]->_value = $registryInfo;
+              Object::set_array_value($res, 'registryInfo', $registryInfo);
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -601,86 +601,86 @@ class openAgency extends webServiceServer {
       }
     }
     //var_dump($res); var_dump($param); die();
-    $ret->getRegistryInfoResponse->_value = $res;
-      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
-      if (empty($res->error)) $this->cache->set($cache_key, $ret);
-      return $ret;
-    }
+    Object::set_value($ret, 'getRegistryInfoResponse', $res);
+    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+    if (empty($res->error)) $this->cache->set($cache_key, $ret);
+    return $ret;
+  }
 
-    /** \brief Fetch SaouLicenseInfo
-     *
-     * Request:
-     * - agencyId
-     * Response:
-     * - saouLicenseInfo (see xsd for parameters)
-     * or
-     * - error
-     */
-    public function getSaouLicenseInfo($param) {
-      if (!$this->aaa->has_right('netpunkt.dk', 500))
-        Object::set_value($res, 'error', 'authentication_error');
-      else {
-        $agency = self::strip_agency($param->agencyId->_value);
-        $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
-        self::set_cache_expire($this->cache_expire[__FUNCTION__]);
-        if ($ret = $this->cache->get($cache_key)) {
-          verbose::log(STAT, 'Cache hit');
-          return $ret;
-        }
-        $oci = new Oci($this->config->get_value('agency_credentials','setup'));
-        $oci->set_charset('UTF8');
+  /** \brief Fetch SaouLicenseInfo
+   *
+   * Request:
+   * - agencyId
+   * Response:
+   * - saouLicenseInfo (see xsd for parameters)
+   * or
+   * - error
+   */
+  public function getSaouLicenseInfo($param) {
+    if (!$this->aaa->has_right('netpunkt.dk', 500))
+      Object::set_value($res, 'error', 'authentication_error');
+    else {
+      $agency = self::strip_agency($param->agencyId->_value);
+      $cache_key = 'OA_getSLI' . $this->config->get_inifile_hash() . $agency;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+      if ($ret = $this->cache->get($cache_key)) {
+        verbose::log(STAT, 'Cache hit');
+        return $ret;
+      }
+      $oci = new Oci($this->config->get_value('agency_credentials','setup'));
+      $oci->set_charset('UTF8');
+      try {
+        $oci->connect();
+      }
+      catch (ociException $e) {
+        verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+        Object::set_value($res, 'error', 'service_unavailable');
+      }
+      if (empty($res->error)) {
         try {
-          $oci->connect();
+          if ($agency) {
+            $oci->bind('bind_agency', $agency);
+            $where = 'ud.bib_nr = :bind_agency AND ';
+          }
+          $fb_licens = 'fb_licens';
+          $oci->bind('bind_fb_licens', $fb_licens);
+          $oci->set_query('SELECT ud.bib_nr, domain, proxyurl 
+              FROM user_domains ud, licensguide lg
+              WHERE ' . $where . '
+              origin_source = :bind_fb_licens
+              AND ud.bib_nr = lg.bib_nr (+)
+              ORDER BY bib_nr');
+          $last_bib = '';
+          while ($sl_row = $oci->fetch_into_assoc()) {
+            if ($last_lib != $sl_row['BIB_NR']) {
+              if ($last_lib) {
+                Object::set_array_value($res, 'saouLicenseInfo', $sl);
+                unset($sl);
+              }
+              $last_lib = $sl_row['BIB_NR'];
+              Object::set_value($sl, 'agencyId', $sl_row['BIB_NR']);
+              if ($sl_row['PROXYURL']) {
+                Object::set_value($sl, 'proxyUrl', $sl_row['PROXYURL']);
+              }
+            }
+            Object::set_array_value($sl, 'ipAddress', $sl_row['DOMAIN']);
+          }
+          if ($sl) {
+            Object::set_array_value($res, 'saouLicenseInfo', $sl);
+          }
         }
         catch (ociException $e) {
-          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI connect error: ' . $oci->get_error_string());
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
           Object::set_value($res, 'error', 'service_unavailable');
         }
-        if (empty($res->error)) {
-          try {
-            if ($agency) {
-              $oci->bind('bind_agency', $agency);
-              $where = 'ud.bib_nr = :bind_agency AND ';
-            }
-            $fb_licens = 'fb_licens';
-            $oci->bind('bind_fb_licens', $fb_licens);
-            $oci->set_query('SELECT ud.bib_nr, domain, proxyurl 
-                             FROM user_domains ud, licensguide lg
-                             WHERE ' . $where . '
-                                   origin_source = :bind_fb_licens
-                               AND ud.bib_nr = lg.bib_nr (+)
-                             ORDER BY bib_nr');
-            $last_bib = '';
-            while ($sl_row = $oci->fetch_into_assoc()) {
-              if ($last_lib != $sl_row['BIB_NR']) {
-                if ($last_lib) {
-                  $res->saouLicenseInfo[]->_value = $sl;
-                  unset($sl);
-                }
-                $last_lib = $sl_row['BIB_NR'];
-                $sl->agencyId->_value = $sl_row['BIB_NR'];
-                if ($sl_row['PROXYURL']) {
-                  $sl->proxyUrl->_value = $sl_row['PROXYURL'];
-                }
-              }
-              $sl->ipAddress[]->_value = $sl_row['DOMAIN'];
-            }
-            if ($sl) {
-              $res->saouLicenseInfo[]->_value = $sl;
-            }
-          }
-          catch (ociException $e) {
-            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            Object::set_value($res, 'error', 'service_unavailable');
-          }
-        }
       }
-      //var_dump($res); var_dump($param); die();
-      $ret->getSaouLicenseInfoResponse->_value = $res;
-      $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
-      if (empty($res->error)) $this->cache->set($cache_key, $ret);
-      return $ret;
     }
+    //var_dump($res); var_dump($param); die();
+    Object::set_value($ret, 'getSaouLicenseInfoResponse', $res);
+    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+    if (empty($res->error)) $this->cache->set($cache_key, $ret);
+    return $ret;
+  }
 
   /** \brief Fetch search profiles for the openSearch service
    *
@@ -754,25 +754,25 @@ class openAgency extends webServiceServer {
               foreach ($profile as $profile_name => $kilde_ids) {
                 foreach ($kilde_ids as $kilde_id) {
                   if ($kilder[$kilde_id] && (empty($kilder[$kilde_id]['ACCESS_FOR']) || strpos($kilder[$kilde_id]['ACCESS_FOR'], $agency) !== FALSE)) {
-                    $s->sourceName->_value = $kilder[$kilde_id]['NAME'];
-                    $s->sourceIdentifier->_value = str_replace('[agency]', $agency, $kilder[$kilde_id]['IDENTIFIER']);
-                    $source[]->_value = $s;
+                    Object::set_value($s->_value, 'sourceName', $kilder[$kilde_id]['NAME']);
+                    Object::set_value($s->_value, 'sourceIdentifier', str_replace('[agency]', $agency, $kilder[$kilde_id]['IDENTIFIER']));
+                    $source[] = $s;
                     unset($s);
                   }
                 }
                 if ($source) {
-                  $p->profileName->_value = $profile_name;
-                  $p->source = $source;
-                  $res_profile[]->_value = $p;
+                  Object::set_value($p->_value, 'profileName', $profile_name);
+                  $p->_value->source = $source;
+                  $res_profile[] = $p;
                   unset($p);
                   unset($source);
                 } 
               } 
             }
             if ($res_profile) {
-              $a->agencyId->_value = $agency;
+              Object::set_value($a, 'agencyId', $agency);
               $a->profile = $res_profile;
-              $res->searchCollection[]->_value = $a;
+              Object::set_array_value($res, 'searchCollection', $a);
               unset($a);
               unset($res_profile);
             }
@@ -788,7 +788,7 @@ class openAgency extends webServiceServer {
         }
       }
       //var_dump($res); var_dump($param); die();
-      $ret->searchCollectionResponse->_value = $res;
+      Object::set_value($ret, 'searchCollectionResponse', $res);
       $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
       if (empty($res->error)) $this->cache->set($cache_key, $ret);
       return $ret;
@@ -929,36 +929,37 @@ class openAgency extends webServiceServer {
             switch ($param->service->_value) {
               case 'information':
                 $inf = &$res->information->_value;
-                $inf->agencyId->_value = self::normalize_agency($oa_row['VV.BIB_NR']);
-                $inf->agencyName->_value = $oa_row['VV.NAVN'];
-                $inf->agencyPhone->_value = $oa_row['VV.TLF_NR'];
-                $inf->agencyFax->_value = $oa_row['VV.FAX_NR'];
-                $inf->agencyEmail->_value = $oa_row['VV.EMAIL'];
-                $inf->agencyType->_value = self::set_agency_type($oa_row['VV.BIB_NR'], $oa_row['VV.BIB_TYPE']);
-                $inf->agencyCatalogueUrl->_value = $oa_row['URL_BIB_KAT'];
-                $inf->branchId->_value = self::normalize_agency($oa_row['V.BIB_NR']);
-                $inf->branchName->_value = $oa_row['V.NAVN'];
-                $inf->branchPhone->_value = $oa_row['V.TLF_NR'];
-                $inf->branchFax->_value = $oa_row['VD.SVAR_FAX'];
-                $inf->branchEmail->_value = $oa_row['V.EMAIL'];
-                $inf->branchType->_value = $oa_row['V.TYPE'];
+                Object::set_value($inf, 'agencyId', self::normalize_agency($oa_row['VV.BIB_NR']));
+                Object::set_value($inf, 'agencyName', $oa_row['VV.NAVN']);
+                Object::set_value($inf, 'agencyPhone', $oa_row['VV.TLF_NR']);
+                Object::set_value($inf, 'agencyFax', $oa_row['VV.FAX_NR']);
+                Object::set_value($inf, 'agencyEmail', $oa_row['VV.EMAIL']);
+                Object::set_value($inf, 'agencyType', self::set_agency_type($oa_row['VV.BIB_NR'], $oa_row['VV.BIB_TYPE']));
+                Object::set_value($inf, 'agencyCatalogueUrl', $oa_row['URL_BIB_KAT']);
+                Object::set_value($inf, 'branchId', self::normalize_agency($oa_row['V.BIB_NR']));
+                Object::set_value($inf, 'branchName', $oa_row['V.NAVN']);
+                Object::set_value($inf, 'branchPhone', $oa_row['V.TLF_NR']);
+                Object::set_value($inf, 'branchFax', $oa_row['VD.SVAR_FAX']);
+                Object::set_value($inf, 'branchEmail', $oa_row['V.EMAIL']);
+                Object::set_value($inf, 'branchType', $oa_row['V.TYPE']);
                 if ($oa_row['AFSAETNINGSBIBLIOTEK'])
-                  $inf->dropOffAgency->_value = $oa_row['AFSAETNINGSBIBLIOTEK'];
-                $inf->postalAddress->_value = $oa_row['V.BADR'];
-                $inf->postalCode->_value = $oa_row['V.BPOSTNR'];
-                $inf->city->_value = $oa_row['V.BCITY'];
-                $inf->isil->_value = $oa_row['ISIL'];
-                $inf->junction->_value = $oa_row['KNUDEPUNKT'];
-                $inf->kvik->_value = ($oa_row['KVIK'] == 'kvik' ? 'YES' : 'NO');
-                $inf->lookupUrl->_value = $oa_row['URL_VIDERESTIL'];
-                $inf->norfri->_value = ($oa_row['NORFRI'] == 'norfri' ? 'YES' : 'NO');
-                $inf->requestOrder->_value = $oa_row['USE_LAANEVEJ'];
-                if (is_null($inf->sender->_value = self::normalize_agency($oa_row['CHANGE_REQUESTER'])))
-                  $inf->sender->_value = self::normalize_agency($oa_row['V.BIB_NR']);
-                $inf->replyToEmail->_value = $oa_row['VD.SVAR_EMAIL'];
+                  Object::set_value($inf, 'dropOffAgency', $oa_row['AFSAETNINGSBIBLIOTEK']);
+                Object::set_value($inf, 'postalAddress', $oa_row['V.BADR']);
+                Object::set_value($inf, 'postalCode', $oa_row['V.BPOSTNR']);
+                Object::set_value($inf, 'city', $oa_row['V.BCITY']);
+                Object::set_value($inf, 'isil', $oa_row['ISIL']);
+                Object::set_value($inf, 'junction', $oa_row['KNUDEPUNKT']);
+                Object::set_value($inf, 'kvik', ($oa_row['KVIK'] == 'kvik' ? 'YES' : 'NO'));
+                Object::set_value($inf, 'lookupUrl', $oa_row['URL_VIDERESTIL']);
+                Object::set_value($inf, 'norfri', ($oa_row['NORFRI'] == 'norfri' ? 'YES' : 'NO'));
+                Object::set_value($inf, 'requestOrder', $oa_row['USE_LAANEVEJ']);
+                Object::set_value($inf, 'sender', self::normalize_agency($oa_row['CHANGE_REQUESTER']));
+                if (is_null($inf->sender->_value))
+                  Object::set_value($inf, 'sender', self::normalize_agency($oa_row['V.BIB_NR']));
+                Object::set_value($inf, 'replyToEmail', $oa_row['VD.SVAR_EMAIL']);
                 foreach ($consortia as $c_key => &$c) {
-                  $inf->consortia[$c_key]->_value->agencyId->_value = $c['BIB_NR_VIDERESTIL'];
-                  $inf->consortia[$c_key]->_value->lookupUrl->_value = $c['URL_VIDERESTIL'];
+                  Object::set_value($inf->consortia[$c_key]->_value, 'agencyId', $c['BIB_NR_VIDERESTIL']);
+                  Object::set_value($inf->consortia[$c_key]->_value, 'lookupUrl', $c['URL_VIDERESTIL']);
                 }
                 //print_r($oa_row); var_dump($res->information->_value); die();
                 break;
@@ -2671,8 +2672,8 @@ class openAgency extends webServiceServer {
   private function set_iso18626(&$buf, $row) {
     if ($row['ISO18626_ADDRESS'] || $row['ISO18626_PASSWORD']) {
       $val = &$buf->iso18626->_value;
-      $val->iso18626Address->_value = $row['ISO18626_ADDRESS'];
-      $val->iso18626Password->_value = $row['ISO18626_PASSWORD'];
+      Object::set_value($val, 'iso18626Address', $row['ISO18626_ADDRESS']);
+      Object::set_value($val, 'iso18626Password', $row['ISO18626_PASSWORD']);
     }
   }
 
@@ -2683,20 +2684,20 @@ class openAgency extends webServiceServer {
    */
   private function set_z3950Ill(&$buf, $row, $all_fields = TRUE) {
     $val = &$buf->z3950Ill->_value;
-    if ($row['URL_ITEMORDER_BESTIL']) $val->z3950Address->_value = $row['URL_ITEMORDER_BESTIL'];
-    if ($row['ZBESTIL_GROUPID']) $val->z3950GroupId->_value = $row['ZBESTIL_GROUPID'];
-    if ($row['ZBESTIL_USERID']) $val->z3950UserId->_value = $row['ZBESTIL_USERID'];
-    if ($row['ZBESTIL_PASSW']) $val->z3950Password->_value = $row['ZBESTIL_PASSW'];
+    if ($row['URL_ITEMORDER_BESTIL']) Object::set_value($val, 'z3950Address', $row['URL_ITEMORDER_BESTIL']);
+    if ($row['ZBESTIL_GROUPID']) Object::set_value($val, 'z3950GroupId', $row['ZBESTIL_GROUPID']);
+    if ($row['ZBESTIL_USERID']) Object::set_value($val, 'z3950UserId', $row['ZBESTIL_USERID']);
+    if ($row['ZBESTIL_PASSW']) Object::set_value($val, 'z3950Password', $row['ZBESTIL_PASSW']);
     if ($all_fields) {
-      $val->illRequest->_value = 1;    // AHP dok?
-      $val->illAnswer->_value = ($row['ORS_ANSWER'] == 'z3950' ? '1' : '0');
-      $val->illShipped->_value = ($row['ORS_SHIPPING'] == 'z3950' ? '1' : '0');
-      $val->illCancel->_value = ($row['ORS_CANCEL'] == 'z3950' ? '1' : '0');
-      $val->illCancelReply->_value = ($row['ORS_CANCELREPLY'] == 'z3950' ? '1' : '0');
-      $val->illCancelReplySynchronous->_value = ($row['ORS_CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
-      $val->illRenew->_value = ($row['ORS_RENEW'] == 'z3950' ? '1' : '0');
-      $val->illRenewAnswer->_value = ($row['ORS_RENEWANSWER'] == 'z3950' ? '1' : '0');
-      $val->illRenewAnswerSynchronous->_value = ($row['ORS_RENEW_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0');
+      Object::set_value($val, 'illRequest', 1);    // AHP dok?
+      Object::set_value($val, 'illAnswer', ($row['ORS_ANSWER'] == 'z3950' ? '1' : '0'));
+      Object::set_value($val, 'illShipped', ($row['ORS_SHIPPING'] == 'z3950' ? '1' : '0'));
+      Object::set_value($val, 'illCancel', ($row['ORS_CANCEL'] == 'z3950' ? '1' : '0'));
+      Object::set_value($val, 'illCancelReply', ($row['ORS_CANCELREPLY'] == 'z3950' ? '1' : '0'));
+      Object::set_value($val, 'illCancelReplySynchronous', ($row['ORS_CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0'));
+      Object::set_value($val, 'illRenew', ($row['ORS_RENEW'] == 'z3950' ? '1' : '0'));
+      Object::set_value($val, 'illRenewAnswer', ($row['ORS_RENEWANSWER'] == 'z3950' ? '1' : '0'));
+      Object::set_value($val, 'illRenewAnswerSynchronous', ($row['ORS_RENEW_ANSWER_SYNCHRONIC'] == 'J' ? '1' : '0'));
     }
   }
 
@@ -2722,17 +2723,17 @@ class openAgency extends webServiceServer {
    */
   private function fill_pickupAgency(&$pickupAgency, $row, $ip_list = array()) {
     if (empty($pickupAgency)) {
-      if (isset($row['VSN_NAVN'])) $pickupAgency->agencyName->_value = $row['VSN_NAVN'];
-      if (isset($row['VSN_BIB_NR'])) $pickupAgency->agencyId->_value = self::normalize_agency($row['VSN_BIB_NR']);
-      if (isset($row['VSN_BIB_TYPE'])) $pickupAgency->agencyType->_value = self::set_agency_type($row['VSN_BIB_NR'], $row['VSN_BIB_TYPE']);
-      if (isset($row['VSN_EMAIL'])) $pickupAgency->agencyEmail->_value = $row['VSN_EMAIL'];
-      if (isset($row['VSN_TLF_NR'])) $pickupAgency->agencyPhone->_value = $row['VSN_TLF_NR'];
-      if (isset($row['VSN_FAX_NR'])) $pickupAgency->agencyFax->_value = $row['VSN_FAX_NR'];
-      if (isset($row['VSN_CVR_NR'])) $pickupAgency->agencyCvrNumber->_value = $row['VSN_CVR_NR'];
-      if (isset($row['VSN_P_NR'])) $pickupAgency->agencyPNumber->_value = $row['VSN_P_NR'];
-      if (isset($row['VSN_EAN_NUMMER'])) $pickupAgency->agencyEanNumber->_value = $row['VSN_EAN_NUMMER'];
-      $pickupAgency->branchId->_value = self::normalize_agency($row['BIB_NR']);
-      $pickupAgency->branchType->_value = $row['TYPE'];
+      if (isset($row['VSN_NAVN'])) Object::set_value($pickupAgency, 'agencyName', $row['VSN_NAVN']);
+      if (isset($row['VSN_BIB_NR'])) Object::set_value($pickupAgency, 'agencyId', self::normalize_agency($row['VSN_BIB_NR']));
+      if (isset($row['VSN_BIB_TYPE'])) Object::set_value($pickupAgency, 'agencyType', self::set_agency_type($row['VSN_BIB_NR'], $row['VSN_BIB_TYPE']));
+      if (isset($row['VSN_EMAIL'])) Object::set_value($pickupAgency, 'agencyEmail', $row['VSN_EMAIL']);
+      if (isset($row['VSN_TLF_NR'])) Object::set_value($pickupAgency, 'agencyPhone', $row['VSN_TLF_NR']);
+      if (isset($row['VSN_FAX_NR'])) Object::set_value($pickupAgency, 'agencyFax', $row['VSN_FAX_NR']);
+      if (isset($row['VSN_CVR_NR'])) Object::set_value($pickupAgency, 'agencyCvrNumber', $row['VSN_CVR_NR']);
+      if (isset($row['VSN_P_NR'])) Object::set_value($pickupAgency, 'agencyPNumber', $row['VSN_P_NR']);
+      if (isset($row['VSN_EAN_NUMMER'])) Object::set_value($pickupAgency, 'agencyEanNumber', $row['VSN_EAN_NUMMER']);
+      Object::set_value($pickupAgency, 'branchId', self::normalize_agency($row['BIB_NR']));
+      Object::set_value($pickupAgency, 'branchType', $row['TYPE']);
       if (empty($pickupAgency->branchName)) {
         if ($row['NAVN']) {
           $pickupAgency->branchName[] = self::value_and_language($row['NAVN'], 'dan');
@@ -2749,27 +2750,27 @@ class openAgency extends webServiceServer {
           $pickupAgency->branchShortName[] = self::value_and_language($row['NAVN_E_K'], 'eng');
         }
       }
-      $pickupAgency->branchPhone->_value = $row['TLF_NR'];
-      $pickupAgency->branchEmail->_value = $row['EMAIL'];
-      if ($row['SVAR_EMAIL']) $pickupAgency->branchIllEmail->_value = $row['SVAR_EMAIL'];
-      $pickupAgency->branchIsAgency->_value = ($row['FILIAL_VSN'] == 'J' ? 1 : 0);
-      if ($row['BADR']) $pickupAgency->postalAddress->_value = $row['BADR'];
-      if ($row['BPOSTNR']) $pickupAgency->postalCode->_value = $row['BPOSTNR'];
-      if ($row['BCITY']) $pickupAgency->city->_value = $row['BCITY'];
-      if ($row['ISIL'] && ($row['BIB_NR'] >= 700000 && $row['BIB_NR'] <= 899999)) $pickupAgency->isil->_value = $row['ISIL'];
-      if ($row['KNUDEPUNKT']) $pickupAgency->junction->_value = self::normalize_agency($row['KNUDEPUNKT']);
-      if ($row['P_NR']) $pickupAgency->branchPNumber->_value = self::normalize_agency($row['P_NR']);
-      if ($row['UNI_C_NR']) $pickupAgency->branchStilNumber->_value = $row['UNI_C_NR'];
-      if ($row['URL_BIB_KAT']) $pickupAgency->branchCatalogueUrl->_value = $row['URL_BIB_KAT'];
-      if ($row['URL_VIDERESTIL']) $pickupAgency->lookupUrl->_value = $row['URL_VIDERESTIL'];
-      if ($row['URL_HOMEPAGE']) $pickupAgency->branchWebsiteUrl->_value = $row['URL_HOMEPAGE'];
-      if ($row['URL_SERV_DKL']) $pickupAgency->serviceDeclarationUrl->_value = $row['URL_SERV_DKL'];
-      if ($row['URL_BEST_BLANKET']) $pickupAgency->registrationFormUrl->_value = $row['URL_BEST_BLANKET'];
-      if ($row['URL_BEST_BLANKET_TEXT']) $pickupAgency->registrationFormUrlText->_value = $row['URL_BEST_BLANKET_TEXT'];
-      if ($row['URL_PAYMENT']) $pickupAgency->paymentUrl->_value = $row['URL_PAYMENT'];
-      if ($row['URL_LAANERSTATUS']) $pickupAgency->userStatusUrl->_value = $row['URL_LAANERSTATUS'];
-      if ($row['SUPPORT_EMAIL']) $pickupAgency->librarydkSupportEmail->_value = $row['SUPPORT_EMAIL'];
-      if ($row['SUPPORT_TLF']) $pickupAgency->librarydkSupportPhone->_value = $row['SUPPORT_TLF'];
+      Object::set_value($pickupAgency, 'branchPhone', $row['TLF_NR']);
+      Object::set_value($pickupAgency, 'branchEmail', $row['EMAIL']);
+      if ($row['SVAR_EMAIL']) Object::set_value($pickupAgency, 'branchIllEmail', $row['SVAR_EMAIL']);
+      Object::set_value($pickupAgency, 'branchIsAgency', ($row['FILIAL_VSN'] == 'J' ? 1 : 0));
+      if ($row['BADR']) Object::set_value($pickupAgency, 'postalAddress', $row['BADR']);
+      if ($row['BPOSTNR']) Object::set_value($pickupAgency, 'postalCode', $row['BPOSTNR']);
+      if ($row['BCITY']) Object::set_value($pickupAgency, 'city', $row['BCITY']);
+      if ($row['ISIL'] && ($row['BIB_NR'] >= 700000 && $row['BIB_NR'] <= 899999)) Object::set_value($pickupAgency, 'isil', $row['ISIL']);
+      if ($row['KNUDEPUNKT']) Object::set_value($pickupAgency, 'junction', self::normalize_agency($row['KNUDEPUNKT']));
+      if ($row['P_NR']) Object::set_value($pickupAgency, 'branchPNumber', self::normalize_agency($row['P_NR']));
+      if ($row['UNI_C_NR']) Object::set_value($pickupAgency, 'branchStilNumber', $row['UNI_C_NR']);
+      if ($row['URL_BIB_KAT']) Object::set_value($pickupAgency, 'branchCatalogueUrl', $row['URL_BIB_KAT']);
+      if ($row['URL_VIDERESTIL']) Object::set_value($pickupAgency, 'lookupUrl', $row['URL_VIDERESTIL']);
+      if ($row['URL_HOMEPAGE']) Object::set_value($pickupAgency, 'branchWebsiteUrl', $row['URL_HOMEPAGE']);
+      if ($row['URL_SERV_DKL']) Object::set_value($pickupAgency, 'serviceDeclarationUrl', $row['URL_SERV_DKL']);
+      if ($row['URL_BEST_BLANKET']) Object::set_value($pickupAgency, 'registrationFormUrl', $row['URL_BEST_BLANKET']);
+      if ($row['URL_BEST_BLANKET_TEXT']) Object::set_value($pickupAgency, 'registrationFormUrlText', $row['URL_BEST_BLANKET_TEXT']);
+      if ($row['URL_PAYMENT']) Object::set_value($pickupAgency, 'paymentUrl', $row['URL_PAYMENT']);
+      if ($row['URL_LAANERSTATUS']) Object::set_value($pickupAgency, 'userStatusUrl', $row['URL_LAANERSTATUS']);
+      if ($row['SUPPORT_EMAIL']) Object::set_value($pickupAgency, 'librarydkSupportEmail', $row['SUPPORT_EMAIL']);
+      if ($row['SUPPORT_TLF']) Object::set_value($pickupAgency, 'librarydkSupportPhone', $row['SUPPORT_TLF']);
     }
     if ($row['HOLDEPLADS'])
       $pickupAgency->agencySubdivision[]->_value = $row['HOLDEPLADS'];
@@ -2782,7 +2783,7 @@ class openAgency extends webServiceServer {
         $pickupAgency->openingHours[] = self::value_and_language($row['AABN_TID_E'], 'eng');
       }
     }
-    $pickupAgency->temporarilyClosed->_value = ($row['BEST_MODT'] == 'J' ? 0 : 1);
+    Object::set_value($pickupAgency, 'temporarilyClosed', ($row['BEST_MODT'] == 'J' ? 0 : 1));
     if ($row['BEST_MODT'] == 'L'
         && empty($pickupAgency->temporarilyClosedReason)
         && ($row['BEST_MODT_LUK'] || $row['BEST_MODT_LUK_ENG'])) {
@@ -2801,19 +2802,19 @@ class openAgency extends webServiceServer {
         $pickupAgency->illOrderReceiptText[] = self::value_and_language($row['KVT_TEKST_FJL_E'], 'eng');
       }
     }
-    $pickupAgency->pickupAllowed->_value = ($row['BEST_MODT'] == 'J' ? '1' : '0');
+    Object::set_value($pickupAgency, 'pickupAllowed', ($row['BEST_MODT'] == 'J' ? '1' : '0'));
     if ($row['DELETE_MARK']) {
-      $pickupAgency->branchStatus->_value = $row['DELETE_MARK'];
+      Object::set_value($pickupAgency, 'branchStatus', $row['DELETE_MARK']);
     }
-    $pickupAgency->ncipLookupUser->_value = ($row['NCIP_LOOKUP_USER'] == 'J' ? 1 : '0');
-    $pickupAgency->ncipRenewOrder->_value = ($row['NCIP_RENEW'] == 'J' ? '1' : '0');
-    $pickupAgency->ncipCancelOrder->_value = ($row['NCIP_CANCEL'] == 'J' ? '1' : '0');
-    $pickupAgency->ncipUpdateOrder->_value = ($row['NCIP_UPDATE_REQUEST'] == 'J' ? '1' : '0');
+    Object::set_value($pickupAgency, 'ncipLookupUser', ($row['NCIP_LOOKUP_USER'] == 'J' ? 1 : '0'));
+    Object::set_value($pickupAgency, 'ncipRenewOrder', ($row['NCIP_RENEW'] == 'J' ? '1' : '0'));
+    Object::set_value($pickupAgency, 'ncipCancelOrder', ($row['NCIP_CANCEL'] == 'J' ? '1' : '0'));
+    Object::set_value($pickupAgency, 'ncipUpdateOrder', ($row['NCIP_UPDATE_REQUEST'] == 'J' ? '1' : '0'));
     if ($row['NCIP_ADDRESS']) {
-      $pickupAgency->ncipServerAddress->_value = $row['NCIP_ADDRESS'];
+      Object::set_value($pickupAgency, 'ncipServerAddress', $row['NCIP_ADDRESS']);
     }
     if ($row['NCIP_PASSWORD']) {
-      $pickupAgency->ncipPassword->_value = $row['NCIP_PASSWORD'];
+      Object::set_value($pickupAgency, 'ncipPassword', $row['NCIP_PASSWORD']);
     }
     if (is_array($ip_list)) {
       foreach ($ip_list as $ip) {
@@ -2821,13 +2822,13 @@ class openAgency extends webServiceServer {
       }
     }
     if ($row['AFSAETNINGSBIBLIOTEK'])
-      $pickupAgency->dropOffBranch->_value = $row['AFSAETNINGSBIBLIOTEK'];
+      Object::set_value($pickupAgency, 'dropOffBranch', $row['AFSAETNINGSBIBLIOTEK']);
     if ($row['AFSAETNINGSNAVN_K'])
-      $pickupAgency->dropOffName->_value = $row['AFSAETNINGSNAVN_K'];
+      Object::set_value($pickupAgency, 'dropOffName', $row['AFSAETNINGSNAVN_K']);
     if ($last_date = max($row['DATO'], $row['BS_DATO'], $row['VSN_DATO']))
-      $pickupAgency->lastUpdated->_value = $last_date;
-    $pickupAgency->isOclcRsLibrary->_value = ($row['OCLC_SYMBOL'] == 'J' ? '1' : '0');
-    $pickupAgency->stateAndUniversityLibraryCopyService->_value = ($row['SB_KOPIBESTIL'] == 'J' ? '1' : '0');
+      Object::set_value($pickupAgency, 'lastUpdated', $last_date);
+    Object::set_value($pickupAgency, 'isOclcRsLibrary', ($row['OCLC_SYMBOL'] == 'J' ? '1' : '0'));
+    Object::set_value($pickupAgency, 'stateAndUniversityLibraryCopyService', ($row['SB_KOPIBESTIL'] == 'J' ? '1' : '0'));
     if ($row['LATITUDE'] || $row['LONGITUDE']) {
       $pickupAgency->geolocation->_value->latitude->_value = str_replace(',', '.', $row['LATITUDE']);
       $pickupAgency->geolocation->_value->longitude->_value = str_replace(',', '.', $row['LONGITUDE']);
