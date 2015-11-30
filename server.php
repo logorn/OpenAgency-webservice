@@ -1740,7 +1740,7 @@ class openAgency extends webServiceServer {
             }
             if ($curr_bib <> $row['BIB_NR']) {
               if ($pickupAgency)
-                $res->pickupAgency[]->_value = $pickupAgency;
+                Object::set_array_value($res, 'pickupAgency', $pickupAgency);
               unset($pickupAgency);
               $curr_bib = $row['BIB_NR'];
             }
@@ -1750,7 +1750,7 @@ class openAgency extends webServiceServer {
             }
           }
           if ($pickupAgency)
-            $res->pickupAgency[]->_value = $pickupAgency;
+            Object::set_array_value($res, 'pickupAgency', $pickupAgency);
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -1758,7 +1758,7 @@ class openAgency extends webServiceServer {
         }
       }
       //var_dump($res); var_dump($param); die();
-      $ret->findLibraryResponse->_value = $res;
+      Object::set_value($ret, 'findLibraryResponse', $res);
       $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
       if (empty($res->error)) $this->cache->set($cache_key, $ret);
       return $ret;
@@ -1806,16 +1806,16 @@ class openAgency extends webServiceServer {
             }
             ksort($buf);
             foreach ($buf as $lib => $row) {
-              $o->agencyId->_value = self::normalize_agency($row['BIB_NR']);
+              Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
               foreach ($row as $name => $value) {
                 if ($name != 'BIB_NR') {
-                  $r->name->_value = strtolower($name);
-                  $r->bool->_value = ($value == 'Y' ? '1' : '0');
-                  $o->libraryRule[]->_value = $r;
+                  Object::set_value($r, 'name', strtolower($name));
+                  Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
+                  Object::set_array_value($o, 'libraryRule', $r);
                   unset($r);
                 }
               }
-              $res->libraryRules[]->_value = $o;
+              Object::set_array_value($res, 'libraryRules', $o);
               unset($o);
             }
           }
@@ -1825,7 +1825,7 @@ class openAgency extends webServiceServer {
           }
         }
       }
-      $ret->libraryRulesResponse->_value = $res;
+      Object::set_value($ret, 'libraryRulesResponse', $res);
       $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
       if (empty($res->error)) $this->cache->set($cache_key, $ret);
       return $ret;
@@ -1870,11 +1870,11 @@ class openAgency extends webServiceServer {
             }
             ksort($buf);
             foreach ($buf as $lib => $row) {
-              $o->agencyId->_value = self::normalize_agency($row['VSN_BIB_NR']);
-              $o->agencyType->_value = $row['BIB_TYPE'];
-              $o->branchId->_value = $lib;
-              $o->branchType->_value = $row['TYPE'];
-              $res->libraryTypeInfo[]->_value = $o;
+              Object::set_value($o, 'agencyId', self::normalize_agency($row['VSN_BIB_NR']));
+              Object::set_value($o, 'agencyType', $row['BIB_TYPE']);
+              Object::set_value($o, 'branchId', $lib);
+              Object::set_value($o, 'branchType', $row['TYPE']);
+              Object::set_array_value($res, 'libraryTypeInfo', $o);
               unset($o);
             }
           }
@@ -1884,7 +1884,7 @@ class openAgency extends webServiceServer {
           }
         }
       }
-      $ret->libraryTypeListResponse->_value = $res;
+      Object::set_value($ret, 'libraryTypeListResponse', $res);
       $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
       if (empty($res->error)) $this->cache->set($cache_key, $ret);
       return $ret;
@@ -1935,9 +1935,9 @@ class openAgency extends webServiceServer {
                               WHERE v.bib_nr = vsn.bib_nr
                                 AND (v.delete_mark is null OR v.delete_mark = :bind_u) ' . $filter_bib_type);
             while ($vv_row = $oci->fetch_into_assoc()) {
-              $o->agencyId->_value = self::normalize_agency($vv_row['BIB_NR']);
-              $o->agencyName->_value = $vv_row['NAVN'];
-              $res->agency[]->_value = $o;
+              Object::set_value($o, 'agencyId', self::normalize_agency($vv_row['BIB_NR']));
+              Object::set_value($o, 'agencyName', $vv_row['NAVN']);
+              Object::set_array_value($res, 'agency', $o);
               unset($o);
             }
           }
@@ -1951,7 +1951,7 @@ class openAgency extends webServiceServer {
       }
     }
     //var_dump($res); var_dump($param); die();
-    $ret->nameListResponse->_value = $res;
+    Object::set_value($ret, 'nameListResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -2206,42 +2206,42 @@ class openAgency extends webServiceServer {
               }
               $this_vsn = $row['KMD_NR'];
               if ($library && $library->agencyId->_value <> $this_vsn) {
-                $library->pickupAgency[]->_value = $pickupAgency;
+                Object::set_array_value($library, 'pickupAgency', $pickupAgency);
                 unset($pickupAgency);
-                $res->library[]->_value = $library;
+                Object::set_array_value($res, 'library', $library);
                 unset($library);
               }
               if (empty($library)) {
-                $library->agencyId->_value = $this_vsn;
-                $library->agencyType->_value = self::set_agency_type($this_vsn, $vsn[$this_vsn]['BIB_TYPE']);
-                $library->agencyName->_value = $vsn[$this_vsn]['NAVN'];
-                if ($vsn[$this_vsn]['TLF_NR']) $library->agencyPhone->_value = $vsn[$this_vsn]['TLF_NR'];
-                if ($vsn[$this_vsn]['EMAIL']) $library->agencyEmail->_value = $vsn[$this_vsn]['EMAIL'];
-                if ($vsn[$this_vsn]['BADR']) $library->postalAddress->_value = $vsn[$this_vsn]['BADR'];
-                if ($vsn[$this_vsn]['BPOSTNR']) $library->postalCode->_value = $vsn[$this_vsn]['BPOSTNR'];
-                if ($vsn[$this_vsn]['BCITY']) $library->city->_value = $vsn[$this_vsn]['BCITY'];
-                if ($vsn[$this_vsn]['URL']) $library->agencyWebsiteUrl->_value = $vsn[$this_vsn]['URL'];
-                if ($vsn[$this_vsn]['CVR_NR']) $library->agencyCvrNumber->_value = $vsn[$this_vsn]['CVR_NR'];
-                if ($vsn[$this_vsn]['P_NR']) $library->agencyPNumber->_value = $vsn[$this_vsn]['P_NR'];
-                if ($vsn[$this_vsn]['EAN_NUMMER']) $library->agencyEanNumber->_value = $vsn[$this_vsn]['EAN_NUMMER'];
+                Object::set_value($library, 'agencyId', $this_vsn);
+                Object::set_value($library, 'agencyType', self::set_agency_type($this_vsn, $vsn[$this_vsn]['BIB_TYPE']));
+                Object::set_value($library, 'agencyName', $vsn[$this_vsn]['NAVN']);
+                if ($vsn[$this_vsn]['TLF_NR']) Object::set_value($library, 'agencyPhone', $vsn[$this_vsn]['TLF_NR']);
+                if ($vsn[$this_vsn]['EMAIL']) Object::set_value($library, 'agencyEmail', $vsn[$this_vsn]['EMAIL']);
+                if ($vsn[$this_vsn]['BADR']) Object::set_value($library, 'postalAddress', $vsn[$this_vsn]['BADR']);
+                if ($vsn[$this_vsn]['BPOSTNR']) Object::set_value($library, 'postalCode', $vsn[$this_vsn]['BPOSTNR']);
+                if ($vsn[$this_vsn]['BCITY']) Object::set_value($library, 'city', $vsn[$this_vsn]['BCITY']);
+                if ($vsn[$this_vsn]['URL']) Object::set_value($library, 'agencyWebsiteUrl', $vsn[$this_vsn]['URL']);
+                if ($vsn[$this_vsn]['CVR_NR']) Object::set_value($library, 'agencyCvrNumber', $vsn[$this_vsn]['CVR_NR']);
+                if ($vsn[$this_vsn]['P_NR']) Object::set_value($library, 'agencyPNumber', $vsn[$this_vsn]['P_NR']);
+                if ($vsn[$this_vsn]['EAN_NUMMER']) Object::set_value($library, 'agencyEanNumber', $vsn[$this_vsn]['EAN_NUMMER']);
               }
               if ($pickupAgency && $pickupAgency->branchId->_value <> $row['BIB_NR']) {
-                $library->pickupAgency[]->_value = $pickupAgency;
+                Object::set_array_value($library, 'pickupAgency', $pickupAgency);
                 unset($pickupAgency);
               }
               $row['SB_KOPIBESTIL'] = $vsn[$this_vsn]['SB_KOPIBESTIL'];
               self::fill_pickupAgency($pickupAgency, $row, $ip_list[$row['BIB_NR']]);
             }
             if ($pickupAgency) {
-              $library->pickupAgency[]->_value = $pickupAgency;
+              Object::set_array_value($library, 'pickupAgency', $pickupAgency);
             }
             if ($library) {
-              $res->library[]->_value = $library;
+              Object::set_array_value($res, 'library', $library);
               if ($ora_par['agencyId']) {
                 foreach ($ora_par['agencyId'] as $agency) {
-                  $help->agencyId->_value = $param_agencies[$agency];
-                  $help->error->_value = 'agency_not_found';
-                  $res->library[]->_value = $help;
+                  Object::set_value($help, 'agencyId', $param_agencies[$agency]);
+                  Object::set_value($help, 'error', 'agency_not_found');
+                  Object::set_array_value($res, 'library', $help);
                   unset($help);
                 }
               }
@@ -2259,7 +2259,7 @@ class openAgency extends webServiceServer {
       }
     }
     //var_dump($res); var_dump($param); die();
-    $ret->pickupAgencyListResponse->_value = $res;
+    Object::set_value($ret, 'pickupAgencyListResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -2330,6 +2330,7 @@ class openAgency extends webServiceServer {
                                 AND broendprofil_to_kilder.profil_id IS NOT NULL
                                 AND broend_to_profiler.id_nr = broendprofil_to_kilder.profil_id (+)' . $sql_add);
             $profil_res = $oci->fetch_all_into_assoc();
+            $profiler = array();
             foreach ($profil_res as $p) {
               if ($p['PROFIL_ID'] && $p['BROENDKILDE_ID']) {
                 $profiler[$p['PROFIL_ID']][$p['BROENDKILDE_ID']] = $p;
@@ -2347,30 +2348,30 @@ class openAgency extends webServiceServer {
                                       AND broend_profil_kilde_relation.kilde_relation_id =  broend_kilde_relation.id_nr 
                                       AND broend_kilde_relation.relation_id = broend_relation.id_nr');
                   $relations = $oci->fetch_all_into_assoc();
-                  $s->sourceName->_value = $kilde['NAME'];
+                  Object::set_value($s, 'sourceName', $kilde['NAME']);
                   if (isset($profil[$kilde['ID_NR']])) {
                     $profile_name = $profil[$kilde['ID_NR']]['NAME'];
-                    $s->sourceSearchable->_value = '1';
+                    Object::set_value($s, 'sourceSearchable', '1');
                   }
                   else
-                    $s->sourceSearchable->_value = '0';
+                    Object::set_value($s, 'sourceSearchable', '0');
                   if ($kilde['CONTAINED_IN']) {
-                    $s->sourceContainedIn->_value = $kilde['CONTAINED_IN'];
+                    Object::set_value($s, 'sourceContainedIn', $kilde['CONTAINED_IN']);
                   }
-                  $s->sourceIdentifier->_value = str_replace('[agency]', $agency, $kilde['IDENTIFIER']);
+                  Object::set_value($s, 'sourceIdentifier', str_replace('[agency]', $agency, $kilde['IDENTIFIER']));
                   if ($relations) {
                     foreach ($relations as $relation) {
-                      $rel->rdfLabel->_value = $relation['RDF'];
+                      Object::set_value($rel, 'rdfLabel', $relation['RDF']);
                       if ($relation['RDF_REVERSE'])
-                        $rel->rdfInverse->_value = $relation['RDF_REVERSE'];
-                      $s->relation[]->_value = $rel;
+                        Object::set_value($rel, 'rdfInverse', $relation['RDF_REVERSE']);
+                      Object::set_array_value($s, 'relation', $rel);
                       unset($rel);
                     }
                   }
                 }
-                $res->profile[$profil_no]->_value->profileName->_value = $profile_name;
+                Object::set_value($res->profile[$profil_no]->_value, 'profileName', $profile_name);
                 if ($s) {
-                  $res->profile[$profil_no]->_value->source[]->_value = $s;
+                  Object::set_array_value($res->profile[$profil_no]->_value, 'source', $s);
                   unset($s);
                 }
               }
@@ -2394,11 +2395,11 @@ class openAgency extends webServiceServer {
                                 AND broendprofil_kilder.profil_id = broendprofiler.id_nr
                                 AND broendprofiler.bib_nr = :bind_agency' . $sql_add);
             while ($s_row = $oci->fetch_into_assoc()) {
-              $s->sourceName->_value = $s_row['NAME'];
-              $s->sourceOwner->_value = (strtolower($s_row['SUBMITTER']) == 'agency' ? $agency : $s_row['SUBMITTER']);
-              $s->sourceFormat->_value = $s_row['FORMAT'];
-              $res->profile[$s_row['BP_NAME']]->_value->profileName->_value = $s_row['BP_NAME'];
-              $res->profile[$s_row['BP_NAME']]->_value->source[]->_value = $s;
+              Object::set_value($s, 'sourceName', $s_row['NAME']);
+              Object::set_value($s, 'sourceOwner', (strtolower($s_row['SUBMITTER']) == 'agency' ? $agency : $s_row['SUBMITTER']));
+              Object::set_value($s, 'sourceFormat', $s_row['FORMAT']);
+              Object::set_value($res->profile[$s_row['BP_NAME']]->_value, 'profileName', $s_row['BP_NAME']);
+              Object::set_array_value($res->profile[$s_row['BP_NAME']]->_value, 'source', $s);
               unset($s);
             }
           }
@@ -2410,7 +2411,7 @@ class openAgency extends webServiceServer {
       }
     }
     //var_dump($res); var_dump($param); die();
-    $ret->openSearchProfileResponse->_value = $res;
+    Object::set_value($ret, 'openSearchProfileResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -2474,29 +2475,32 @@ class openAgency extends webServiceServer {
                           AND fjernadgang.faust = fjernadgang_andre.faust (+)
                           AND fjernadgang.bib_nr = licensguide.bib_nr (+)');
           $buf = $oci->fetch_all_into_assoc();
-          $res->agencyId->_value = $param->agencyId->_value;
+          Object::set_value($res, 'agencyId', $param->agencyId->_value);
           foreach ($buf as $val) {
-            if ($s->name->_value = $val['licens_navn']) {
+            if ($help = $val['licens_navn']) {
+              Object::set_value($s, 'name', $help);
               if ($val['AUTOLINK']) {
-                $s->url->_value = $val['AUTOLINK'];
+                Object::set_value($s, 'url', $val['AUTOLINK']);
               }
               else {
-                $s->url->_value = ($val['URL'] ? $val['URL'] : $val['licens_url']);
+                Object::set_value($s, 'url', ($val['URL'] ? $val['URL'] : $val['licens_url']));
               }
             }
-            elseif ($s->name->_value = $val['dbc_navn']) {
-              $s->url->_value = ($val['URL'] ? $val['URL'] : $val['dbc_url']);
+            elseif ($help = $val['dbc_navn']) {
+              Object::set_value($s, 'name', $help);
+              Object::set_value($s, 'url', ($val['URL'] ? $val['URL'] : $val['dbc_url']));
             }
-            elseif ($s->name->_value = $val['andre_navn']) {
-              $s->url->_value = ($val['URL'] ? $val['URL'] : $val['andre_url']);
+            elseif ($help = $val['andre_navn']) {
+              Object::set_value($s, 'name', $help);
+              Object::set_value($s, 'url', ($val['URL'] ? $val['URL'] : $val['andre_url']));
             }
             if ($s->url->_value && $val['FAUST'] <> 1234567) {    // drop eBib
               if ($val['URL'])
-                $s->url->_value = str_replace('[URL_FJERNADGANG]', $val['URL'], $s->url->_value);
+                Object::set_value($s, 'url', str_replace('[URL_FJERNADGANG]', $val['URL'], $s->url->_value));
               else
-                $s->url->_value = str_replace('[URL_FJERNADGANG]', $val['licens_url'], $s->url->_value);
-              $s->url->_value = str_replace('[LICENS_ID]', $val['FAUST'], $s->url->_value);
-              $res->subscription[]->_value = $s;
+                Object::set_value($s, 'url', str_replace('[URL_FJERNADGANG]', $val['licens_url'], $s->url->_value));
+              Object::set_value($s, 'url', str_replace('[LICENS_ID]', $val['FAUST'], $s->url->_value));
+              Object::set_array_value($res, 'subscription', $s);
             }
             unset($s);
           }
@@ -2508,7 +2512,7 @@ class openAgency extends webServiceServer {
       }
     }
     //var_dump($res); var_dump($param); die();
-    $ret->remoteAccessResponse->_value = $res;
+    Object::set_value($ret, 'remoteAccessResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -2538,7 +2542,7 @@ class openAgency extends webServiceServer {
       $res = self::get_prioritized_agency_list($agency, 'laaneveje');
     }
     //var_dump($res); var_dump($param); die();
-    $ret->requestOrderResponse->_value = $res;
+    Object::set_value($ret, 'requestOrderResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -2571,7 +2575,7 @@ class openAgency extends webServiceServer {
       }
     }
     //var_dump($res); var_dump($param); die();
-    $ret->showOrderResponse->_value = $res;
+    Object::set_value($ret, 'showOrderResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
     if (empty($res->error)) $this->cache->set($cache_key, $ret);
     return $ret;
@@ -2616,7 +2620,7 @@ class openAgency extends webServiceServer {
             ORDER BY prionr DESC');
         $prio = array();
         while ($s_row = $oci->fetch_into_assoc()) {
-          $res->agencyId[]->_value = $s_row['VILSE'];
+          Object::set_array_value($res, 'agencyId', $s_row['VILSE']);
         }
         if (empty($res->agencyId))
           Object::set_value($res, 'error', 'no_agencies_found');
@@ -2819,7 +2823,7 @@ class openAgency extends webServiceServer {
     }
     if (is_array($ip_list)) {
       foreach ($ip_list as $ip) {
-        $pickupAgency->branchDomains->_value->domain[]->_value = $ip;
+        Object::set_array_value($pickupAgency->branchDomains->_value, 'domain', $ip);
       }
     }
     if ($row['AFSAETNINGSBIBLIOTEK'])
@@ -2831,10 +2835,10 @@ class openAgency extends webServiceServer {
     Object::set_value($pickupAgency, 'isOclcRsLibrary', ($row['OCLC_SYMBOL'] == 'J' ? '1' : '0'));
     Object::set_value($pickupAgency, 'stateAndUniversityLibraryCopyService', ($row['SB_KOPIBESTIL'] == 'J' ? '1' : '0'));
     if ($row['LATITUDE'] || $row['LONGITUDE']) {
-      $pickupAgency->geolocation->_value->latitude->_value = str_replace(',', '.', $row['LATITUDE']);
-      $pickupAgency->geolocation->_value->longitude->_value = str_replace(',', '.', $row['LONGITUDE']);
+      Object::set_value($pickupAgency->geolocation->_value, 'latitude', str_replace(',', '.', $row['LATITUDE']));
+      Object::set_value($pickupAgency->geolocation->_value, 'longitude', str_replace(',', '.', $row['LONGITUDE']));
       if ($row['DISTANCE']) {
-        $pickupAgency->geolocation->_value->distanceInMeter->_value = round(floatval(str_replace(',', '.', $row['DISTANCE'])));
+        Object::set_value($pickupAgency->geolocation->_value, 'distanceInMeter', round(floatval(str_replace(',', '.', $row['DISTANCE']))));
       }
     }
   
