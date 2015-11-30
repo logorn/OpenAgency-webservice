@@ -1290,6 +1290,7 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:enumeration value="barcode"/>
       <xs:enumeration value="cardno"/>
       <xs:enumeration value="optional"/>
+      <xs:enumeration value="no_userid_selected"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="userParameterTypeType">
