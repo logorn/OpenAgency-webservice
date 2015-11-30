@@ -279,7 +279,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="openSearchProfileResponse">
     <xs:complexType>
       <xs:choice>
-        <xs:element ref="oa:profile" maxOccurs="unbounded"/>
+        <xs:element ref="oa:profile" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element ref="oa:error"/>
       </xs:choice>
     </xs:complexType>
