@@ -965,110 +965,110 @@ class openAgency extends webServiceServer {
                 break;
               case 'orsAnswer':
                 $orsA = &$res->orsAnswer->_value;
-                $orsA->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                Object::set_value($orsA, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsA, $oa_row);
                 }
                 else {
-                  $orsA->willReceive->_value = (in_array($oa_row['ANSWER'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-                  $orsA->synchronous->_value = 0;
-                  $orsA->protocol->_value = self::normalize_iso18626($oa_row['ANSWER']);
+                  Object::set_value($orsA, 'willReceive', (in_array($oa_row['ANSWER'], array('z3950', 'mail', 'ors')) ? 'YES' : ''));
+                  Object::set_value($orsA, 'synchronous', 0);
+                  Object::set_value($orsA, 'protocol', self::normalize_iso18626($oa_row['ANSWER']));
                   if ($oa_row['ANSWER'] == 'z3950') {
-                    $orsA->address->_value = $oa_row['ANSWER_Z3950_ADDRESS'];
+                    Object::set_value($orsA, 'address', $oa_row['ANSWER_Z3950_ADDRESS']);
                   }
                   elseif ($oa_row['ANSWER'] == 'mail') {
-                    $orsA->address->_value = $oa_row['ANSWER_MAIL_ADDRESS'];
+                    Object::set_value($orsA, 'address', $oa_row['ANSWER_MAIL_ADDRESS']);
                   }
-                  $orsA->userId->_value = $oa_row['ANSWER_Z3950_USER'];
-                  $orsA->groupId->_value = $oa_row['ANSWER_Z3950_GROUP'];
-                  $orsA->passWord->_value = ($oa_row['ANSWER'] == 'z3950' ? $oa_row['ANSWER_Z3950_PASSWORD'] : $oa_row['ANSWER_NCIP_AUTH']);
+                  Object::set_value($orsA, 'userId', $oa_row['ANSWER_Z3950_USER']);
+                  Object::set_value($orsA, 'groupId', $oa_row['ANSWER_Z3950_GROUP']);
+                  Object::set_value($orsA, 'passWord', ($oa_row['ANSWER'] == 'z3950' ? $oa_row['ANSWER_Z3950_PASSWORD'] : $oa_row['ANSWER_NCIP_AUTH']));
                 }
                 //var_dump($res->orsAnswer->_value); die();
                 break;
               case 'orsCancelRequestUser':
                 $orsCRU = &$res->orsCancelRequestUser->_value;
-                $orsCRU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
-                $orsCRU->willReceive->_value = ($oa_row['NCIP_CANCEL'] == 'J' ? 'YES' : 'NO');
-                $orsCRU->synchronous->_value = 0;
-                $orsCRU->address->_value = $oa_row['NCIP_CANCEL_ADDRESS'];
-                $orsCRU->passWord->_value = $oa_row['NCIP_CANCEL_PASSWORD'];
+                Object::set_value($orsCRU, 'responder', self::normalize_agency($oa_row['VK.BIB_NR']));
+                Object::set_value($orsCRU, 'willReceive', ($oa_row['NCIP_CANCEL'] == 'J' ? 'YES' : 'NO'));
+                Object::set_value($orsCRU, 'synchronous', 0);
+                Object::set_value($orsCRU, 'address', $oa_row['NCIP_CANCEL_ADDRESS']);
+                Object::set_value($orsCRU, 'passWord', $oa_row['NCIP_CANCEL_PASSWORD']);
                 //var_dump($res->orsCancelRequestUser->_value); die();
                 break;
               case 'orsEndUserRequest':
                 $orsEUR = &$res->orsEndUserRequest->_value;
-                $orsEUR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
-                $orsEUR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
-                $orsEUR->synchronous->_value = 0;
+                Object::set_value($orsEUR, 'responder', self::normalize_agency($oa_row['VB.BIB_NR']));
+                Object::set_value($orsEUR, 'willReceive', ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO'));
+                Object::set_value($orsEUR, 'synchronous', 0);
                 switch ($oa_row['BESTIL_VIA']) {
                   case 'A':
-                    $orsEUR->protocol->_value = 'mail';
-                    $orsEUR->address->_value = $oa_row['EMAIL_BESTIL'];
-                    $orsEUR->format->_value = 'text';
+                    Object::set_value($orsEUR, 'protocol', 'mail');
+                    Object::set_value($orsEUR, 'address', $oa_row['EMAIL_BESTIL']);
+                    Object::set_value($orsEUR, 'format', 'text');
                     break;
                   case 'B':
-                    $orsEUR->protocol->_value = 'mail';
-                    $orsEUR->address->_value = $oa_row['EMAIL_BESTIL'];
-                    $orsEUR->format->_value = 'ill0';
+                    Object::set_value($orsEUR, 'protocol', 'mail');
+                    Object::set_value($orsEUR, 'address', $oa_row['EMAIL_BESTIL']);
+                    Object::set_value($orsEUR, 'format', 'ill0');
                     break;
                   case 'C':
-                    $orsEUR->protocol->_value = 'ors';
+                    Object::set_value($orsEUR, 'protocol', 'ors');
                     break;
                   case 'D':
-                    $orsEUR->protocol->_value = 'ncip';
-                    $orsEUR->address->_value = $oa_row['VBST.NCIP_ADDRESS'];
-                    $orsEUR->passWord->_value = $oa_row['NCIP_PASSWORD'];
+                    Object::set_value($orsEUR, 'protocol', 'ncip');
+                    Object::set_value($orsEUR, 'address', $oa_row['VBST.NCIP_ADDRESS']);
+                    Object::set_value($orsEUR, 'passWord', $oa_row['NCIP_PASSWORD']);
                     break;
                 }
                 //var_dump($res->orsEndUserRequest->_value); die();
                 break;
               case 'orsEndUserIllRequest':
                 $orsEUIR = &$res->orsEndUserIllRequest->_value;
-                $orsEUIR->responder->_value = self::normalize_agency($oa_row['VB.BIB_NR']);
-                $orsEUIR->willReceive->_value = ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO');
-                $orsEUIR->synchronous->_value = 0;
+                Object::set_value($orsEUIR, 'responder', self::normalize_agency($oa_row['VB.BIB_NR']));
+                Object::set_value($orsEUIR, 'willReceive', ($oa_row['BEST_MODT'] == 'J' ? 'YES' : 'NO'));
+                Object::set_value($orsEUIR, 'synchronous', 0);
                 switch ($oa_row['BESTIL_FJL_VIA']) {
                   case 'A':
-                    $orsEUIR->protocol->_value = 'mail';
-                    $orsEUIR->address->_value = $oa_row['EMAIL_FJL_BESTIL'];
-                    $orsEUIR->format->_value = 'text';
+                    Object::set_value($orsEUIR, 'protocol', 'mail');
+                    Object::set_value($orsEUIR, 'address', $oa_row['EMAIL_FJL_BESTIL']);
+                    Object::set_value($orsEUIR, 'format', 'text');
                     break;
                   case 'B':
-                    $orsEUIR->protocol->_value = 'mail';
-                    $orsEUIR->address->_value = $oa_row['EMAIL_FJL_BESTIL'];
-                    $orsEUIR->format->_value = 'ill0';
+                    Object::set_value($orsEUIR, 'protocol', 'mail');
+                    Object::set_value($orsEUIR, 'address', $oa_row['EMAIL_FJL_BESTIL']);
+                    Object::set_value($orsEUIR, 'format', 'ill0');
                     break;
                   case 'C':
-                    $orsEUIR->protocol->_value = 'ors';
+                    Object::set_value($orsEUIR, 'protocol', 'ors');
                     break;
                 }
                 break;
               case 'orsItemRequest':
                 $orsIR = &$res->orsItemRequest->_value;
-                $orsIR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
+                Object::set_value($orsIR, 'responder', self::normalize_agency($oa_row['VD.BIB_NR']));
                 switch ($oa_row['MAILBESTIL_VIA']) {
                   case 'A':
-                    $orsIR->willReceive->_value = 'YES';
-                    $orsIR->synchronous->_value = 0;
-                    $orsIR->protocol->_value = 'mail';
-                    $orsIR->address->_value = $oa_row['BEST_EMAIL'];
+                    Object::set_value($orsIR, 'willReceive', 'YES');
+                    Object::set_value($orsIR, 'synchronous', 0);
+                    Object::set_value($orsIR, 'protocol', 'mail');
+                    Object::set_value($orsIR, 'address', $oa_row['BEST_EMAIL']);
                     break;
                   case 'B':
-                    $orsIR->willReceive->_value = 'YES';
-                    $orsIR->synchronous->_value = 0;
-                    $orsIR->protocol->_value = 'ors';
+                    Object::set_value($orsIR, 'willReceive', 'YES');
+                    Object::set_value($orsIR, 'synchronous', 0);
+                    Object::set_value($orsIR, 'protocol', 'ors');
                     break;
                   case 'C':
-                    $orsIR->willReceive->_value = 'YES';
-                    $orsIR->synchronous->_value = 0;
-                    $orsIR->protocol->_value = 'z3950';
-                    $orsIR->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
+                    Object::set_value($orsIR, 'willReceive', 'YES');
+                    Object::set_value($orsIR, 'synchronous', 0);
+                    Object::set_value($orsIR, 'protocol', 'z3950');
+                    Object::set_value($orsIR, 'address', $oa_row['URL_ITEMORDER_BESTIL']);
                     break;
                   case 'E':
                     self::fill_iso18626_protocol($orsIR, $oa_row);
                     break;
                   case 'D':
                   default:
-                    $orsIR->willReceive->_value = 'NO';
+                    Object::set_value($orsIR, 'willReceive', 'NO');
                     if ($oa_row['BEST_TXT']) {
                       $orsIR->reason = self::value_and_language($oa_row['BEST_TXT'], 'dan');
                     }
@@ -1076,19 +1076,19 @@ class openAgency extends webServiceServer {
                 }
                 if (in_array($orsIR->protocol->_value, array('mail', 'ors', 'z3950'))) {
                   if ($oa_row['ZBESTIL_USERID'])
-                    $orsIR->userId->_value = $oa_row['ZBESTIL_USERID'];
+                    Object::set_value($orsIR, 'userId', $oa_row['ZBESTIL_USERID']);
                   if ($oa_row['ZBESTIL_GROUPID'])
-                    $orsIR->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
+                    Object::set_value($orsIR, 'groupId', $oa_row['ZBESTIL_GROUPID']);
                   if ($oa_row['ZBESTIL_PASSW'])
-                    $orsIR->passWord->_value = $oa_row['ZBESTIL_PASSW'];
+                    Object::set_value($orsIR, 'passWord', $oa_row['ZBESTIL_PASSW']);
                   if ($orsIR->protocol->_value == 'mail')
                     switch ($oa_row['FORMAT_BEST']) {
                       case 'illdanbest':
-                        $orsIR->format->_value = 'text';
+                        Object::set_value($orsIR, 'format', 'text');
                         break;
                       case 'ill0form':
                       case 'ill5form':
-                        $orsIR->format->_value = 'ill0';
+                        Object::set_value($orsIR, 'format', 'ill0');
                         break;
                     }
                 }
@@ -1096,62 +1096,62 @@ class openAgency extends webServiceServer {
                 break;
               case 'orsLookupUser':
                 $orsLU = &$res->orsLookupUser->_value;
-                $orsLU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
-                $orsLU->willReceive->_value = ($oa_row['NCIP_LOOKUP_USER'] == 'J' ? 'YES' : 'NO');
-                $orsLU->synchronous->_value = 0;
-                $orsLU->address->_value = $oa_row['NCIP_LOOKUP_USER_ADDRESS'];
-                $orsLU->passWord->_value = $oa_row['NCIP_LOOKUP_USER_PASSWORD'];
+                Object::set_value($orsLU, 'responder', self::normalize_agency($oa_row['VK.BIB_NR']));
+                Object::set_value($orsLU, 'willReceive', ($oa_row['NCIP_LOOKUP_USER'] == 'J' ? 'YES' : 'NO'));
+                Object::set_value($orsLU, 'synchronous', 0);
+                Object::set_value($orsLU, 'address', $oa_row['NCIP_LOOKUP_USER_ADDRESS']);
+                Object::set_value($orsLU, 'passWord', $oa_row['NCIP_LOOKUP_USER_PASSWORD']);
                 //var_dump($res->orsLookupUser->_value); die();
                 break;
               case 'orsRecall':
                 $orsR = &$res->orsRecall->_value;
-                $orsR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                Object::set_value($orsR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                   self::fill_iso18626_protocol($orsR, $oa_row);
                 }
                 else {
-                  $orsR->willReceive->_value = (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-                  $orsR->synchronous->_value = 0;
-                  $orsR->protocol->_value = self::normalize_iso18626($oa_row['RECALL']);
-                  $orsR->address->_value = '';
-                  $orsR->userId->_value = $oa_row['RECALL_Z3950_USER'];
-                  $orsR->groupId->_value = $oa_row['RECALL_Z3950_GROUP'];
-                  $orsR->passWord->_value = ($oa_row['RECALL'] == 'z3950' ? $oa_row['RECALL_Z3950_PASSWORD'] : $oa_row['RECALL_NCIP_AUTH']);
+                  Object::set_value($orsR, 'willReceive', (in_array($oa_row['RECALL'], array('z3950', 'mail', 'ors')) ? 'YES' : ''));
+                  Object::set_value($orsR, 'synchronous', 0);
+                  Object::set_value($orsR, 'protocol', self::normalize_iso18626($oa_row['RECALL']));
+                  Object::set_value($orsR, 'address', '');
+                  Object::set_value($orsR, 'userId', $oa_row['RECALL_Z3950_USER']);
+                  Object::set_value($orsR, 'groupId', $oa_row['RECALL_Z3950_GROUP']);
+                  Object::set_value($orsR, 'passWord', ($oa_row['RECALL'] == 'z3950' ? $oa_row['RECALL_Z3950_PASSWORD'] : $oa_row['RECALL_NCIP_AUTH']));
                   if ($oa_row['RECALL'] == 'z3950')
-                    $orsR->address->_value = $oa_row['RECALL_Z3950_ADDRESS'];
+                    Object::set_value($orsR, 'address', $oa_row['RECALL_Z3950_ADDRESS']);
                 }
                 //var_dump($res->orsRecall->_value); die();
                 break;
               case 'orsReceipt':
                 $orsR = &$res->orsReceipt->_value;
-                $orsR->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
-                $orsR->willReceive->_value = (in_array($oa_row['MAILKVITTER_VIA'], array('A', 'B', 'C')) ? 'YES' : 'NO');
-                $orsR->synchronous->_value = 0;
+                Object::set_value($orsR, 'responder', self::normalize_agency($oa_row['VD.BIB_NR']));
+                Object::set_value($orsR, 'willReceive', (in_array($oa_row['MAILKVITTER_VIA'], array('A', 'B', 'C')) ? 'YES' : 'NO'));
+                Object::set_value($orsR, 'synchronous', 0);
                 if ($oa_row['MAILKVITTER_VIA'] == 'C') {
-                  $orsR->protocol->_value = 'https';
-                  $orsR->address->_value = $oa_row['OPENRECEIPT_URL'];
-                  $orsR->passWord->_value = $oa_row['OPENRECEIPT_PASSWORD'];
-                  $orsR->format->_value = 'xml';
+                  Object::set_value($orsR, 'protocol', 'https');
+                  Object::set_value($orsR, 'address', $oa_row['OPENRECEIPT_URL']);
+                  Object::set_value($orsR, 'passWord', $oa_row['OPENRECEIPT_PASSWORD']);
+                  Object::set_value($orsR, 'format', 'xml');
                 }
                 else {
                   if ($oa_row['MAILKVITTER_VIA'] == 'A') {
-                    $orsR->protocol->_value = 'mail';
+                    Object::set_value($orsR, 'protocol', 'mail');
                   }
                   elseif ($oa_row['MAILKVITTER_VIA'] == 'B') {
-                    $orsR->protocol->_value = 'ors';
+                    Object::set_value($orsR, 'protocol', 'ors');
                   }
                   else {
-                    $orsR->protocol->_value = '';
+                    Object::set_value($orsR, 'protocol', '');
                   }
-                  $orsR->address->_value = $oa_row['KVIT_EMAIL'];
+                  Object::set_value($orsR, 'address', $oa_row['KVIT_EMAIL']);
                   if ($oa_row['FORMAT_KVIT'] == 'ill0form') {
-                    $orsR->format->_value = 'ill0';
+                    Object::set_value($orsR, 'format', 'ill0');
                   }
                   elseif ($oa_row['FORMAT_KVIT'] == 'ill5form') {
-                    $orsR->format->_value = 'ill0';
+                    Object::set_value($orsR, 'format', 'ill0');
                   }
                   elseif ($oa_row['FORMAT_KVIT'] == 'illdanbest') {
-                    $orsR->format->_value = 'text';
+                    Object::set_value($orsR, 'format', 'text');
                   }
                 }
                 //var_dump($res->orsReceipt->_value); die();
@@ -1190,19 +1190,19 @@ class openAgency extends webServiceServer {
                 else {
                   if ($oa_row['RENEW'] == 'z3950' || $oa_row['RENEW'] == 'ors') {
                     if ($oa_row['RENEWANSWER'] == 'z3950' || $oa_row['RENEWANSWER'] == 'ors') {
-                      $orsRA->willReceive->_value = 'YES';
-                      $orsRA->synchronous->_value = $oa_row['RENEW_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                      $orsRA->protocol->_value = self::normalize_iso18626($oa_row['RENEWANSWER']);
+                      Object::set_value($orsRA, 'willReceive', 'YES');
+                      Object::set_value($orsRA, 'synchronous', $oa_row['RENEW_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0);
+                      Object::set_value($orsRA, 'protocol', self::normalize_iso18626($oa_row['RENEWANSWER']));
                       if ($oa_row['RENEWANSWER'] == 'z3950') {
-                        $orsRA->address->_value = $oa_row['RENEWANSWER_Z3950_ADDRESS'];
-                        $orsRA->userId->_value = $oa_row['RENEWANSWER_Z3950_USER'];
-                        $orsRA->groupId->_value = $oa_row['RENEWANSWER_Z3950_GROUP'];
-                        $orsRA->passWord->_value = $oa_row['RENEWANSWER_Z3950_PASSWORD'];
+                        Object::set_value($orsRA, 'address', $oa_row['RENEWANSWER_Z3950_ADDRESS']);
+                        Object::set_value($orsRA, 'userId', $oa_row['RENEWANSWER_Z3950_USER']);
+                        Object::set_value($orsRA, 'groupId', $oa_row['RENEWANSWER_Z3950_GROUP']);
+                        Object::set_value($orsRA, 'passWord', $oa_row['RENEWANSWER_Z3950_PASSWORD']);
                       }
                     }
                     else {
-                      $orsRA->willReceive->_value = 'NO';
-                      $orsRA->synchronous->_value = 0;
+                      Object::set_value($orsRA, 'willReceive', 'NO');
+                      Object::set_value($orsRA, 'synchronous', 0);
                     }
                   }
                 }
@@ -1210,116 +1210,116 @@ class openAgency extends webServiceServer {
                 break;
               case 'orsCancel':
                 $orsC = &$res->orsCancel->_value;
-                $orsC->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                Object::set_value($orsC, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                   self::fill_iso18626_protocol($orsC, $oa_row);
                 }
                 else {
                   if ($oa_row['CANCEL'] == 'z3950' || $oa_row['CANCEL'] == 'ors') {
-                    $orsC->willReceive->_value = 'YES';
-                    $orsC->synchronous->_value = 0;
-                    $orsC->protocol->_value = self::normalize_iso18626($oa_row['CANCEL']);
+                    Object::set_value($orsC, 'willReceive', 'YES');
+                    Object::set_value($orsC, 'synchronous', 0);
+                    Object::set_value($orsC, 'protocol', self::normalize_iso18626($oa_row['CANCEL']));
                     if ($oa_row['CANCEL'] == 'z3950') {
-                      $orsC->address->_value = $oa_row['CANCEL_Z3950_ADDRESS'];
-                      $orsC->userId->_value = $oa_row['CANCEL_Z3950_USER'];
-                      $orsC->groupId->_value = $oa_row['CANCEL_Z3950_GROUP'];
-                      $orsC->passWord->_value = $oa_row['CANCEL_Z3950_PASSWORD'];
+                      Object::set_value($orsC, 'address', $oa_row['CANCEL_Z3950_ADDRESS']);
+                      Object::set_value($orsC, 'userId', $oa_row['CANCEL_Z3950_USER']);
+                      Object::set_value($orsC, 'groupId', $oa_row['CANCEL_Z3950_GROUP']);
+                      Object::set_value($orsC, 'passWord', $oa_row['CANCEL_Z3950_PASSWORD']);
                     }
                   }
                   else {
-                    $orsC->willReceive->_value = 'NO';
-                    $orsC->synchronous->_value = 0;
+                    Object::set_value($orsC, 'willReceive', 'NO');
+                    Object::set_value($orsC, 'synchronous', 0);
                   }
                 }
                 //var_dump($res->orsCancel->_value); die();
                 break;
               case 'orsCancelReply':
                 $orsCR = &$res->orsCancelReply->_value;
-                $orsCR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                Object::set_value($orsCR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsCR, $oa_row);
                 }
                 else {
                   if ($oa_row['CANCELREPLY'] == 'z3950' || $oa_row['CANCELREPLY'] == 'ors') {
-                    $orsCR->willReceive->_value = 'YES';
-                    $orsCR->synchronous->_value = $oa_row['CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0;
-                    $orsCR->protocol->_value = self::normalize_iso18626($oa_row['CANCELREPLY']);
+                    Object::set_value($orsCR, 'willReceive', 'YES');
+                    Object::set_value($orsCR, 'synchronous', $oa_row['CANCEL_ANSWER_SYNCHRONIC'] == 'J' ? 1 : 0);
+                    Object::set_value($orsCR, 'protocol', self::normalize_iso18626($oa_row['CANCELREPLY']));
                     if ($oa_row['CANCELREPLY'] == 'z3950') {
-                      $orsCR->address->_value = $oa_row['CANCELREPLY_Z3950_ADDRESS'];
-                      $orsCR->userId->_value = $oa_row['CANCELREPLY_Z3950_USER'];
-                      $orsCR->groupId->_value = $oa_row['CANCELREPLY_Z3950_GROUP'];
-                      $orsCR->passWord->_value = $oa_row['CANCELREPLY_Z3950_PASSWORD'];
+                      Object::set_value($orsCR, 'address', $oa_row['CANCELREPLY_Z3950_ADDRESS']);
+                      Object::set_value($orsCR, 'userId', $oa_row['CANCELREPLY_Z3950_USER']);
+                      Object::set_value($orsCR, 'groupId', $oa_row['CANCELREPLY_Z3950_GROUP']);
+                      Object::set_value($orsCR, 'passWord', $oa_row['CANCELREPLY_Z3950_PASSWORD']);
                     }
                   }
                   else {
-                    $orsCR->willReceive->_value = 'NO';
-                    $orsCR->synchronous->_value = 0;
+                    Object::set_value($orsCR, 'willReceive', 'NO');
+                    Object::set_value($orsCR, 'synchronous', 0);
                   }
                 }
                 //var_dump($res->orsCancelReply->_value); die();
                 break;
               case 'orsRenewItemUser':
                 $orsRIU = &$res->orsRenewItemUser->_value;
-                $orsRIU->responder->_value = self::normalize_agency($oa_row['VK.BIB_NR']);
-                $orsRIU->willReceive->_value = ($oa_row['NCIP_RENEW'] == 'J' ? 'YES' : 'NO');
-                $orsRIU->synchronous->_value = 0;
-                $orsRIU->address->_value = $oa_row['NCIP_RENEW_ADDRESS'];
-                $orsRIU->passWord->_value = $oa_row['NCIP_RENEW_PASSWORD'];
+                Object::set_value($orsRIU, 'responder', self::normalize_agency($oa_row['VK.BIB_NR']));
+                Object::set_value($orsRIU, 'willReceive', ($oa_row['NCIP_RENEW'] == 'J' ? 'YES' : 'NO'));
+                Object::set_value($orsRIU, 'synchronous', 0);
+                Object::set_value($orsRIU, 'address', $oa_row['NCIP_RENEW_ADDRESS']);
+                Object::set_value($orsRIU, 'passWord', $oa_row['NCIP_RENEW_PASSWORD']);
                 //var_dump($res->orsRenewItemUser->_value); die();
                 break;
               case 'orsShipping':
                 $orsS = &$res->orsShipping->_value;
-                $orsS->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
+                Object::set_value($orsS, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
                 if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsS, $oa_row);
                 }
                 else {
-                  $orsS->willReceive->_value = (in_array($oa_row['SHIPPING'], array('z3950', 'mail', 'ors')) ? 'YES' : '');
-                  $orsS->synchronous->_value = 0;
-                  $orsS->protocol->_value = self::normalize_iso18626($oa_row['SHIPPING']);
-                  $orsS->address->_value = '';
-                  $orsS->userId->_value = $oa_row['SHIPPING_Z3950_USER'];
-                  $orsS->groupId->_value = $oa_row['SHIPPING_Z3950_GROUP'];
-                  $orsS->passWord->_value = ($oa_row['SHIPPING'] == 'z3950' ? $oa_row['SHIPPING_Z3950_PASSWORD'] : $oa_row['SHIPPING_NCIP_AUTH']);
+                  Object::set_value($orsS, 'willReceive', (in_array($oa_row['SHIPPING'], array('z3950', 'mail', 'ors')) ? 'YES' : ''));
+                  Object::set_value($orsS, 'synchronous', 0);
+                  Object::set_value($orsS, 'protocol', self::normalize_iso18626($oa_row['SHIPPING']));
+                  Object::set_value($orsS, 'address', '');
+                  Object::set_value($orsS, 'userId', $oa_row['SHIPPING_Z3950_USER']);
+                  Object::set_value($orsS, 'groupId', $oa_row['SHIPPING_Z3950_GROUP']);
+                  Object::set_value($orsS, 'passWord', ($oa_row['SHIPPING'] == 'z3950' ? $oa_row['SHIPPING_Z3950_PASSWORD'] : $oa_row['SHIPPING_NCIP_AUTH']));
                   if ($oa_row['SHIPPING'] == 'z3950')
-                    $orsS->address->_value = $oa_row['SHIPPING_Z3950_ADDRESS'];
+                    Object::set_value($orsS, 'address', $oa_row['SHIPPING_Z3950_ADDRESS']);
                 }
                 //var_dump($res->orsShipping->_value); die();
                 break;
               case 'orsStatusRequest':
                 $orsSR = &$res->orsStatusRequest->_value;
-                $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-                $orsSR->willReceive->_value = '';
+                Object::set_value($orsSR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
+                Object::set_value($orsSR, 'willReceive', '');
                 if ($oa_row['MAILBESTIL_VIA'] == 'E') {
                   self::fill_iso18626_protocol($orsSR, $oa_row);
                 }
                 break;
               case 'orsStatusResponse':
                 $orsSR = &$res->orsStatusResponse->_value;
-                $orsSR->responder->_value = self::normalize_agency($oa_row['OAO.BIB_NR']);
-                $orsSR->willReceive->_value = '';
+                Object::set_value($orsSR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
+                Object::set_value($orsSR, 'willReceive', '');
                 if ($oa_row['MAILBESTIL_VIA'] == 'E' || $oa_row['ANSWER'] == '18626') {
                   self::fill_iso18626_protocol($orsSR, $oa_row);
                 }
                 break;
               case 'serverInformation':
                 $serI = &$res->serverInformation->_value;
-                $serI->responder->_value = self::normalize_agency($oa_row['VD.BIB_NR']);
-                $serI->isil->_value = $oa_row['ISIL'];
+                Object::set_value($serI, 'responder', self::normalize_agency($oa_row['VD.BIB_NR']));
+                Object::set_value($serI, 'isil', $oa_row['ISIL']);
                 if ($oa_row['ISO20775_URL']) {
-                  $serI->protocol->_value = 'iso20775';
-                  $serI->address->_value = $oa_row['ISO20775_URL'];
-                  $serI->passWord->_value = $oa_row['ISO20775_PASSWORD'];
+                  Object::set_value($serI, 'protocol', 'iso20775');
+                  Object::set_value($serI, 'address', $oa_row['ISO20775_URL']);
+                  Object::set_value($serI, 'passWord', $oa_row['ISO20775_PASSWORD']);
                 }
                 elseif ($oa_row['URL_ITEMORDER_BESTIL']) {
-                  $serI->protocol->_value = 'z3950';
-                  $serI->address->_value = $oa_row['URL_ITEMORDER_BESTIL'];
-                  $serI->userId->_value = $oa_row['ZBESTIL_USERID'];
-                  $serI->groupId->_value = $oa_row['ZBESTIL_GROUPID'];
-                  $serI->passWord->_value = $oa_row['ZBESTIL_PASSW'];
+                  Object::set_value($serI, 'protocol', 'z3950');
+                  Object::set_value($serI, 'address', $oa_row['URL_ITEMORDER_BESTIL']);
+                  Object::set_value($serI, 'userId', $oa_row['ZBESTIL_USERID']);
+                  Object::set_value($serI, 'groupId', $oa_row['ZBESTIL_GROUPID']);
+                  Object::set_value($serI, 'passWord', $oa_row['ZBESTIL_PASSW']);
                 }
                 else {
-                  $serI->protocol->_value = 'none';
+                  Object::set_value($serI, 'protocol', 'none');
                 }
                 //var_dump($res->serverInformation->_value); die();
                 break;
@@ -1330,10 +1330,10 @@ class openAgency extends webServiceServer {
                                  'LD_LKST' => 'barcode',
                                  'LD_KLNR' => 'cardno',
                                  'LD_TXT' => 'optional');
-                $usrP->userIdType->_value = 'no_userid_selected';
+                Object::set_value($usrP, 'userIdType', 'no_userid_selected');
                 foreach ($get_obl as $key => $val) {
                   if (substr($oa_row[$key],0,1) == 'O') {
-                    $usrP->userIdType->_value = $val;
+                    Object::set_value($usrP, 'userIdType', $val);
                     break;
                   }
                 }
@@ -1354,9 +1354,9 @@ class openAgency extends webServiceServer {
                 foreach ($u_fld as $vip_key => $res_key) {
                   $sw = $oa_row[$vip_key][0];
                   if (in_array($sw, array('J', 'O'))) {
-                    $f->userParameterType->_value = $res_key;
-                    $f->parameterRequired->_value = ($sw == 'O'? '1' : '0');
-                    $usrOP->userParameter[]->_value = $f;
+                    Object::set_value($f, 'userParameterType', $res_key);
+                    Object::set_value($f, 'parameterRequired', ($sw == 'O'? '1' : '0'));
+                    Object::set_array_value($usrOP, 'userParameter', $f);
                     unset($f);
                   }
                 }
@@ -1406,39 +1406,40 @@ class openAgency extends webServiceServer {
                                'VIDEO_BEST_MODT_FJL' => array('video', 'ill'));
                 foreach ($m_fld as $vip_key => $res_key) {
                   if (in_array($oa_row[$vip_key], array('J', 'B'))) {
-                    $f->orderMaterialType->_value = $res_key[0];
-                    $f->orderType->_value = $res_key[1];
+                    Object::set_value($f, 'orderMaterialType', $res_key[0]);
+                    Object::set_value($f, 'orderType', $res_key[1]);
                     if (is_array($res_key[2])) {
                       foreach ($res_key[2] as $elem_vip_key => $elem_res_key) {
                         if (in_array($oa_row[$elem_vip_key], array('J', 'O'))) {
-                          $p->itemParameterType->_value = $elem_res_key;
-                          $p->parameterRequired->_value = ($oa_row[$elem_vip_key] == 'O'? '1' : '0');
-                          $f->itemParameter[]->_value = $p;
+                          Object::set_value($p, 'itemParameterType', $elem_res_key);
+                          Object::set_value($p, 'parameterRequired', ($oa_row[$elem_vip_key] == 'O'? '1' : '0'));
+                          Object::set_array_value($f, 'itemParameter', $p);
                           unset($p);
                         }
                       }
                     }
-                    $usrOP->orderParameters[]->_value = $f;
+                    Object::set_array_value($usrOP, 'orderParameters', $f);
                     unset($f);
                   }
                 }
                 foreach ($fjernadgang_rows as $fjern) {
-                  $f->borrowerCheckSystem->_value = $fjern['NAVN'];
-                  $f->borrowerCheck->_value = $fjern['FJERNADGANG_HAR_LAANERTJEK'] == 1 ? '1' : '0';
-                  $bCP[]->_value = $f;
+                  Object::set_value($f->_value, 'borrowerCheckSystem', $fjern['NAVN']);
+                  Object::set_value($f->_value, 'borrowerCheck', $fjern['FJERNADGANG_HAR_LAANERTJEK'] == 1 ? '1' : '0');
+                  $bCP[] = $f;
                   unset($f);
                 }
+                $aP = new stdClass();
                 $aP->borrowerCheckParameters = $bCP;
-                $aP->acceptOrderFromUnknownUser->_value = in_array($oa_row['BEST_UKENDT'], array('N', 'K'))? '1' : '0';
+                Object::set_value($aP, 'acceptOrderFromUnknownUser', in_array($oa_row['BEST_UKENDT'], array('N', 'K'))? '1' : '0');
                 if ($oa_row['BEST_UKENDT_TXT']) {
                   $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT'], 'dan');
                 }
                 if ($oa_row['BEST_UKENDT_TXT_ENG']) {
                   $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT_ENG'], 'eng');
                 }
-                $aP->acceptOrderAgencyOffline->_value = $oa_row['LAANERTJEK_NORESPONSE'] == 'N' ? '0' : '1';
-                $aP->payForPostage->_value = $oa_row['PORTO_BETALING'] == 'N' ? '0' : '1';
-                $usrOP->agencyParameters->_value = $aP;
+                Object::set_value($aP, 'acceptOrderAgencyOffline', $oa_row['LAANERTJEK_NORESPONSE'] == 'N' ? '0' : '1');
+                Object::set_value($aP, 'payForPostage', $oa_row['PORTO_BETALING'] == 'N' ? '0' : '1');
+                Object::set_value($usrOP, 'agencyParameters', $aP);
   /*      <open:userOrderParameters>
               <!--1 or more repetitions:-->
               <open:userParameter>
