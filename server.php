@@ -104,9 +104,11 @@ class openAgency extends webServiceServer {
                                   AND status = :bind_status');    // ??? NULL og DISTINCT
                   $ap = &$res->autPotential->_value;
                   Object::set_value($ap, 'materialType', $param->materialType->_value);
-                  while ($vf_row = $oci->fetch_into_assoc())
-                    if ($vf_row['LAANGIVER'])
+                  while ($vf_row = $oci->fetch_into_assoc()) {
+                    if ($vf_row['LAANGIVER']) {
                       Object::set_array_value($ap, 'responder', $vf_row['LAANGIVER']);
+                    }
+                  }
                 }
                 catch (ociException $e) {
                   verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -246,9 +248,10 @@ class openAgency extends webServiceServer {
             Object::set_array_value($res, 'encryption', $o);
             unset($o);
           }
-          if (empty($res))
+          if (empty($res)) {
             Object::set_value($o, 'encrypt', 'NO');
             Object::set_array_value($res, 'encryption', $o);
+          }
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -338,8 +341,9 @@ class openAgency extends webServiceServer {
         else
           Object::set_value($res, 'error', 'error_in_request');
       }
-      if (empty($res))
+      if (empty($res)) {
         Object::set_value($res, 'error', 'no_agencies_found');
+      }
     }
 
     //var_dump($res); var_dump($param); die();
@@ -591,8 +595,9 @@ class openAgency extends webServiceServer {
                 }
               }
             }
-            if ($registryInfo)
+            if ($registryInfo) {
               Object::set_array_value($res, 'registryInfo', $registryInfo);
+            }
         }
         catch (ociException $e) {
           verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -894,8 +899,9 @@ class openAgency extends webServiceServer {
                                     AND vip.bib_nr = :bind_bib_nr
                                   ORDER BY prionr DESC');
                 while ($lv_row = $oci->fetch_into_assoc()) {
-                  if ($p = $vv_row[$lv_row['VILSE']])
-                  $consortia[] = $p;
+                  if ($p = $vv_row[$lv_row['VILSE']]) {
+                    $consortia[] = $p;
+                  }
                 }
                 if (count($vv_row) <> count($consortia)) {
                   verbose::log(ERROR, 'OpenAgency('.__LINE__.'):: agency ' . $agency . 
@@ -922,8 +928,9 @@ class openAgency extends webServiceServer {
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
             Object::set_value($res, 'error', 'service_unavailable');
           }
-          if (empty($oa_row))
+          if (empty($oa_row)) {
             Object::set_value($res, 'error', 'agency_not_found');
+          }
           if (empty($res->error)) {
   //        verbose::log(TRACE, 'OpenAgency('.__LINE__.'):: action=service&agencyId=' . $param->agencyId->_value .  '&service=' . $param->service->_value);
             switch ($param->service->_value) {
@@ -1081,7 +1088,7 @@ class openAgency extends webServiceServer {
                     Object::set_value($orsIR, 'groupId', $oa_row['ZBESTIL_GROUPID']);
                   if ($oa_row['ZBESTIL_PASSW'])
                     Object::set_value($orsIR, 'passWord', $oa_row['ZBESTIL_PASSW']);
-                  if ($orsIR->protocol->_value == 'mail')
+                  if ($orsIR->protocol->_value == 'mail') {
                     switch ($oa_row['FORMAT_BEST']) {
                       case 'illdanbest':
                         Object::set_value($orsIR, 'format', 'text');
@@ -1091,6 +1098,7 @@ class openAgency extends webServiceServer {
                         Object::set_value($orsIR, 'format', 'ill0');
                         break;
                     }
+                  }
                 }
                 //var_dump($res->orsItemRequest->_value); die();
                 break;
@@ -1655,10 +1663,12 @@ class openAgency extends webServiceServer {
         if (isset($param->pickupAllowed->_value)) {
           $j = 'J';
           $oci->bind('bind_j', $j);
-          if (self::xs_boolean($param->pickupAllowed->_value))
+          if (self::xs_boolean($param->pickupAllowed->_value)) {
             $sqls[] .= 'vb.best_modt = :bind_j';
-          else
+          }
+          else {
             $sqls[] .= 'vb.best_modt != :bind_j';
+          }
         }
         $filter_sql = implode(' AND ', $sqls);
 
@@ -2085,10 +2095,7 @@ class openAgency extends webServiceServer {
                       break;
                   }
                   if ($add_item) {
-                    if (empty($add_sql))
-                      $add_sql = ' (' . $add_item;
-                    else
-                      $add_sql .= ' OR ' . $add_item;
+                    $add_sql .= (empty($add_sql) ? ' (' : ' OR ' ) . $add_item;
                   }
                 }
                 if ($add_sql) $filter_bib_type[] = $add_sql . ')';
@@ -2154,10 +2161,7 @@ class openAgency extends webServiceServer {
             }
             if (isset($param->pickupAllowed->_value)) {
               $oci->bind('bind_j', 'J');
-              if (self::xs_boolean($param->pickupAllowed->_value))
-                $filter_bib_type[] = 'vb.best_modt = :bind_j';
-              else
-                $filter_bib_type[] = 'vb.best_modt != :bind_j';
+              $filter_bib_type[] = 'vb.best_modt ' . (self::xs_boolean($param->pickupAllowed->_value) ? '=' : '!=') . ':bind_j';
             }
             if ($param->libraryStatus->_value == 'alle') {
               $filter_delete = '';
@@ -2494,7 +2498,7 @@ class openAgency extends webServiceServer {
               Object::set_value($s, 'name', $help);
               Object::set_value($s, 'url', ($val['URL'] ? $val['URL'] : $val['andre_url']));
             }
-            if ($s->url->_value && $val['FAUST'] <> 1234567) {    // drop eBib
+            if ($s->url->_value && ($val['FAUST'] <> 1234567)) {    // drop eBib
               if ($val['URL'])
                 Object::set_value($s, 'url', str_replace('[URL_FJERNADGANG]', $val['URL'], $s->url->_value));
               else
@@ -2622,8 +2626,9 @@ class openAgency extends webServiceServer {
         while ($s_row = $oci->fetch_into_assoc()) {
           Object::set_array_value($res, 'agencyId', $s_row['VILSE']);
         }
-        if (empty($res->agencyId))
+        if (empty($res->agencyId)) {
           Object::set_value($res, 'error', 'no_agencies_found');
+        }
       }
       catch (ociException $e) {
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -2779,8 +2784,7 @@ class openAgency extends webServiceServer {
     }
     if ($row['HOLDEPLADS'])
       $pickupAgency->agencySubdivision[]->_value = $row['HOLDEPLADS'];
-    if (empty($pickupAgency->openingHours)
-        && ($row['AABN_TID'] || $row['AABN_TID_E'])) {
+    if (empty($pickupAgency->openingHours) && ($row['AABN_TID'] || $row['AABN_TID_E'])) {
       if ($row['AABN_TID']) {
         $pickupAgency->openingHours[] = self::value_and_language($row['AABN_TID'], 'dan');
       }
@@ -2898,10 +2902,7 @@ class openAgency extends webServiceServer {
    * @return (string) - $id numeric aligned align to 6 digits
    */
   private function normalize_agency($id) {
-    if (is_numeric($id))
-      return sprintf('%06s', $id);
-    else
-      return $id;
+    return is_numeric($id) ? sprintf('%06s', $id) : $id;
   }
 
   /** \brief Removes anything but digits
