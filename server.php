@@ -1804,26 +1804,21 @@ class openAgency extends webServiceServer {
           $this->watch->start('sql1');
           $oci->set_query('SELECT * FROM vip_library_rules' . $where . ' ORDER BY bib_nr ASC');
           $this->watch->stop('sql1');
-$mem = memory_get_usage();
+//$mem = memory_get_usage();
           while ($row = $oci->fetch_into_assoc()) {
-            $o->agencyId->_value = self::normalize_agency($row['BIB_NR']);
-            //Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
+            Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
             foreach ($row as $name => $value) {
               if ($name != 'BIB_NR') {
-                $r->name->_value = strtolower($name);
-                $r->bool->_value = ($value == 'Y' ? '1' : '0');
-                //Object::set_value($r, 'name', strtolower($name));
-                //Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
-                $o->libraryRule[]->_value = $r;
-                //Object::set_array_value($o, 'libraryRule', $r);
+                Object::set_value($r, 'name', strtolower($name));
+                Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
+                Object::set_array_value($o, 'libraryRule', $r);
                 unset($r);
               }
             }
-            $res->libraryRules[]->_value = $o;
-            //Object::set_array_value($res, 'libraryRules', $o);
+            Object::set_array_value($res, 'libraryRules', $o);
             unset($o);
           }
-$this->watch->sums['mem'] = memory_get_usage() - $mem;
+//$this->watch->sums['mem'] = memory_get_usage() - $mem;
         }
         catch (ociException $e) {
           $this->watch->stop('sql1');
