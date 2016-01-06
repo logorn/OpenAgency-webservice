@@ -2062,181 +2062,184 @@ class openAgency extends webServiceServer {
                       break;
                     case 'agencyAddress':
                       $add_item .= 'upper(v.badr) like upper(\'%' . $par . '%\')';
-                          break;
-                          case 'agencyName':
-                          $add_item .= 'upper(v.navn) like upper(\'%' . $par . '%\')';
-                            break;
-                            case 'city':
-                            $add_item .= 'upper(v.bcity) like upper(\'%' . $par . '%\')';
-                              break;
-                              case 'postalCode':
-                              $add_item .= 'upper(v.bpostnr) like upper(\'%' . $par . '%\')';
-                                break;
-                                }
-                                if ($add_item) {
-                                $add_sql .= (empty($add_sql) ? ' (' : ' OR ' ) . $add_item;
-                                  }
-                                  }
-                                  if ($add_sql) $filter_bib_type[] = $add_sql . ')';
-                                  }
-                                  }
-                                  if ($ora_par['agencyId']) {
-                                  foreach ($ora_par['agencyId'] as $agency) {
-                                  $agency_list .= ($agency_list ? ', ' : '') . ':bind_' . $agency;
-                                  $oci->bind('bind_' . $agency, $agency);
-                                  }
-                                  $filter_bib_type[] = ' v.bib_nr IN (' . $agency_list . ')';
-                                    }
-                                    elseif (empty($ora_par) && $param->libraryType->_value <> 'Alle') {
-                                    $filter_bib_type[] = ' vsn.bib_type = :bind_bib_type';
-                                    $oci->bind('bind_bib_type', $param->libraryType->_value);
-                                    }
-                                    else {
-                                    $filter_bib_type[] = ' vsn.bib_type != :bind_bib_type';
-                                    $oci->bind('bind_bib_type', 'Skolebibliotek');
-                                    }
-                                    // 2do vip_beh.best_modt = $param->pickupAllowed->_value
-                                    if ($param->libraryStatus->_value == 'alle') {
-                                    $filter_delete_vsn = '';
-                                    } elseif ($param->libraryStatus->_value == 'usynlig') {
-                                    $oci->bind('bind_u', 'U');
-                                    $filter_delete_vsn = 'v.delete_mark = :bind_u AND ';
-                                    } elseif ($param->libraryStatus->_value == 'slettet') {
-                                    $oci->bind('bind_s', 'S');
-                                    $filter_delete_vsn = 'v.delete_mark = :bind_s AND ';
-                                    } else {
-                                    $filter_delete_vsn = 'v.delete_mark is null AND ';
-                                    }
-                                    $sql = 'SELECT vsn.bib_nr, vsn.navn, vsn.bib_type, vsn.tlf_nr, vsn.email,
-                                      vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil,
-                                      vsn.cvr_nr, vsn.p_nr, vsn.ean_nummer
-                                        FROM vip_vsn vsn, vip v, vip_sup vs
-                                        WHERE ' . $filter_delete_vsn . ($filter_bib_type ? implode(' AND ', $filter_bib_type) . ' AND ' : '') . '
-                                        v.bib_nr = vs.bib_nr (+)
-                                        AND v.kmd_nr = vsn.bib_nr
-                                        ORDER BY vsn.bib_nr';
-                                    $this->watch->start('sql1');
-                                    $oci->set_query($sql);
-                                    while ($row = $oci->fetch_into_assoc()) {
-                                      $bib_nr = &$row['BIB_NR'];
-                                      $vsn[$bib_nr] = $row;
-                                    }
-                                    $this->watch->stop('sql1');
+                      break;
+                    case 'agencyName':
+                      $add_item .= 'upper(v.navn) like upper(\'%' . $par . '%\')';
+                      break;
+                    case 'city':
+                      $add_item .= 'upper(v.bcity) like upper(\'%' . $par . '%\')';
+                      break;
+                    case 'postalCode':
+                      $add_item .= 'upper(v.bpostnr) like upper(\'%' . $par . '%\')';
+                      break;
+                  }
+                  if ($add_item) {
+                    $add_sql .= (empty($add_sql) ? ' (' : ' OR ' ) . $add_item;
+                  }
+                }
+                if ($add_sql) $filter_bib_type[] = $add_sql . ')';
+              }
+            }
+            if ($ora_par['agencyId']) {
+              foreach ($ora_par['agencyId'] as $agency) {
+                $agency_list .= ($agency_list ? ', ' : '') . ':bind_' . $agency;
+                $oci->bind('bind_' . $agency, $agency);
+              }
+              $filter_bib_type[] = ' v.bib_nr IN (' . $agency_list . ')';
+            }
+            elseif (empty($ora_par) && $param->libraryType->_value <> 'Alle') {
+              $filter_bib_type[] = ' vsn.bib_type = :bind_bib_type';
+              $oci->bind('bind_bib_type', $param->libraryType->_value);
+            }
+            else {
+              $filter_bib_type[] = ' vsn.bib_type != :bind_bib_type';
+              $oci->bind('bind_bib_type', 'Skolebibliotek');
+            }
+            // 2do vip_beh.best_modt = $param->pickupAllowed->_value
+            if ($param->libraryStatus->_value == 'alle') {
+              $filter_delete_vsn = '';
+            } elseif ($param->libraryStatus->_value == 'usynlig') {
+              $oci->bind('bind_u', 'U');
+              $filter_delete_vsn = 'v.delete_mark = :bind_u AND ';
+            } elseif ($param->libraryStatus->_value == 'slettet') {
+              $oci->bind('bind_s', 'S');
+              $filter_delete_vsn = 'v.delete_mark = :bind_s AND ';
+            } else {
+              $filter_delete_vsn = 'v.delete_mark is null AND ';
+            }
+            $sql = 'SELECT vsn.bib_nr, vsn.navn, vsn.bib_type, vsn.tlf_nr, vsn.email,
+                           vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil,
+                           vsn.cvr_nr, vsn.p_nr, vsn.ean_nummer
+                      FROM vip_vsn vsn, vip v, vip_sup vs
+                     WHERE ' . $filter_delete_vsn . ($filter_bib_type ? implode(' AND ', $filter_bib_type) . ' AND ' : '') . '
+                           v.bib_nr = vs.bib_nr (+)
+                       AND v.kmd_nr = vsn.bib_nr
+                     ORDER BY vsn.bib_nr';
+            $this->watch->start('sql1');
+            $oci->set_query($sql);
+            while ($row = $oci->fetch_into_assoc()) {
+              $bib_nr = &$row['BIB_NR'];
+              $vsn[$bib_nr] = $row;
+            }
+            $this->watch->stop('sql1');
 
-                                    $sql = 'SELECT bib_nr, domain FROM user_domains WHERE DELETE_DATE IS NULL';
-                                    $this->watch->start('sql2');
-                                    $oci->set_query($sql);
-                                    while ($row = $oci->fetch_into_assoc()) {
-                                      $ip_list[$row['BIB_NR']][] = $row['DOMAIN'];
-                                    }
-                                    $this->watch->stop('sql2');
+            $sql = 'SELECT bib_nr, domain FROM user_domains WHERE DELETE_DATE IS NULL';
+            $this->watch->start('sql2');
+            $oci->set_query($sql);
+            while ($row = $oci->fetch_into_assoc()) {
+              $ip_list[$row['BIB_NR']][] = $row['DOMAIN'];
+            }
+            $this->watch->stop('sql2');
 
-                                    if ($ora_par['agencyId']) {
-                                      foreach ($ora_par['agencyId'] as $agency) {
-                                        $oci->bind('bind_' . $agency, $agency);
-                                      }
-                                    }
-                                    elseif (empty($ora_par) && $param->libraryType->_value <> 'Alle') {
-                                      $oci->bind('bind_bib_type', $param->libraryType->_value);
-                                    }
-                                    else {
-                                      $oci->bind('bind_bib_type', 'Skolebibliotek');
-                                    }
-                                    if (isset($param->pickupAllowed->_value)) {
-                                      $oci->bind('bind_j', 'J');
-                                      $filter_bib_type[] = 'vb.best_modt ' . (self::xs_boolean($param->pickupAllowed->_value) ? '=' : '!=') . ':bind_j';
-                                    }
-                                    if ($param->libraryStatus->_value == 'alle') {
-                                      $filter_delete = '';
-                                    } elseif ($param->libraryStatus->_value == 'usynlig') {
-                                      $oci->bind('bind_u', 'U');
-                                      $filter_delete = ' AND v.delete_mark = :bind_u';
-                                    } elseif ($param->libraryStatus->_value == 'slettet') {
-                                      $oci->bind('bind_s', 'S');
-                                      $filter_delete = ' AND v.delete_mark = :bind_s';
-                                    } else {
-                                      $filter_delete = ' AND v.delete_mark is null';
-                                    }
-                                    if ($filter_delete) {
-                                      $oci->bind('bind_n', 'N');
-                                      $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
-                                    }
-                                    $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-                                      v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr, v.uni_c_nr, 
-                                      vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
-                                      txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
-                                      bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
-                                      kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
-                                      kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn,
-                                      kat.url_viderestil, kat.url_bib_kat
-                                        FROM vip v, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
-                                      vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
-                                        WHERE v.kmd_nr IN (SELECT UNIQUE vsn.bib_nr
-                                            FROM vip_vsn vsn, vip v, vip_sup vs
-                                            WHERE ' . $filter_delete_vsn . '
-                                            v.kmd_nr = vsn.bib_nr ' .
-                                            ($filter_bib_type ? ' AND ' . implode(' AND ', $filter_bib_type) : '') . ')
-                                        ' . $filter_delete . '
-                                        ' . $filter_filial . '
-                                        AND v.bib_nr = vb.bib_nr (+)
-                                        AND v.bib_nr = txt.bib_nr (+)
-                                        AND v.bib_nr = hold.bib_nr (+)
-                                        AND v.bib_nr = eng.bib_nr (+)
-                                        AND v.bib_nr = bestil.bib_nr (+)
-                                        AND v.bib_nr = kat.bib_nr (+)
-                                        ORDER BY v.kmd_nr, v.bib_nr';
-                                    $this->watch->start('sql3');
-                                    $oci->set_query($sql);
-                                    $this->watch->stop('sql3');
-                                    while ($row = $oci->fetch_into_assoc()) {
-                                      if ($ora_par['agencyId']) {
-                                        $a_key = array_search($row['BIB_NR'], $ora_par['agencyId']);
-                                        if (is_int($a_key)) unset($ora_par['agencyId'][$a_key]);
-                                      }
-                                      $this_vsn = $row['KMD_NR'];
-                                      if ($library && $library->agencyId->_value <> $this_vsn) {
-                                        Object::set_array_value($library, 'pickupAgency', $pickupAgency);
-                                        unset($pickupAgency);
-                                        Object::set_array_value($res, 'library', $library);
-                                        unset($library);
-                                      }
-                                      if (empty($library)) {
-                                        Object::set_value($library, 'agencyId', $this_vsn);
-                                        Object::set_value($library, 'agencyType', self::set_agency_type($this_vsn, $vsn[$this_vsn]['BIB_TYPE']));
-                                        Object::set_value($library, 'agencyName', $vsn[$this_vsn]['NAVN']);
-                                        if ($vsn[$this_vsn]['TLF_NR']) Object::set_value($library, 'agencyPhone', $vsn[$this_vsn]['TLF_NR']);
-                                        if ($vsn[$this_vsn]['EMAIL']) Object::set_value($library, 'agencyEmail', $vsn[$this_vsn]['EMAIL']);
-                                        if ($vsn[$this_vsn]['BADR']) Object::set_value($library, 'postalAddress', $vsn[$this_vsn]['BADR']);
-                                        if ($vsn[$this_vsn]['BPOSTNR']) Object::set_value($library, 'postalCode', $vsn[$this_vsn]['BPOSTNR']);
-                                        if ($vsn[$this_vsn]['BCITY']) Object::set_value($library, 'city', $vsn[$this_vsn]['BCITY']);
-                                        if ($vsn[$this_vsn]['URL']) Object::set_value($library, 'agencyWebsiteUrl', $vsn[$this_vsn]['URL']);
-                                        if ($vsn[$this_vsn]['CVR_NR']) Object::set_value($library, 'agencyCvrNumber', $vsn[$this_vsn]['CVR_NR']);
-                                        if ($vsn[$this_vsn]['P_NR']) Object::set_value($library, 'agencyPNumber', $vsn[$this_vsn]['P_NR']);
-                                        if ($vsn[$this_vsn]['EAN_NUMMER']) Object::set_value($library, 'agencyEanNumber', $vsn[$this_vsn]['EAN_NUMMER']);
-                                      }
-                                      if ($pickupAgency && $pickupAgency->branchId->_value <> $row['BIB_NR']) {
-                                        Object::set_array_value($library, 'pickupAgency', $pickupAgency);
-                                        unset($pickupAgency);
-                                      }
-                                      $row['SB_KOPIBESTIL'] = $vsn[$this_vsn]['SB_KOPIBESTIL'];
-                                      self::fill_pickupAgency($pickupAgency, $row, $ip_list[$row['BIB_NR']]);
-                                    }
-                                    if ($pickupAgency) {
-                                      Object::set_array_value($library, 'pickupAgency', $pickupAgency);
-                                    }
-                                    if ($library) {
-                                      Object::set_array_value($res, 'library', $library);
-                                      if ($ora_par['agencyId']) {
-                                        foreach ($ora_par['agencyId'] as $agency) {
-                                          Object::set_value($help, 'agencyId', $param_agencies[$agency]);
-                                          Object::set_value($help, 'error', 'agency_not_found');
-                                          Object::set_array_value($res, 'library', $help);
-                                          unset($help);
-                                        }
-                                      }
-                                    } else {
-                                      Object::set_value($res, 'error', 'no_agencies_found');
-                                    }
+            if ($ora_par['agencyId']) {
+              foreach ($ora_par['agencyId'] as $agency) {
+                $oci->bind('bind_' . $agency, $agency);
+              }
+            }
+            elseif (empty($ora_par) && $param->libraryType->_value <> 'Alle') {
+              $oci->bind('bind_bib_type', $param->libraryType->_value);
+            }
+            else {
+              $oci->bind('bind_bib_type', 'Skolebibliotek');
+            }
+            if (isset($param->pickupAllowed->_value)) {
+              $oci->bind('bind_j', 'J');
+              $filter_bib_type[] = 'vb.best_modt ' . (self::xs_boolean($param->pickupAllowed->_value) ? '=' : '!=') . ':bind_j';
+            }
+            if ($param->libraryStatus->_value == 'alle') {
+              $filter_delete = '';
+            } elseif ($param->libraryStatus->_value == 'usynlig') {
+              $oci->bind('bind_u', 'U');
+              $filter_delete = ' AND v.delete_mark = :bind_u';
+            } elseif ($param->libraryStatus->_value == 'slettet') {
+              $oci->bind('bind_s', 'S');
+              $filter_delete = ' AND v.delete_mark = :bind_s';
+            } else {
+              $filter_delete = ' AND v.delete_mark is null';
+            }
+            if ($filter_delete) {
+              $oci->bind('bind_n', 'N');
+              $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
+            }
+            $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
+                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr, v.uni_c_nr, 
+                          vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                          vd.svar_email,
+                          txt.aabn_tid, txt.kvt_tekst_fjl, 
+                          eng.aabn_tid_e, eng.kvt_tekst_fjl_e, 
+                          hold.holdeplads,
+                          bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
+                          kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user, kat.ncip_renew, 
+                          kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, kat.url_viderestil, kat.url_bib_kat
+                     FROM vip v, vip_beh vb, vip_danbib vd, vip_txt txt, vip_txt_eng eng, 
+                          vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
+                    WHERE v.kmd_nr IN (SELECT UNIQUE vsn.bib_nr
+                                         FROM vip_vsn vsn, vip v, vip_sup vs
+                                        WHERE ' . $filter_delete_vsn . '
+                                              v.kmd_nr = vsn.bib_nr ' .
+                                              ($filter_bib_type ? ' AND ' . implode(' AND ', $filter_bib_type) : '') . ')
+                          ' . $filter_delete . '
+                          ' . $filter_filial . '
+                      AND v.bib_nr = vb.bib_nr (+)
+                      AND v.bib_nr = vd.bib_nr (+)
+                      AND v.bib_nr = txt.bib_nr (+)
+                      AND v.bib_nr = hold.bib_nr (+)
+                      AND v.bib_nr = eng.bib_nr (+)
+                      AND v.bib_nr = bestil.bib_nr (+)
+                      AND v.bib_nr = kat.bib_nr (+)
+                    ORDER BY v.kmd_nr, v.bib_nr';
+            $this->watch->start('sql3');
+            $oci->set_query($sql);
+            $this->watch->stop('sql3');
+            while ($row = $oci->fetch_into_assoc()) {
+              if ($ora_par['agencyId']) {
+                $a_key = array_search($row['BIB_NR'], $ora_par['agencyId']);
+                if (is_int($a_key)) unset($ora_par['agencyId'][$a_key]);
+              }
+              $this_vsn = $row['KMD_NR'];
+              if ($library && $library->agencyId->_value <> $this_vsn) {
+                Object::set_array_value($library, 'pickupAgency', $pickupAgency);
+                unset($pickupAgency);
+                Object::set_array_value($res, 'library', $library);
+                unset($library);
+              }
+              if (empty($library)) {
+               Object::set_value($library, 'agencyId', $this_vsn);
+               Object::set_value($library, 'agencyType', self::set_agency_type($this_vsn, $vsn[$this_vsn]['BIB_TYPE']));
+               Object::set_value($library, 'agencyName', $vsn[$this_vsn]['NAVN']);
+               if ($vsn[$this_vsn]['TLF_NR']) Object::set_value($library, 'agencyPhone', $vsn[$this_vsn]['TLF_NR']);
+               if ($vsn[$this_vsn]['EMAIL']) Object::set_value($library, 'agencyEmail', $vsn[$this_vsn]['EMAIL']);
+               if ($vsn[$this_vsn]['BADR']) Object::set_value($library, 'postalAddress', $vsn[$this_vsn]['BADR']);
+               if ($vsn[$this_vsn]['BPOSTNR']) Object::set_value($library, 'postalCode', $vsn[$this_vsn]['BPOSTNR']);
+               if ($vsn[$this_vsn]['BCITY']) Object::set_value($library, 'city', $vsn[$this_vsn]['BCITY']);
+               if ($vsn[$this_vsn]['URL']) Object::set_value($library, 'agencyWebsiteUrl', $vsn[$this_vsn]['URL']);
+               if ($vsn[$this_vsn]['CVR_NR']) Object::set_value($library, 'agencyCvrNumber', $vsn[$this_vsn]['CVR_NR']);
+               if ($vsn[$this_vsn]['P_NR']) Object::set_value($library, 'agencyPNumber', $vsn[$this_vsn]['P_NR']);
+               if ($vsn[$this_vsn]['EAN_NUMMER']) Object::set_value($library, 'agencyEanNumber', $vsn[$this_vsn]['EAN_NUMMER']);
+             }
+             if ($pickupAgency && $pickupAgency->branchId->_value <> $row['BIB_NR']) {
+               Object::set_array_value($library, 'pickupAgency', $pickupAgency);
+               unset($pickupAgency);
+             }
+             $row['SB_KOPIBESTIL'] = $vsn[$this_vsn]['SB_KOPIBESTIL'];
+             self::fill_pickupAgency($pickupAgency, $row, $ip_list[$row['BIB_NR']]);
+           }
+           if ($pickupAgency) {
+             Object::set_array_value($library, 'pickupAgency', $pickupAgency);
+           }
+           if ($library) {
+             Object::set_array_value($res, 'library', $library);
+             if ($ora_par['agencyId']) {
+               foreach ($ora_par['agencyId'] as $agency) {
+                 Object::set_value($help, 'agencyId', $param_agencies[$agency]);
+                 Object::set_value($help, 'error', 'agency_not_found');
+                 Object::set_array_value($res, 'library', $help);
+                 unset($help);
+               }
+             }
+           } else {
+             Object::set_value($res, 'error', 'no_agencies_found');
+           }
           }
           catch (ociException $e) {
             $this->watch->stop('sql1');
