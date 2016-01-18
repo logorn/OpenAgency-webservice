@@ -163,8 +163,10 @@ class openAgency extends webServiceServer {
                 Object::set_value($ar, 'autChoice', $vf_row['VALG']);
                 Object::set_value($ar, 'autRes', ($vf_row['RESERVERING'] == 'J' ? 'YES' : 'NO'));
               }
-              else
+              else {
                 Object::set_value($ar, 'willSend', 'NO');
+                Object::set_value($ar, 'willSendOwn', 'NO');
+              }
             }
             catch (ociException $e) {
               $this->watch->stop('sql4');
