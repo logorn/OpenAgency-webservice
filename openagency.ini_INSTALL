@@ -90,6 +90,14 @@ dump_timer = openAgency(%s)
 agency_credentials = some_user/some_pwd@some.server.dbc.dk
 
 ; --------------
+; table for automatic interlibrary loan setting of material owned by the library
+; first profile set below, will automatically be default profile
+profile_for_own_material[profil_1][age_in_days] = 365
+profile_for_own_material[profil_1][limit_in_days] = 14
+profile_for_own_material[profil_2][age_in_days] = 10
+profile_for_own_material[profil_2][limit_in_days] = 0
+
+; --------------
 ; Change agencyType for a library
 ; as of 20150512, 700400 is Folkebibliotek som this is not neeeded any more
 ;agencyTypeOverride[700400] = Folkebibliotek

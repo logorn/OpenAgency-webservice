@@ -152,6 +152,12 @@ class openAgency extends webServiceServer {
               if ($vf_row = $oci->fetch_into_assoc()) {
                 Object::set_value($ar, 'willSend', self::parse_will_send($vf_row['STATUS']));
                 Object::set_value($ar, 'willSendOwn', self::parse_will_send($vf_row['STATUS_EGET']));
+                $profile_fom = $this->config->get_value('profile_for_own_material','setup');
+                if (!$profile = $profile_fom[strtolower($vf_row['PROFIL_EGET'])]) {
+                  $profile = reset($profile_fom);
+                }
+                Object::set_value($ar, 'ownMaterialAgeInDays', $profile['age_in_days']);
+                Object::set_value($ar, 'ownDeliveryLimitInDays', $profile['limit_in_days']);
                 Object::set_value($ar, 'autPeriod', $vf_row['PERIODE']);
                 Object::set_value($ar, 'autId', $vf_row['ID_NR']);
                 Object::set_value($ar, 'autChoice', $vf_row['VALG']);

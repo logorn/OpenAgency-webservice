@@ -442,6 +442,8 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:materialType"/>
       <xs:element ref="oa:willSend"/>
       <xs:element ref="oa:willSendOwn"/>
+      <xs:element ref="oa:ownMaterialAgeInDays"/>
+      <xs:element ref="oa:ownDeliveryLimitInDays"/>
       <xs:element ref="oa:autPeriod" minOccurs="0"/>
       <xs:element ref="oa:autId" minOccurs="0"/>
       <xs:element ref="oa:autChoice" minOccurs="0"/>
@@ -871,6 +873,8 @@ You should have received a copy of the GNU Affero General Public License along w
     </xs:annotation>
   </xs:element>
   <xs:element name="ownedByAgency" type="xs:boolean"/>
+  <xs:element name="ownDeliveryLimitInDays" type="xs:integer"/>
+  <xs:element name="ownMaterialAgeInDays" type="xs:integer"/>
   <xs:element name="parameterRequired" type="xs:boolean"/>
   <xs:element name="passWord" type="xs:string"/>
   <xs:element name="passwordAut" type="xs:string">
