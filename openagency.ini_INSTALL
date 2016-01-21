@@ -94,8 +94,8 @@ agency_credentials = some_user/some_pwd@some.server.dbc.dk
 ; first profile set below, will automatically be default profile
 profile_for_own_material[profil_1][age_in_days] = 365
 profile_for_own_material[profil_1][limit_in_days] = 14
-profile_for_own_material[profil_2][age_in_days] = 10
-profile_for_own_material[profil_2][limit_in_days] = 0
+profile_for_own_material[profil_2][age_in_days] = 0
+profile_for_own_material[profil_2][limit_in_days] = 8
 
 ; --------------
 ; Change agencyType for a library
