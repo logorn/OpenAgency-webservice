@@ -2131,7 +2131,7 @@ class openAgency extends webServiceServer {
             }
             $this->watch->stop('sql1');
 
-            $sql = 'SELECT bib_nr, domain FROM user_domains WHERE DELETE_DATE IS NULL';
+            $sql = 'SELECT unique bib_nr, domain FROM user_domains WHERE DELETE_DATE IS NULL';
             $this->watch->start('sql2');
             $oci->set_query($sql);
             while ($row = $oci->fetch_into_assoc()) {
@@ -2848,6 +2848,7 @@ class openAgency extends webServiceServer {
       Object::set_value($pickupAgency, 'ncipPassword', $row['NCIP_PASSWORD']);
     }
     if (is_array($ip_list)) {
+      natsort($ip_list);
       foreach ($ip_list as $ip) {
         Object::set_array_value($pickupAgency->branchDomains->_value, 'domain', $ip);
       }
