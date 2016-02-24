@@ -1804,34 +1804,39 @@ class openAgency extends webServiceServer {
       $oci = self::connect($this->config->get_value('agency_credentials','setup'), __LINE__, $res);
       if (empty($res->error)) {
         $agency = self::strip_agency($param->agencyId->_value);
-        try {
-          if ($agency) {
-            $oci->bind('bind_bib_nr', $agency);
-            $where = ' WHERE bib_nr = :bind_bib_nr';
-          }
-          $this->watch->start('sql1');
-          $oci->set_query('SELECT * FROM vip_library_rules' . $where . ' ORDER BY bib_nr ASC');
-          $this->watch->stop('sql1');
-//$mem = memory_get_usage();
-          while ($row = $oci->fetch_into_assoc()) {
-            Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
-            foreach ($row as $name => $value) {
-              if ($name != 'BIB_NR') {
-                Object::set_value($r, 'name', strtolower($name));
-                Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
-                Object::set_array_value($o, 'libraryRule', $r);
-                unset($r);
-              }
-            }
-            Object::set_array_value($res, 'libraryRules', $o);
-            unset($o);
-          }
-//$this->watch->sums['mem'] = memory_get_usage() - $mem;
+        if (empty($agency) && !empty($param->agencyId->_value)) {
+          Object::set_value($res, 'error', 'agency_not_found');
         }
-        catch (ociException $e) {
-          $this->watch->stop('sql1');
-          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-          Object::set_value($res, 'error', 'service_unavailable');
+        else {
+          try {
+            if ($agency) {
+              $oci->bind('bind_bib_nr', $agency);
+              $where = ' WHERE bib_nr = :bind_bib_nr';
+            }
+            $this->watch->start('sql1');
+            $oci->set_query('SELECT * FROM vip_library_rules' . $where . ' ORDER BY bib_nr ASC');
+            $this->watch->stop('sql1');
+            //$mem = memory_get_usage();
+            while ($row = $oci->fetch_into_assoc()) {
+              Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
+              foreach ($row as $name => $value) {
+                if ($name != 'BIB_NR') {
+                  Object::set_value($r, 'name', strtolower($name));
+                  Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
+                  Object::set_array_value($o, 'libraryRule', $r);
+                  unset($r);
+                }
+              }
+              Object::set_array_value($res, 'libraryRules', $o);
+              unset($o);
+            }
+            //$this->watch->sums['mem'] = memory_get_usage() - $mem;
+          }
+          catch (ociException $e) {
+            $this->watch->stop('sql1');
+            verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+            Object::set_value($res, 'error', 'service_unavailable');
+          }
         }
       }
     }
