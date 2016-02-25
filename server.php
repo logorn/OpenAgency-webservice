@@ -516,9 +516,11 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
             else {    // Alle or NULL
-              $sqls[] = '(vsn.bib_type = :bind_bib_type_1 OR vsn.bib_type = :bind_bib_type_2)';
-              $oci->bind('bind_bib_type_1', 'Folkebibliotek');
-              $oci->bind('bind_bib_type_2', 'Forskningsbibliotek');
+              $sqls[] = 'vsn.bib_type != :bind_bib_type';
+              $oci->bind('bind_bib_type', 'Skolebibliotek');
+              //$sqls[] = '(vsn.bib_type = :bind_bib_type_1 OR vsn.bib_type = :bind_bib_type_2)';
+              //$oci->bind('bind_bib_type_1', 'Folkebibliotek');
+              //$oci->bind('bind_bib_type_2', 'Forskningsbibliotek');
             }
         // libraryStatus
             if ($param->libraryStatus->_value == 'usynlig') {
