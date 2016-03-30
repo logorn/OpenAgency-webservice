@@ -89,6 +89,24 @@ class TestOfAgency extends WebTestCase {
             'pattern' => array('/pickupAgency.*branchName.*postalCode.*openingHours.*getRegistryInfoResponse/',
 //                               '/iso18626.*iso18626Address.*getRegistryInfoResponse/'));
                                '/z3950Ill.*z3950Address.*getRegistryInfoResponse/'));
+  // getSaouLicenseInfo
+    $this->test_cases[] = 
+      array('action' => array('post' => 'getSaouLicenseInfoRequest', 'get' => 'getSaouLicenseInfo'),
+            'pars' => array('agencyId' => 'DK-710100'),
+            'text' => array('710100'),
+            'pattern' => array('/saouLicenseInfo.*ipAddress/'));
+  // libraryRules
+    $this->test_cases[] = 
+      array('action' => array('post' => 'libraryRulesRequest', 'get' => 'libraryRules'),
+            'pars' => array('agencyId' => 'DK-710100'),
+            'text' => array('create_enrichments'),
+            'pattern' => array('/libraryRules.*libraryRule.*name/'));
+  // libraryTypeList
+    $this->test_cases[] = 
+      array('action' => array('post' => 'libraryTypeListRequest', 'get' => 'libraryTypeList'),
+            'pars' => array('trackingId' => 'test'),
+            'text' => array('Skolebibliotek', 'Folkebibliotek', 'Forskningsbibliotek'),
+            'pattern' => array('/libraryTypeInfo.*agencyType/'));
   // nameList
     $this->test_cases[] = 
       array('action' => array('post' => 'nameListRequest', 'get' => 'nameList'),
@@ -101,6 +119,12 @@ class TestOfAgency extends WebTestCase {
             'pars' => array('agencyId' => 'DK-710100'),
             'text' => array('Krystalgade', '1172'),
             'pattern' => array('/agencyName.*branchName.*postalCode.*temporarilyClosed/'));
+  // openSearchProfile
+    $this->test_cases[] = 
+      array('action' => array('post' => 'openSearchProfileRequest', 'get' => 'openSearchProfile'),
+            'pars' => array('agencyId' => 'DK-100200', 'profileName' => 'test', 'profileVersion' => '3'),
+            'text' => array('870970-basis'),
+            'pattern' => array('/profile.*source.*relation.*rdfLabel/'));
   // remoteAccess
     $this->test_cases[] = 
       array('action' => array('post' => 'remoteAccessRequest', 'get' => 'remoteAccess'),
@@ -135,6 +159,12 @@ class TestOfAgency extends WebTestCase {
             'pars' => array('agencyId' => 'DK-810010', 'service' => 'userOrderParameters'),
             'text' => array('userId'),
             'pattern' => array('/userOrderParameters.*userParameter.*parameterRequired.*borrowerCheckParameters.*serviceResponse/'));
+  // showOrder
+    $this->test_cases[] = 
+      array('action' => array('post' => 'showOrderRequest', 'get' => 'showOrder'),
+            'pars' => array('agencyId' => 'DK-820040'),
+            'text' => array('820040'),
+            'pattern' => array('/agencyId/'));
   }
 
   private function post_service($action, $pars, $texts, $patterns) {
