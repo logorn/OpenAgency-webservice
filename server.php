@@ -78,9 +78,9 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_laantager', $agency);
               $oci->bind('bind_materiale_id', $param->materialType->_value);
               $oci->set_query('SELECT id_nr, valg
-                              FROM vip_fjernlaan
-                              WHERE laantager = :bind_laantager
-                              AND materiale_id = :bind_materiale_id');
+                                 FROM vip_fjernlaan
+                                WHERE laantager = :bind_laantager
+                                  AND materiale_id = :bind_materiale_id');
               $vf_row = $oci->fetch_into_assoc();
             }
             catch (ociException $e) {
@@ -95,9 +95,9 @@ class openAgency extends webServiceServer {
                   $oci->bind('bind_status', 'J');
                   $this->watch->start('sql2');
                   $oci->set_query('SELECT laangiver
-                                  FROM vip_fjernlaan
-                                  WHERE materiale_id = :bind_materiale_id
-                                  AND status = :bind_status');    // ??? NULL og DISTINCT
+                                     FROM vip_fjernlaan
+                                    WHERE materiale_id = :bind_materiale_id
+                                      AND status = :bind_status');    // ??? NULL og DISTINCT
                   $this->watch->stop('sql2');
                   $ap = &$res->autPotential->_value;
                   Object::set_value($ap, 'materialType', $param->materialType->_value);
@@ -118,8 +118,8 @@ class openAgency extends webServiceServer {
                 try {
                   $oci->bind('bind_fjernlaan_id', $vf_row['ID_NR']);
                   $oci->set_query('SELECT bib_nr
-                                  FROM vip_fjernlaan_bibliotek
-                                  WHERE fjernlaan_id = :bind_fjernlaan_id');
+                                     FROM vip_fjernlaan_bibliotek
+                                    WHERE fjernlaan_id = :bind_fjernlaan_id');
                   $ap = &$res->autPotential->_value;
                   Object::set_value($ap, 'materialType', $param->materialType->_value);
                   while ($vfb_row = $oci->fetch_into_assoc())
@@ -142,9 +142,9 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_materiale_id', $param->materialType->_value);
               $this->watch->start('sql4');
               $oci->set_query('SELECT *
-                              FROM vip_fjernlaan
-                              WHERE laantager = :bind_laantager
-                              AND materiale_id = :bind_materiale_id');
+                                 FROM vip_fjernlaan
+                                WHERE laantager = :bind_laantager
+                                  AND materiale_id = :bind_materiale_id');
               $this->watch->stop('sql4');
               $ar = &$res->autRequester->_value;
               Object::set_value($ar, 'requester', $agency);
@@ -180,9 +180,9 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_materiale_id', $param->materialType->_value);
               $this->watch->start('sql5');
               $oci->set_query('SELECT *
-                              FROM vip_fjernlaan
-                              WHERE laangiver = :bind_laangiver
-                              AND materiale_id = :bind_materiale_id');
+                                 FROM vip_fjernlaan
+                                WHERE laangiver = :bind_laangiver
+                                  AND materiale_id = :bind_materiale_id');
               $this->watch->stop('sql5');
               $ap = &$res->autProvider->_value;
               Object::set_value($ap, 'provider', $agency);
@@ -326,10 +326,10 @@ class openAgency extends webServiceServer {
             $oci->bind('bind_bib_nr', $agency);
             $this->watch->start('sql1');
             $oci->set_query('SELECT best_modt, ' . $will_receive . ' "WR", vt.*, vte.*
-                            FROM vip_beh vb, vip_txt vt, vip_txt_eng vte
-                            WHERE vb.bib_nr = :bind_bib_nr
-                            AND vb.bib_nr = vt.bib_nr (+)
-                            AND vb.bib_nr = vte.bib_nr (+)');
+                               FROM vip_beh vb, vip_txt vt, vip_txt_eng vte
+                              WHERE vb.bib_nr = :bind_bib_nr
+                                AND vb.bib_nr = vt.bib_nr (+)
+                                AND vb.bib_nr = vte.bib_nr (+)');
             $this->watch->stop('sql1');
             if ($vb_row = $oci->fetch_into_assoc()) {
               Object::set_value($res, 'willReceive',
@@ -397,8 +397,8 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_profile_name', $profile_name);
           $this->watch->start('sql1');
           $oci->set_query('SELECT * FROM vip_culr_profile 
-                           WHERE bib_nr = :bind_agency 
-                             AND profilename = :bind_profile_name');
+                            WHERE bib_nr = :bind_agency 
+                              AND profilename = :bind_profile_name');
           $this->watch->stop('sql1');
           while ($cp_row = $oci->fetch_into_assoc()) {
             Object::set_value($cp, 'agencyId', self::normalize_agency($cp_row['BIB_NR']));
@@ -554,21 +554,20 @@ class openAgency extends webServiceServer {
                           ors.renew ors_renew, ors.renewanswer ors_renewanswer, 
                           ors.renew_answer_synchronic ors_renew_answer_synchronic,
                           ors.iso18626_address, ors.iso18626_password
-                  FROM vip v, vip_vsn vsn, vip_danbib vd, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
-                       vip_sup sup, vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat, open_agency_ors ors
-                  WHERE 
-                    ' . $filter_sql . '
-                    AND v.kmd_nr = vsn.bib_nr (+)
-                    AND v.bib_nr = vd.bib_nr (+)
-                    AND v.bib_nr = vb.bib_nr (+)
-                    AND v.bib_nr = sup.bib_nr (+)
-                    AND v.bib_nr = txt.bib_nr (+)
-                    AND v.bib_nr = hold.bib_nr (+)
-                    AND v.bib_nr = eng.bib_nr (+)
-                    AND v.bib_nr = bestil.bib_nr (+)
-                    AND v.bib_nr = ors.bib_nr (+)
-                    AND v.bib_nr = kat.bib_nr (+)
-                  ORDER BY vsn.bib_nr ASC, v.bib_nr ASC';
+                     FROM vip v, vip_vsn vsn, vip_danbib vd, vip_beh vb, vip_txt txt, vip_txt_eng eng, 
+                          vip_sup sup, vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat, open_agency_ors ors
+                    WHERE ' . $filter_sql . '
+                      AND v.kmd_nr = vsn.bib_nr (+)
+                      AND v.bib_nr = vd.bib_nr (+)
+                      AND v.bib_nr = vb.bib_nr (+)
+                      AND v.bib_nr = sup.bib_nr (+)
+                      AND v.bib_nr = txt.bib_nr (+)
+                      AND v.bib_nr = hold.bib_nr (+)
+                      AND v.bib_nr = eng.bib_nr (+)
+                      AND v.bib_nr = bestil.bib_nr (+)
+                      AND v.bib_nr = ors.bib_nr (+)
+                      AND v.bib_nr = kat.bib_nr (+)
+                    ORDER BY vsn.bib_nr ASC, v.bib_nr ASC';
             $this->watch->start('sql1');
             $oci->set_query($sql);
             $this->watch->stop('sql1');
@@ -651,11 +650,10 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_fb_licens', $fb_licens);
           $this->watch->start('sql1');
           $oci->set_query('SELECT ud.bib_nr, domain, proxyurl 
-              FROM user_domains ud, licensguide lg
-              WHERE ' . $where . '
-              origin_source = :bind_fb_licens
-              AND ud.bib_nr = lg.bib_nr (+)
-              ORDER BY bib_nr');
+                             FROM user_domains ud, licensguide lg
+                            WHERE ' . $where . ' origin_source = :bind_fb_licens
+                              AND ud.bib_nr = lg.bib_nr (+)
+                            ORDER BY bib_nr');
           $this->watch->stop('sql1');
           $last_bib = '';
           while ($sl_row = $oci->fetch_into_assoc()) {
@@ -729,9 +727,9 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_y', 'Y');
           $this->watch->start('sql1');
           $oci->set_query('SELECT DISTINCT *
-              FROM broend_to_kilder
-              WHERE searchable = :bind_y
-              ORDER BY upper(name)');
+                             FROM broend_to_kilder
+                            WHERE searchable = :bind_y
+                            ORDER BY upper(name)');
           $kilder_res = $oci->fetch_all_into_assoc();
           $this->watch->stop('sql1');
           foreach ($kilder_res as $kilde) {
@@ -743,10 +741,10 @@ class openAgency extends webServiceServer {
           }
           $this->watch->start('sql2');
           $oci->set_query('SELECT broendkilde_id, profil_id, name, broend_to_profiler.bib_nr
-              FROM broendprofil_to_kilder, broend_to_profiler
-              WHERE broendprofil_to_kilder.broendkilde_id IS NOT NULL
-              AND broendprofil_to_kilder.profil_id IS NOT NULL
-              AND broend_to_profiler.id_nr = broendprofil_to_kilder.profil_id (+)' . $sql_add);
+                             FROM broendprofil_to_kilder, broend_to_profiler
+                            WHERE broendprofil_to_kilder.broendkilde_id IS NOT NULL
+                              AND broendprofil_to_kilder.profil_id IS NOT NULL
+                              AND broend_to_profiler.id_nr = broendprofil_to_kilder.profil_id (+)' . $sql_add);
           $profil_res = $oci->fetch_all_into_assoc();
           $this->watch->stop('sql2');
           $profiles = array();
@@ -864,14 +862,14 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_bib_nr', $agency);
           $this->watch->start('sql1');
           $oci->set_query('SELECT ' . $q . '
-              FROM vip v, vip_vsn vv, vip_beh vb, vip_bestil vbst, vip_danbib vd, vip_kat vk, open_agency_ors oao
-              WHERE v.bib_nr = vd.bib_nr (+)
-              AND v.kmd_nr = vv.bib_nr (+)
-              AND v.bib_nr = vk.bib_nr (+)
-              AND v.bib_nr = vb.bib_nr (+)
-              AND v.bib_nr = vbst.bib_nr (+)
-              AND v.bib_nr = oao.bib_nr (+)
-              AND v.bib_nr = :bind_bib_nr');
+                             FROM vip v, vip_vsn vv, vip_beh vb, vip_bestil vbst, vip_danbib vd, vip_kat vk, open_agency_ors oao
+                            WHERE v.bib_nr = vd.bib_nr (+)
+                              AND v.kmd_nr = vv.bib_nr (+)
+                              AND v.bib_nr = vk.bib_nr (+)
+                              AND v.bib_nr = vb.bib_nr (+)
+                              AND v.bib_nr = vbst.bib_nr (+)
+                              AND v.bib_nr = oao.bib_nr (+)
+                              AND v.bib_nr = :bind_bib_nr');
           $oa_row = $oci->fetch_into_assoc();
           $this->watch->stop('sql1');
           self::sanitize_array($oa_row);
@@ -886,8 +884,8 @@ class openAgency extends webServiceServer {
             $oci->bind('bind_bib_nr', $help);
             $this->watch->start('sql2');
             $oci->set_query('SELECT *
-                FROM vip_viderestil
-                WHERE bib_nr = :bind_bib_nr');
+                               FROM vip_viderestil
+                              WHERE bib_nr = :bind_bib_nr');
             while ($row = $oci->fetch_into_assoc()) {
               $vv_row[$row['BIB_NR_VIDERESTIL']] = $row;
             }
@@ -896,10 +894,10 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_nr', $help);
               $this->watch->start('sql3');
               $oci->set_query('SELECT vilse 
-                  FROM vip, laaneveje
-                  WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
-                  AND vip.bib_nr = :bind_bib_nr
-                  ORDER BY prionr DESC');
+                                 FROM vip, laaneveje
+                                WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
+                                  AND vip.bib_nr = :bind_bib_nr
+                                ORDER BY prionr DESC');
               while ($lv_row = $oci->fetch_into_assoc()) {
                 if ($p = $vv_row[$lv_row['VILSE']]) {
                   $consortia[] = $p;
@@ -920,11 +918,10 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_nr', $agency);
             }
             $this->watch->start('sql4');
-            $oci->set_query('SELECT fjernadgang.har_laanertjek fjernadgang_har_laanertjek, fjernadgang.*, 
-                fjernadgang_andre.*
-                FROM fjernadgang, fjernadgang_andre
-                WHERE fjernadgang.faust (+) = fjernadgang_andre.faust
-                AND bib_nr = :bind_bib_nr');
+            $oci->set_query('SELECT fjernadgang.har_laanertjek fjernadgang_har_laanertjek, fjernadgang.*, fjernadgang_andre.*
+                               FROM fjernadgang, fjernadgang_andre
+                              WHERE fjernadgang.faust (+) = fjernadgang_andre.faust
+                                AND bib_nr = :bind_bib_nr');
             $fjernadgang_rows = $oci->fetch_all_into_assoc();
             $this->watch->stop('sql4');
           }
@@ -1717,33 +1714,32 @@ class openAgency extends webServiceServer {
       }
 
       $sql ='SELECT ' . $distance_sql . 'v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-        v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
-        v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr, v.uni_c_nr,
-        TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
-        v.latitude, v.longitude,
-        vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
-        vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
-        TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, vsn.sb_kopibestil,
-        vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
-        vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
-        txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
-        bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
-        kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
-        kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, 
-        kat.url_viderestil, kat.url_bib_kat
-          FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
-        vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
-          WHERE 
-          ' . $filter_sql . '
-          AND v.kmd_nr = vsn.bib_nr (+)
-          AND v.bib_nr = vb.bib_nr (+)
-          AND v.bib_nr = sup.bib_nr (+)
-          AND v.bib_nr = txt.bib_nr (+)
-          AND v.bib_nr = hold.bib_nr (+)
-          AND v.bib_nr = eng.bib_nr (+)
-          AND v.bib_nr = bestil.bib_nr (+)
-          AND v.bib_nr = kat.bib_nr (+)
-          ORDER BY ' . $order_by;
+                    v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
+                    v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr, v.uni_c_nr,
+                    TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
+                    v.latitude, v.longitude,
+                    vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
+                    vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
+                    TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, vsn.sb_kopibestil,
+                    vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
+                    vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                    txt.aabn_tid, txt.kvt_tekst_fjl, eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
+                    bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf, bestil.ncip_address, bestil.ncip_password,
+                    kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
+                    kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, 
+                    kat.url_viderestil, kat.url_bib_kat
+               FROM vip v, vip_vsn vsn, vip_beh vb, vip_txt txt, vip_txt_eng eng, vip_sup sup,
+                    vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
+              WHERE ' . $filter_sql . '
+                AND v.kmd_nr = vsn.bib_nr (+)
+                AND v.bib_nr = vb.bib_nr (+)
+                AND v.bib_nr = sup.bib_nr (+)
+                AND v.bib_nr = txt.bib_nr (+)
+                AND v.bib_nr = hold.bib_nr (+)
+                AND v.bib_nr = eng.bib_nr (+)
+                AND v.bib_nr = bestil.bib_nr (+)
+                AND v.bib_nr = kat.bib_nr (+)
+              ORDER BY ' . $order_by;
       //var_dump($geoloc); var_dump($sorts); var_dump($distance_sql); die($sql);
       $this->watch->start('sql1');
       try {
@@ -1772,7 +1768,7 @@ class openAgency extends webServiceServer {
         $this->watch->stop('sql1');
         verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
         Object::set_value($res, 'error', 'service_unavailable');
-      }
+      } 
       $this->watch->stop('sql1');
     }
     //var_dump($res); var_dump($param); die();
@@ -1874,10 +1870,10 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_u', 'U');
           $this->watch->start('sql1');
           $oci->set_query('SELECT vsn.bib_nr vsn_bib_nr, vsn.bib_type, v.bib_nr, v.type
-              FROM vip v, vip_vsn vsn
-              WHERE v.kmd_nr = vsn.bib_nr
-              AND (v.delete_mark is null OR v.delete_mark = :bind_u)
-              ORDER BY bib_nr');
+                             FROM vip v, vip_vsn vsn
+                            WHERE v.kmd_nr = vsn.bib_nr
+                              AND (v.delete_mark is null OR v.delete_mark = :bind_u)
+                            ORDER BY bib_nr');
           $this->watch->stop('sql1');
 //$mem = memory_get_usage();
           while ($row = $oci->fetch_into_assoc()) {
@@ -1896,7 +1892,7 @@ class openAgency extends webServiceServer {
           Object::set_value($res, 'error', 'service_unavailable');
         }
       }
-      $this->watch->stop('sql');
+      $this->watch->stop('sql1');
     }
     Object::set_value($ret, 'libraryTypeListResponse', $res);
     $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
@@ -1940,9 +1936,9 @@ class openAgency extends webServiceServer {
             $oci->bind('bind_u', 'U');
             $this->watch->start('sql1');
             $oci->set_query('SELECT vsn.bib_nr, vsn.navn
-                FROM vip v, vip_vsn vsn
-                WHERE v.bib_nr = vsn.bib_nr
-                AND (v.delete_mark is null OR v.delete_mark = :bind_u) ' . $filter_bib_type);
+                               FROM vip v, vip_vsn vsn
+                              WHERE v.bib_nr = vsn.bib_nr
+                                AND (v.delete_mark is null OR v.delete_mark = :bind_u) ' . $filter_bib_type);
             while ($vv_row = $oci->fetch_into_assoc()) {
               Object::set_value($o, 'agencyId', self::normalize_agency($vv_row['BIB_NR']));
               Object::set_value($o, 'agencyName', $vv_row['NAVN']);
@@ -2123,13 +2119,13 @@ class openAgency extends webServiceServer {
               $filter_delete_vsn = 'v.delete_mark is null AND ';
             }
             $sql = 'SELECT vsn.bib_nr, vsn.navn, vsn.bib_type, vsn.tlf_nr, vsn.email,
-              vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil,
-              vsn.cvr_nr, vsn.p_nr, vsn.ean_nummer
-                FROM vip_vsn vsn, vip v, vip_sup vs
-                WHERE ' . $filter_delete_vsn . ($filter_bib_type ? implode(' AND ', $filter_bib_type) . ' AND ' : '') . '
-                v.bib_nr = vs.bib_nr (+)
-                AND v.kmd_nr = vsn.bib_nr
-                ORDER BY vsn.bib_nr';
+                           vsn.badr, vsn.bpostnr, vsn.bcity, vsn.url, vsn.sb_kopibestil,
+                           vsn.cvr_nr, vsn.p_nr, vsn.ean_nummer
+                      FROM vip_vsn vsn, vip v, vip_sup vs
+                     WHERE ' . $filter_delete_vsn . ($filter_bib_type ? implode(' AND ', $filter_bib_type) . ' AND ' : '') . '
+                             v.bib_nr = vs.bib_nr (+)
+                       AND v.kmd_nr = vsn.bib_nr
+                     ORDER BY vsn.bib_nr';
             $this->watch->start('sql1');
             $oci->set_query($sql);
             while ($row = $oci->fetch_into_assoc()) {
@@ -2177,32 +2173,31 @@ class openAgency extends webServiceServer {
               $filter_filial = ' AND (vb.filial_tf <> :bind_n OR vb.filial_tf is null)';
             }
             $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
-              v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr, v.uni_c_nr, 
-              vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
-              vd.svar_email,
-              txt.aabn_tid, txt.kvt_tekst_fjl, 
-              eng.aabn_tid_e, eng.kvt_tekst_fjl_e, 
-              hold.holdeplads,
-              bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
-              kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user, kat.ncip_renew, 
-              kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, kat.url_viderestil, kat.url_bib_kat
-                FROM vip v, vip_beh vb, vip_danbib vd, vip_txt txt, vip_txt_eng eng, 
-              vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
-                WHERE v.kmd_nr IN (SELECT UNIQUE vsn.bib_nr
-                    FROM vip_vsn vsn, vip v, vip_sup vs
-                    WHERE ' . $filter_delete_vsn . '
-                    v.kmd_nr = vsn.bib_nr ' .
-                    ($filter_bib_type ? ' AND ' . implode(' AND ', $filter_bib_type) : '') . ')
-                ' . $filter_delete . '
-                ' . $filter_filial . '
-                AND v.bib_nr = vb.bib_nr (+)
-                AND v.bib_nr = vd.bib_nr (+)
-                AND v.bib_nr = txt.bib_nr (+)
-                AND v.bib_nr = hold.bib_nr (+)
-                AND v.bib_nr = eng.bib_nr (+)
-                AND v.bib_nr = bestil.bib_nr (+)
-                AND v.bib_nr = kat.bib_nr (+)
-                ORDER BY v.kmd_nr, v.bib_nr';
+                          v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr, v.uni_c_nr, 
+                          vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                          vd.svar_email,
+                          txt.aabn_tid, txt.kvt_tekst_fjl, 
+                          eng.aabn_tid_e, eng.kvt_tekst_fjl_e, 
+                          hold.holdeplads,
+                          bestil.url_serv_dkl, bestil.support_email, bestil.support_tlf,
+                          kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user, kat.ncip_renew, 
+                          kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn, kat.url_viderestil, kat.url_bib_kat
+                     FROM vip v, vip_beh vb, vip_danbib vd, vip_txt txt, vip_txt_eng eng, 
+                          vip_bogbus_holdeplads hold, vip_bestil bestil, vip_kat kat
+                    WHERE v.kmd_nr IN (SELECT UNIQUE vsn.bib_nr
+                                         FROM vip_vsn vsn, vip v, vip_sup vs
+                                        WHERE ' . $filter_delete_vsn . ' v.kmd_nr = vsn.bib_nr ' .
+                                              ($filter_bib_type ? ' AND ' . implode(' AND ', $filter_bib_type) : '') . ')
+                          ' . $filter_delete . '
+                          ' . $filter_filial . '
+                      AND v.bib_nr = vb.bib_nr (+)
+                      AND v.bib_nr = vd.bib_nr (+)
+                      AND v.bib_nr = txt.bib_nr (+)
+                      AND v.bib_nr = hold.bib_nr (+)
+                      AND v.bib_nr = eng.bib_nr (+)
+                      AND v.bib_nr = bestil.bib_nr (+)
+                      AND v.bib_nr = kat.bib_nr (+)
+                    ORDER BY v.kmd_nr, v.bib_nr';
             $this->watch->start('sql3');
             $oci->set_query($sql);
             $this->watch->stop('sql3');
@@ -2319,9 +2314,9 @@ class openAgency extends webServiceServer {
             $oci->bind('bind_y', 'Y');
             $this->watch->start('sql1');
             $oci->set_query('SELECT DISTINCT *
-                FROM broend_to_kilder
-                WHERE searchable = :bind_y
-                ORDER BY upper(name)');
+                               FROM broend_to_kilder
+                              WHERE searchable = :bind_y
+                              ORDER BY upper(name)');
             $kilder = $oci->fetch_all_into_assoc();
             $this->watch->stop('sql1');
             $oci->bind('bind_agency', $agency);
@@ -2331,11 +2326,11 @@ class openAgency extends webServiceServer {
             }
             $this->watch->start('sql2');
             $oci->set_query('SELECT broendkilde_id, profil_id, name
-                FROM broendprofil_to_kilder, broend_to_profiler
-                WHERE broend_to_profiler.bib_nr = :bind_agency
-                AND broendprofil_to_kilder.broendkilde_id IS NOT NULL
-                AND broendprofil_to_kilder.profil_id IS NOT NULL
-                AND broend_to_profiler.id_nr = broendprofil_to_kilder.profil_id (+)' . $sql_add);
+                               FROM broendprofil_to_kilder, broend_to_profiler
+                              WHERE broend_to_profiler.bib_nr = :bind_agency
+                                AND broendprofil_to_kilder.broendkilde_id IS NOT NULL
+                                AND broendprofil_to_kilder.profil_id IS NOT NULL
+                                AND broend_to_profiler.id_nr = broendprofil_to_kilder.profil_id (+)' . $sql_add);
             $profil_res = $oci->fetch_all_into_assoc();
             $this->watch->stop('sql2');
             $profiler = array();
@@ -2351,11 +2346,11 @@ class openAgency extends webServiceServer {
                   $oci->bind('bind_profil_id', $profil_no);
                   $this->watch->start('sql3');
                   $oci->set_query('SELECT DISTINCT rdf, rdf_reverse
-                      FROM broend_relation, broend_kilde_relation, broend_profil_kilde_relation
-                      WHERE broend_kilde_relation.broendkilde_id = :bind_kilde_id 
-                      AND broend_profil_kilde_relation.profil_id = :bind_profil_id 
-                      AND broend_profil_kilde_relation.kilde_relation_id =  broend_kilde_relation.id_nr 
-                      AND broend_kilde_relation.relation_id = broend_relation.id_nr');
+                                     FROM broend_relation, broend_kilde_relation, broend_profil_kilde_relation
+                                    WHERE broend_kilde_relation.broendkilde_id = :bind_kilde_id 
+                                      AND broend_profil_kilde_relation.profil_id = :bind_profil_id 
+                                      AND broend_profil_kilde_relation.kilde_relation_id =  broend_kilde_relation.id_nr 
+                                      AND broend_kilde_relation.relation_id = broend_relation.id_nr');
                   $relations = $oci->fetch_all_into_assoc();
                   $this->watch->stop('sql3');
                   Object::set_value($s, 'sourceName', $kilde['NAME']);
@@ -2399,12 +2394,11 @@ class openAgency extends webServiceServer {
           }
           try {
             $this->watch->start('sql4');
-            $oci->set_query('SELECT DISTINCT broendprofiler.name bp_name,
-                broendkilder.name, submitter, format
-                FROM broendkilder, broendprofil_kilder, broendprofiler
-                WHERE broendkilder.id_nr = broendprofil_kilder.broendkilde_id
-                AND broendprofil_kilder.profil_id = broendprofiler.id_nr
-                AND broendprofiler.bib_nr = :bind_agency' . $sql_add);
+            $oci->set_query('SELECT DISTINCT broendprofiler.name bp_name, broendkilder.name, submitter, format
+                               FROM broendkilder, broendprofil_kilder, broendprofiler
+                              WHERE broendkilder.id_nr = broendprofil_kilder.broendkilde_id
+                                AND broendprofil_kilder.profil_id = broendprofiler.id_nr
+                                AND broendprofiler.bib_nr = :bind_agency' . $sql_add);
             $this->watch->stop('sql4');
             while ($s_row = $oci->fetch_into_assoc()) {
               Object::set_value($s, 'sourceName', $s_row['NAME']);
@@ -2467,24 +2461,24 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_har_adgang', $uno);
           $this->watch->start('sql1');
           $oci->set_query('SELECT fjernadgang_licenser.navn "licens_navn",
-              fjernadgang_licenser.url "licens_url",
-              fjernadgang_dbc.navn "dbc_navn",
-              fjernadgang_dbc.url "dbc_url",
-              fjernadgang_dbc.har_fjernadgang "dbc_har_fjernadgang",
-              fjernadgang_andre.navn "andre_navn",
-              fjernadgang_andre.url "andre_url",
-              fjernadgang_andre.har_fjernadgang "andre_har_fjernadgang",
-              fjernadgang.har_adgang,
-              fjernadgang.faust,
-              fjernadgang.url,
-              autolink
-              FROM fjernadgang, fjernadgang_licenser, fjernadgang_dbc, fjernadgang_andre, licensguide
-              WHERE fjernadgang.bib_nr = :bind_agency
-              AND fjernadgang.type = :bind_har_adgang
-              AND fjernadgang.faust = fjernadgang_licenser.faust (+)
-              AND fjernadgang.faust = fjernadgang_dbc.faust (+)
-              AND fjernadgang.faust = fjernadgang_andre.faust (+)
-              AND fjernadgang.bib_nr = licensguide.bib_nr (+)');
+                                  fjernadgang_licenser.url "licens_url",
+                                  fjernadgang_dbc.navn "dbc_navn",
+                                  fjernadgang_dbc.url "dbc_url",
+                                  fjernadgang_dbc.har_fjernadgang "dbc_har_fjernadgang",
+                                  fjernadgang_andre.navn "andre_navn",
+                                  fjernadgang_andre.url "andre_url",
+                                  fjernadgang_andre.har_fjernadgang "andre_har_fjernadgang",
+                                  fjernadgang.har_adgang,
+                                  fjernadgang.faust,
+                                  fjernadgang.url,
+                                  autolink
+                             FROM fjernadgang, fjernadgang_licenser, fjernadgang_dbc, fjernadgang_andre, licensguide
+                            WHERE fjernadgang.bib_nr = :bind_agency
+                              AND fjernadgang.type = :bind_har_adgang
+                              AND fjernadgang.faust = fjernadgang_licenser.faust (+)
+                              AND fjernadgang.faust = fjernadgang_dbc.faust (+)
+                              AND fjernadgang.faust = fjernadgang_andre.faust (+)
+                              AND fjernadgang.bib_nr = licensguide.bib_nr (+)');
           $buf = $oci->fetch_all_into_assoc();
           $this->watch->stop('sql1');
           Object::set_value($res, 'agencyId', $param->agencyId->_value);
@@ -2645,10 +2639,10 @@ class openAgency extends webServiceServer {
         $oci->bind('bind_agency', $agency);
         $this->watch->start('sql1');
         $oci->set_query('SELECT vilse 
-            FROM vip, ' . $table_name . '
-            WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
-            AND vip.bib_nr = :bind_agency
-            ORDER BY prionr DESC');
+                           FROM vip, ' . $table_name . '
+                          WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
+                            AND vip.bib_nr = :bind_agency
+                          ORDER BY prionr DESC');
         $this->watch->stop('sql1');
         $prio = array();
         while ($s_row = $oci->fetch_into_assoc()) {
