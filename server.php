@@ -537,6 +537,7 @@ class openAgency extends webServiceServer {
             $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                           v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
                           v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.knudepunkt, v.p_nr, v.uni_c_nr, 
+                          v.mail_refused_records, v.mail_data_transmission,
                           TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                           vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
                           vsn.email vsn_email, vsn.tlf_nr vsn_tlf_nr, vsn.fax_nr vsn_fax_nr, 
@@ -1716,6 +1717,7 @@ class openAgency extends webServiceServer {
       $sql ='SELECT ' . $distance_sql . 'v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                     v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark,
                     v.afsaetningsbibliotek, v.afsaetningsnavn_k, v.p_nr, v.uni_c_nr,
+                    v.mail_refused_records, v.mail_data_transmission,
                     TO_CHAR(v.dato, \'YYYY-MM-DD\') dato, TO_CHAR(v.bs_dato, \'YYYY-MM-DD\') bs_dato,
                     v.latitude, v.longitude,
                     vsn.navn vsn_navn, vsn.bib_nr vsn_bib_nr, vsn.bib_type vsn_bib_type,
@@ -2178,6 +2180,7 @@ class openAgency extends webServiceServer {
             }
             $sql ='SELECT v.bib_nr, v.navn, v.navn_e, v.navn_k, v.navn_e_k, v.type, v.tlf_nr, v.email, v.badr, 
                           v.bpostnr, v.bcity, v.isil, v.kmd_nr, v.url_homepage, v.url_payment, v.delete_mark, v.p_nr, v.uni_c_nr, 
+                          v.mail_refused_records, v.mail_data_transmission,
                           vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                           vd.svar_email,
                           txt.aabn_tid, txt.kvt_tekst_fjl, 
@@ -2790,6 +2793,8 @@ class openAgency extends webServiceServer {
       Object::set_value($pickupAgency, 'branchPhone', $row['TLF_NR']);
       Object::set_value($pickupAgency, 'branchEmail', $row['EMAIL']);
       if ($row['SVAR_EMAIL']) Object::set_value($pickupAgency, 'branchIllEmail', $row['SVAR_EMAIL']);
+      if ($row['MAIL_REFUSED_RECORDS']) Object::set_value($pickupAgency, 'branchRejectedRecordsEmail', $row['MAIL_REFUSED_RECORDS']);
+      if ($row['MAIL_DATA_TRANSMISSION']) Object::set_value($pickupAgency, 'branchTransReportEmail', $row['MAIL_DATA_TRANSMISSION']);
       Object::set_value($pickupAgency, 'branchIsAgency', ($row['FILIAL_VSN'] == 'J' ? 1 : 0));
       if ($row['BADR']) Object::set_value($pickupAgency, 'postalAddress', $row['BADR']);
       if ($row['BPOSTNR']) Object::set_value($pickupAgency, 'postalCode', $row['BPOSTNR']);

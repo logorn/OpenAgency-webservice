@@ -540,8 +540,10 @@ You should have received a copy of the GNU Affero General Public License along w
   </xs:complexType>
   <xs:element name="branchPhone" type="xs:string"/>
   <xs:element name="branchPNumber" type="xs:string"/>
+  <xs:element name="branchRejectedRecordsEmail" type="xs:string"/>
   <xs:element name="branchStatus" type="xs:string"/>
   <xs:element name="branchStilNumber" type="xs:string"/>
+  <xs:element name="branchTransReportEmail" type="xs:string"/>
   <xs:element name="branchType" type="xs:string"/>
   <xs:element name="branchWebsiteUrl" type="xs:string"/>
   <xs:element name="callback" type="xs:string">
@@ -904,6 +906,8 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:branchPhone"/>
       <xs:element ref="oa:branchEmail"/>
       <xs:element ref="oa:branchIllEmail" minOccurs="0"/>
+      <xs:element ref="oa:branchRejectedRecordsEmail" minOccurs="0"/>
+      <xs:element ref="oa:branchTransReportEmail" minOccurs="0"/>
       <xs:element ref="oa:branchIsAgency"/>
       <xs:element ref="oa:postalAddress" minOccurs="0"/>
       <xs:element ref="oa:postalCode" minOccurs="0"/>
