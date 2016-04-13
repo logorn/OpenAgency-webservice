@@ -1809,14 +1809,18 @@ class openAgency extends webServiceServer {
           try {
             if ($agency) {
               $oci->bind('bind_bib_nr', $agency);
-              $where = ' WHERE bib_nr = :bind_bib_nr';
+              $and_bib = ' AND vip_library_rules.bib_nr = :bind_bib_nr';
             }
             $this->watch->start('sql1');
-            $oci->set_query('SELECT * FROM vip_library_rules' . $where . ' ORDER BY bib_nr ASC');
+            $oci->set_query('SELECT vip_vsn.bib_type, vip_library_rules.* 
+                               FROM vip_library_rules, vip_vsn, vip
+                              WHERE vip_vsn.bib_nr = vip.kmd_nr 
+                                AND vip.bib_nr = vip_library_rules.bib_nr ' . $and_bib . ' ORDER BY vip_library_rules.bib_nr ASC');
             $this->watch->stop('sql1');
             //$mem = memory_get_usage();
             while ($row = $oci->fetch_into_assoc()) {
               Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
+              Object::set_value($o, 'agencyType', $row['BIB_TYPE']);
               foreach ($row as $name => $value) {
                 if ($name != 'BIB_NR') {
                   Object::set_value($r, 'name', strtolower($name));
