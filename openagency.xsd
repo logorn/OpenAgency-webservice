@@ -703,6 +703,8 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:branchPhone" minOccurs="0"/>
       <xs:element ref="oa:branchFax" minOccurs="0"/>
       <xs:element ref="oa:branchEmail" minOccurs="0"/>
+      <xs:element ref="oa:branchRejectedRecordsEmail" minOccurs="0"/>
+      <xs:element ref="oa:branchTransReportEmail" minOccurs="0"/>
       <xs:element ref="oa:branchType" minOccurs="0"/>
       <xs:element ref="oa:dropOffAgency" minOccurs="0"/>
       <xs:element ref="oa:postalAddress" minOccurs="0"/>
@@ -906,8 +908,6 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:branchPhone"/>
       <xs:element ref="oa:branchEmail"/>
       <xs:element ref="oa:branchIllEmail" minOccurs="0"/>
-      <xs:element ref="oa:branchRejectedRecordsEmail" minOccurs="0"/>
-      <xs:element ref="oa:branchTransReportEmail" minOccurs="0"/>
       <xs:element ref="oa:branchIsAgency"/>
       <xs:element ref="oa:postalAddress" minOccurs="0"/>
       <xs:element ref="oa:postalCode" minOccurs="0"/>
