@@ -2814,7 +2814,7 @@ class openAgency extends webServiceServer {
       if ($row['SUPPORT_TLF']) Object::set_value($pickupAgency, 'librarydkSupportPhone', $row['SUPPORT_TLF']);
     }
     if ($row['HOLDEPLADS'])
-      $pickupAgency->agencySubdivision[]->_value = $row['HOLDEPLADS'];
+      Object::set_array_value($pickupAgency, 'agencySubdivision', $row['HOLDEPLADS']);
     if (empty($pickupAgency->openingHours) && ($row['AABN_TID'] || $row['AABN_TID_E'])) {
       if ($row['AABN_TID']) {
         $pickupAgency->openingHours[] = self::value_and_language($row['AABN_TID'], 'dan');
