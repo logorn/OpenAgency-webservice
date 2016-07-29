@@ -1818,7 +1818,7 @@ class openAgency extends webServiceServer {
             $this->watch->start('sql1');
             $oci->set_query('SELECT vip_vsn.bib_type, vip_library_rules.* 
                                FROM vip_library_rules, vip_vsn, vip
-                              WHERE vip_vsn.bib_nr = vip.kmd_nr 
+                              WHERE vip.kmd_nr = vip_vsn.bib_nr (+)
                                 AND vip.bib_nr = vip_library_rules.bib_nr ' . $and_bib . ' ORDER BY vip_library_rules.bib_nr ASC');
             $this->watch->stop('sql1');
             //$mem = memory_get_usage();
