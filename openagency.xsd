@@ -785,7 +785,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:complexType name="libraryRules">
     <xs:sequence>
       <xs:element ref="oa:agencyId"/>
-      <xs:element ref="oa:agencyType"/>
+      <xs:element ref="oa:agencyType" minOccurs="0"/>
       <xs:element ref="oa:libraryRule" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
