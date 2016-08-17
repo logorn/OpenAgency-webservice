@@ -1796,7 +1796,7 @@ class openAgency extends webServiceServer {
     if (!$this->aaa->has_right('netpunkt.dk', 500))
       Object::set_value($res, 'error', 'authentication_error');
     else {
-      $cache_key = 'OA_libRu_' . $this->config->get_inifile_hash() . $param->agencyId->_value;
+      $cache_key = 'OA_libRu_' . $this->config->get_inifile_hash() . $param->agencyId->_value . md5(json_encode($param->libraryRule)); 
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
@@ -1815,6 +1815,13 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_nr', $agency);
               $and_bib = ' AND vip_library_rules.bib_nr = :bind_bib_nr';
             }
+            else if ($param->libraryRule) {
+              $lib_rule = is_array($param->libraryRule) ? $param->libraryRule : array($param->libraryRule);
+              foreach ($lib_rule as $idx => $rule) {
+                $oci->bind('bind_val_' . $idx, self::xs_boolean($rule->_value->bool->_value) ? 'Y' : 'N');
+                $and_bib .= ' AND vip_library_rules.' . $rule->_value->name->_value . ' = :bind_val_' . $idx;
+              }
+            }
             $this->watch->start('sql1');
             $oci->set_query('SELECT vip_vsn.bib_type, vip_library_rules.* 
                                FROM vip_library_rules, vip_vsn, vip
@@ -1826,7 +1833,7 @@ class openAgency extends webServiceServer {
               Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
               Object::set_value($o, 'agencyType', $row['BIB_TYPE']);
               foreach ($row as $name => $value) {
-                if ($name != 'BIB_NR') {
+                if ($name != 'BIB_NR' && $name != 'BIB_TYPE') {
                   Object::set_value($r, 'name', strtolower($name));
                   Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
                   Object::set_array_value($o, 'libraryRule', $r);
