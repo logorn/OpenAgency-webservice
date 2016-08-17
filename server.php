@@ -1848,7 +1848,11 @@ class openAgency extends webServiceServer {
           catch (ociException $e) {
             $this->watch->stop('sql1');
             verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
-            Object::set_value($res, 'error', 'service_unavailable');
+            if ($oci->error['code'] == 904) {
+              Object::set_value($res, 'error', 'error_in_request');
+            } else {
+              Object::set_value($res, 'error', 'service_unavailable');
+            }
           }
         }
       }
