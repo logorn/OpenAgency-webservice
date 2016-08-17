@@ -421,6 +421,7 @@ You should have received a copy of the GNU Affero General Public License along w
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:element name="addToQuery" type="xs:string"/>
   <xs:element name="autPotential" type="oa:autPotential"/>
   <xs:complexType name="autPotential">
     <xs:sequence>
@@ -970,6 +971,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:complexType name="profile">
     <xs:sequence>
       <xs:element ref="oa:profileName"/>
+      <xs:element ref="oa:addToQuery" minOccurs="0"/>
       <xs:element ref="oa:source" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>

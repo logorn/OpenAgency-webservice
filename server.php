@@ -2344,7 +2344,7 @@ class openAgency extends webServiceServer {
               $sql_add = ' AND lower(broend_to_profiler.name) = :bind_profile';
             }
             $this->watch->start('sql2');
-            $oci->set_query('SELECT broendkilde_id, profil_id, name
+            $oci->set_query('SELECT broendkilde_id, profil_id, name, add_to_query
                                FROM broendprofil_to_kilder, broend_to_profiler
                               WHERE broend_to_profiler.bib_nr = :bind_agency
                                 AND broendprofil_to_kilder.broendkilde_id IS NOT NULL
@@ -2375,6 +2375,7 @@ class openAgency extends webServiceServer {
                   Object::set_value($s, 'sourceName', $kilde['NAME']);
                   if (isset($profil[$kilde['ID_NR']])) {
                     $profile_name = $profil[$kilde['ID_NR']]['NAME'];
+                    $add_to_query = $profil[$kilde['ID_NR']]['ADD_TO_QUERY'];
                     Object::set_value($s, 'sourceSearchable', '1');
                   }
                   else
@@ -2394,6 +2395,9 @@ class openAgency extends webServiceServer {
                   }
                 }
                 Object::set_value($res->profile[$profil_no]->_value, 'profileName', $profile_name);
+                if ($add_to_query) {
+                  Object::set_value($res->profile[$profil_no]->_value, 'addToQuery', $add_to_query);
+                }
                 if ($s) {
                   Object::set_array_value($res->profile[$profil_no]->_value, 'source', $s);
                   unset($s);
