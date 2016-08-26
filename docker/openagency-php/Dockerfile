@@ -1,17 +1,32 @@
-FROM docker-i.dbc.dk/dbc-apache-php
+FROM dbc-apache-php
 MAINTAINER iscrum, iscrum@dbc.dk
 
-RUN apt-get update && apt-get install -qy --no-install-recommends gettext-base subversion && apt-get clean  && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -qy --no-install-recommends gettext-base php-pear php5-dev libcurl3-openssl-dev libpcre3-dev libaio-dev unzip make && apt-get clean  && rm -rf /var/lib/apt/lists/*
+
+ADD instantclient-basic-linux.x64-12.1.0.2.0.zip /data/instantclient-basic-linux.x64-12.1.0.2.0.zip
+ADD instantclient-sdk-linux.x64-12.1.0.2.0.zip /data/instantclient-sdk-linux.x64-12.1.0.2.0.zip
+ADD instantclient-sqlplus-linux.x64-12.1.0.2.0.zip /data/instantclient-sqlplus-linux.x64-12.1.0.2.0.zip
+
+RUN unzip /data/instantclient-basic-linux.x64-12.1.0.2.0.zip -d /usr/local/
+RUN unzip /data/instantclient-sdk-linux.x64-12.1.0.2.0.zip -d /usr/local/
+RUN unzip /data/instantclient-sqlplus-linux.x64-12.1.0.2.0.zip -d /usr/local/
+RUN ln -s /usr/local/instantclient_12_1 /usr/local/instantclient
+RUN ln -s /usr/local/instantclient_12_1/libclntsh.so.12.1 /usr/local/instantclient/libclntsh.so
+RUN ln -s /usr/local/instantclient_12_1/sqlplus /usr/bin/sqlplus
+RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8-2.0.10
+RUN echo "extension=oci8.so" > /etc/php5/apache2/conf.d/30-oci8.ini
 
 RUN svn co https://svn.dbc.dk/repos/php/OpenLibrary/OpenAgency/trunk/ $APACHE_ROOT/
 
-# Remove settings files as these will be overwritten later
 RUN rm $APACHE_ROOT/openagency.ini_INSTALL
 RUN rm $APACHE_ROOT/openagency.wsdl_INSTALL
 RUN rm $APACHE_ROOT/robots.txt_INSTALL
 
-# Adds settings files
-ADD php-init.d/* $APACHE_ROOT/
+ADD dbc-apache-php.d/* $PHP_HOME/
+ADD openagency.ini $APACHE_ROOT/openagency.ini
+ADD openagency.wsdl $APACHE_ROOT/openagency.wsdl
+ADD robots.txt $APACHE_ROOT/robots.txt
+ADD envsubst.sh /data/envsubst.sh
 
 RUN ln -s $APACHE_ROOT/server.php $APACHE_ROOT/index.php
 
@@ -23,15 +38,16 @@ ENV XMLDIR=./xml
 ENV LOGFILE=/tmp/openagency.log
 ENV VERBOSE_LEVEL=WARNING+ERROR+FATAL+STAT+TIMER+TRACE+DEBUG+Z3950+OCI
 ENV DUMP_TIMER=openAgency(%s)
+ENV SHOW_SAMPLE=1
 ENV AGENCY_CREDENTIALS=some_user/some_pwd@some.server.dbc.dk
 ENV Z3950_ADDRESS=z3950.dbc.dk:210/danbib
 ENV ISO18626_ADDRESS=http://oss-services.dbc.dk/copa-rs/app/iso18626/
 ENV ISO18626_PASSWORD=dbc_iso18626_password
-ENV AAA_IP_RIGHTS_IP_LIST=172.16.0.0-172.31.255.255;193.111.162.0-193.111.162.255
+ENV AAA_IP_RIGHTS_IP_LIST=0.0.0.1-255.255.255.255
 ENV AAA_IP_RIGHTS_RESOURCE_LIST=500,550,551,552
 
 #Replace variables in the settings files environment variables defined above
-RUN $APACHE_ROOT/envsubst.sh
-RUN rm $APACHE_ROOT/envsubst.sh
+RUN /data/envsubst.sh
+RUN rm /data/envsubst.sh
 
 EXPOSE 80
