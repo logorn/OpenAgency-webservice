@@ -19,11 +19,13 @@ services:
       - LOGFILE=/tmp/openagency.log
       - VERBOSE_LEVEL=WARNING+ERROR+FATAL+STAT+TIMER+TRACE+DEBUG+Z3950+OCI
       - DUMP_TIMER=openAgency(%s)
+      - SHOW_SAMPLE=1
       - AGENCY_CREDENTIALS=some_user/some_pwd@some.server.dbc.dk
       - Z3950_ADDRESS=z3950.dbc.dk:210/danbib
       - ISO18626_ADDRESS=http://oss-services.dbc.dk/copa-rs/app/iso18626/
       - ISO18626_PASSWORD=dbc_iso18626_password
       - AAA_IP_RIGHTS_IP_LIST=172.16.0.0-172.31.255.255;193.111.162.0-193.111.162.255
       - AAA_IP_RIGHTS_RESOURCE_LIST=500,550,551,552
+      - LOCALTION=__LOCALTION__
     expose:
       - "80"
