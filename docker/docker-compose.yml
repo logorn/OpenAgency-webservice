@@ -16,7 +16,8 @@ services:
       - DEFAULT_NAMESPACE_PREFIX=oa
       - XMLNS_OA=http://oss.dbc.dk/ns/openagency
       - XMLDIR=./xml
-      - LOGFILE=/tmp/openagency.log
+      - ENV LOGDIR=/tmp/ws_logs
+      - ENV LOGFILE=$LOGDIR/openagency.log
       - VERBOSE_LEVEL=WARNING+ERROR+FATAL+STAT+TIMER+TRACE+DEBUG+Z3950+OCI
       - DUMP_TIMER=openAgency(%s)
       - SHOW_SAMPLE=1
@@ -26,6 +27,5 @@ services:
       - ISO18626_PASSWORD=dbc_iso18626_password
       - AAA_IP_RIGHTS_IP_LIST=172.16.0.0-172.31.255.255;193.111.162.0-193.111.162.255
       - AAA_IP_RIGHTS_RESOURCE_LIST=500,550,551,552
-      - LOCALTION=__LOCALTION__
     expose:
       - "80"
