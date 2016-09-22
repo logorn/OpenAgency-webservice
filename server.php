@@ -1816,6 +1816,8 @@ class openAgency extends webServiceServer {
               $and_bib = ' AND vip_library_rules.bib_nr = :bind_bib_nr';
             }
             else if ($param->libraryRule) {
+              $oci->bind('bind_u', 'U');
+              $and_bib = ' AND (vip.delete_mark is null OR vip.delete_mark = :bind_u)';    // drop deleted 
               $lib_rule = is_array($param->libraryRule) ? $param->libraryRule : array($param->libraryRule);
               foreach ($lib_rule as $idx => $rule) {
                 $oci->bind('bind_val_' . $idx, self::xs_boolean($rule->_value->bool->_value) ? 'Y' : 'N');
