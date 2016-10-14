@@ -218,6 +218,75 @@ class openAgency extends webServiceServer {
   /** \brief Fetch encryption to use when sending mails
    *
    * Request:
+   * - serviceRequester
+   * - borrowerCheckAllowed
+   * Response:
+   * - borrowerCheckLibrary
+   * - - isil
+   * - - agencyName
+   * or
+   * - error
+   */
+  public function borrowerCheckList($param) {
+    if (!$this->aaa->has_right('netpunkt.dk', 500))
+      Object::set_value($res, 'error', 'authentication_error');
+    else {
+      $cache_key = 'OA_bcl' . $this->config->get_inifile_hash() . $param->serviceRequester->_value . $param->borrowerCheckAllowed->_value;
+      self::set_cache_expire($this->cache_expire[__FUNCTION__]);
+      if ($ret = $this->cache->get($cache_key)) {
+        verbose::log(STAT, 'Cache hit');
+        return $ret;
+      }
+      $this->watch->start('entry');
+      $oci = self::connect($this->config->get_value('agency_credentials','setup'), __LINE__, $res);
+      if (empty($res->error)) {
+        try {
+          $oci->bind('bind_navn', strtolower($param->serviceRequester->_value));
+          if (self::xs_boolean($param->borrowerCheckAllowed->_value)) {
+            $oci->bind('bind_1', '1');
+            $add_sql = 'f.har_laanertjek = :bind_1';
+          }
+          else {
+            $oci->bind('bind_0', '0');
+            $add_sql = '(f.har_laanertjek = :bind_0 OR f.har_laanertjek is null)';
+          }
+          $this->watch->start('sql1');
+          $oci->set_query('SELECT fa.faust, f.bib_nr, vv.navn
+                             FROM fjernadgang_andre fa, fjernadgang f, vip_vsn vv
+                            WHERE lower(fa.navn) = :bind_navn 
+                              AND vv.bib_nr = f.bib_nr
+                              AND vv.delete_mark_vsn is null
+                              AND fa.faust = f.faust
+                              AND ' . $add_sql . '
+                            ORDER BY vv.navn');
+          $this->watch->stop('sql1');
+          while ($vk_row = $oci->fetch_into_assoc()) {
+            Object::set_value($b, 'agencyName', $vk_row['NAVN']);
+            Object::set_value($b, 'isil', 'DK-' . $vk_row['BIB_NR']);
+            Object::set_array_value($res, 'borrowerCheckLibrary', $b);
+            unset($b);
+          }
+        }
+        catch (ociException $e) {
+          $this->watch->stop('sql1');
+          verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
+          Object::set_value($res, 'error', 'service_unavailable');
+        }
+      }
+    }
+    //print_r($res); var_dump($param); die();
+    Object::set_value($ret, 'borrowerCheckListResponse', $res);
+    //@ $ret->borrowerCheckListResponse->_value = $res;
+    $ret = $this->objconvert->set_obj_namespace($ret, $this->xmlns['oa']);
+    if (empty($res->error)) $this->cache->set($cache_key, $ret);
+    $this->watch->stop('entry');
+    return $ret;
+  }
+
+
+  /** \brief Fetch encryption to use when sending mails
+   *
+   * Request:
    * - email
    * Response:
    * - encryption

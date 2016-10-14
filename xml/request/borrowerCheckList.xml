@@ -1,0 +1,15 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:open="http://oss.dbc.dk/ns/openagency">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <open:borrowerCheckListRequest>
+         <!--Optional:-->
+         <open:authentication>
+            <open:groupIdAut>?</open:groupIdAut>
+            <open:passwordAut>?</open:passwordAut>
+            <open:userIdAut>?</open:userIdAut>
+         </open:authentication>
+         <open:serviceRequester>?</open:serviceRequester>
+         <open:borrowerCheckAllowed>?</open:borrowerCheckAllowed>
+      </open:borrowerCheckListRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
