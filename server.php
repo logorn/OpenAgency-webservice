@@ -253,10 +253,11 @@ class openAgency extends webServiceServer {
           $oci->bind('bind_u', 'U');
           $this->watch->start('sql1');
           $oci->set_query('SELECT fa.faust, f.bib_nr, vv.navn
-                             FROM fjernadgang_andre fa, fjernadgang f, vip_vsn vv
+                             FROM fjernadgang_andre fa, fjernadgang f, vip_vsn vv, vip v
                             WHERE lower(fa.navn) = :bind_navn 
                               AND vv.bib_nr = f.bib_nr
-                              AND (vv.delete_mark_vsn is null OR vv.delete_mark_vsn = :bind_u)
+                              AND v.bib_nr = f.bib_nr
+                              AND (v.delete_mark is null OR v.delete_mark = :bind_u)
                               AND fa.faust = f.faust
                               AND ' . $add_sql . '
                             ORDER BY vv.navn');
