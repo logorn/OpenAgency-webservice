@@ -1721,7 +1721,7 @@ class openAgency extends webServiceServer {
         $oci->bind('bind_bib_type', $param->libraryType->_value);
       }
       elseif (empty($agency_id) && empty($param->stilNumber->_value)) {
-        $sqls[] = 'vsn.bib_type != :bind_bib_type';
+        $sqls[] = '(vsn.bib_type != :bind_bib_type OR vsn.bib_type IS null)';
         $oci->bind('bind_bib_type', 'Skolebibliotek');
       }
       // libraryStatus
