@@ -10,6 +10,12 @@
          </open:authentication>
          <open:serviceRequester>?</open:serviceRequester>
          <open:borrowerCheckAllowed>?</open:borrowerCheckAllowed>
+         <!--Optional:-->
+         <open:callback>?</open:callback>
+         <!--Optional:-->
+         <open:outputType>?</open:outputType>
+         <!--Optional:-->
+         <open:trackingId>?</open:trackingId>
       </open:borrowerCheckListRequest>
    </soapenv:Body>
 </soapenv:Envelope>
