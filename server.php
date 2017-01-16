@@ -1882,6 +1882,7 @@ class openAgency extends webServiceServer {
         }
         else {
           try {
+            $enum_map['cataloging_template_set'] = array(' ' => '', 'F' => 'fbs', 'P' => 'ph');
             if ($agency) {
               $oci->bind('bind_bib_nr', $agency);
               $and_bib = ' AND vip_library_rules.bib_nr = :bind_bib_nr';
@@ -1891,7 +1892,16 @@ class openAgency extends webServiceServer {
               $and_bib = ' AND (vip.delete_mark is null OR vip.delete_mark = :bind_u)';    // drop deleted 
               $lib_rule = is_array($param->libraryRule) ? $param->libraryRule : array($param->libraryRule);
               foreach ($lib_rule as $idx => $rule) {
-                $oci->bind('bind_val_' . $idx, self::xs_boolean($rule->_value->bool->_value) ? 'Y' : 'N');
+                if ($rule->_value->string) {
+                  $str = $rule->_value->string->_value;
+                  if ($enum = $enum_map[$rule->_value->name->_value]) {
+                    $str = array_search($str, $enum);
+                  }
+                  $oci->bind('bind_val_' . $idx, $str);
+                }
+                else {
+                  $oci->bind('bind_val_' . $idx, self::xs_boolean($rule->_value->bool->_value) ? 'Y' : 'N');
+                }
                 $and_bib .= ' AND vip_library_rules.' . $rule->_value->name->_value . ' = :bind_val_' . $idx;
               }
             }
@@ -1908,7 +1918,12 @@ class openAgency extends webServiceServer {
               foreach ($row as $name => $value) {
                 if ($name != 'BIB_NR' && $name != 'BIB_TYPE') {
                   Object::set_value($r, 'name', strtolower($name));
-                  Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
+                  if ($enum = $enum_map[strtolower($name)]) {
+                    Object::set_value($r, 'string', $enum[$value]);
+                  }
+                  else {
+                    Object::set_value($r, 'bool', ($value == 'Y' ? '1' : '0'));
+                  }
                   Object::set_array_value($o, 'libraryRule', $r);
                   unset($r);
                 }

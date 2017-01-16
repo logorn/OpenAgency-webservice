@@ -524,6 +524,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="autRes" type="xs:string"/>
   <xs:element name="autService" type="oa:autServiceType"/>
   <xs:element name="base64" type="xs:string"/>
+  <xs:element name="bool" type="xs:boolean"/>
   <xs:element name="borrowerCheckLibrary" type="oa:borrowerCheckLibrary"/>
   <xs:complexType name="borrowerCheckLibrary">
     <xs:sequence>
@@ -809,10 +810,12 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:complexType name="libraryRule">
     <xs:sequence>
       <xs:element ref="oa:name"/>
-      <xs:element ref="oa:bool"/>
+      <xs:choice>
+        <xs:element ref="oa:bool"/>
+        <xs:element ref="oa:string"/>
+      </xs:choice>
     </xs:sequence>
   </xs:complexType>
-  <xs:element name="bool" type="xs:boolean"/>
   <xs:element name="libraryRules" type="oa:libraryRules"/>
   <xs:complexType name="libraryRules">
     <xs:sequence>
@@ -1083,6 +1086,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="sourceSearchable" type="xs:boolean"/>
   <xs:element name="stateAndUniversityLibraryCopyService" type="xs:boolean"/>
   <xs:element name="stilNumber" type="xs:string"/>
+  <xs:element name="string" type="xs:string"/>
   <xs:element name="subscription" type="oa:subscription"/>
   <xs:complexType name="subscription">
     <xs:sequence>
