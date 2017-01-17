@@ -574,6 +574,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="branchPhone" type="xs:string"/>
   <xs:element name="branchPNumber" type="xs:string"/>
   <xs:element name="branchRejectedRecordsEmail" type="xs:string"/>
+  <xs:element name="branchServiceTxt" type="xs:string"/>
   <xs:element name="branchStatus" type="xs:string"/>
   <xs:element name="branchStilNumber" type="xs:string"/>
   <xs:element name="branchTransReportEmail" type="xs:string"/>
@@ -703,6 +704,12 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:documentation xml:lang="en">Identifier of the group (most often a library number) the user belongs to (for authentication purposes)</xs:documentation>
     </xs:annotation>
   </xs:element>
+  <xs:element name="headOfBranchName" type="xs:string"/>
+  <xs:element name="headOfBranchTitle" type="xs:string"/>
+  <xs:element name="headOfConsortiumName" type="xs:string"/>
+  <xs:element name="headOfConsortiumTitle" type="xs:string"/>
+  <xs:element name="headOfInstitutionName" type="xs:string"/>
+  <xs:element name="headOfInstitutionTitle" type="xs:string"/>
   <xs:element name="illAnswer" type="xs:boolean"/>
   <xs:element name="illCancel" type="xs:boolean"/>
   <xs:element name="illCancelReply" type="xs:boolean"/>
@@ -858,6 +865,7 @@ You should have received a copy of the GNU Affero General Public License along w
   <xs:element name="materialType" type="xs:integer"/>
   <xs:element name="MergePatronIds" type="xs:boolean"/>
   <xs:element name="name" type="xs:string"/>
+  <xs:element name="nationalDeliveryService" type="xs:boolean"/>
   <xs:element name="ncipCancelOrder" type="xs:boolean"/>
   <xs:element name="ncipLookupUser" type="xs:boolean"/>
   <xs:element name="ncipPassword" type="xs:string"/>
@@ -981,6 +989,16 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:element ref="oa:isOclcRsLibrary" minOccurs="0"/>
       <xs:element ref="oa:stateAndUniversityLibraryCopyService" minOccurs="0"/>
       <xs:element ref="oa:geolocation" minOccurs="0"/>
+      <xs:element ref="oa:headOfBranchName" minOccurs="0"/>
+      <xs:element ref="oa:headOfBranchTitle" minOccurs="0"/>
+      <xs:element ref="oa:headOfInstitutionName" minOccurs="0"/>
+      <xs:element ref="oa:headOfInstitutionTitle" minOccurs="0"/>
+      <xs:element ref="oa:headOfConsortiumName" minOccurs="0"/>
+      <xs:element ref="oa:headOfConsortiumTitle" minOccurs="0"/>
+      <xs:element ref="oa:branchServiceTxt" minOccurs="0"/>
+      <xs:element ref="oa:nationalDeliveryService" minOccurs="0"/>
+      <xs:element ref="oa:willReceiveIll" minOccurs="0"/>
+      <xs:element ref="oa:willReceiveIllTxt" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:element name="pickupAllowed" type="xs:boolean">
@@ -1169,6 +1187,8 @@ You should have received a copy of the GNU Affero General Public License along w
   </xs:complexType>
   <xs:element name="userStatusUrl" type="xs:string"/>
   <xs:element name="willReceive" type="xs:string"/>
+  <xs:element name="willReceiveIll" type="xs:boolean"/>
+  <xs:element name="willReceiveIllTxt" type="xs:string"/>
   <xs:element name="willSend" type="oa:willSendType"/>
   <xs:element name="willSendOwn" type="oa:willSendType"/>
   <xs:simpleType name="willSendType">
