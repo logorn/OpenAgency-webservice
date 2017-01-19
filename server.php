@@ -621,7 +621,7 @@ class openAgency extends webServiceServer {
                           kat.url_best_blanket, kat.url_best_blanket_text, kat.url_laanerstatus, kat.ncip_lookup_user,
                           kat.ncip_renew, kat.ncip_cancel, kat.ncip_update_request, kat.filial_vsn,
                           vd.mailbestil_via, vd.url_itemorder_bestil, vd.zbestil_groupid, vd.zbestil_userid, vd.zbestil_passw,
-                          vd.holdingsformat, vd.svar_email,
+                          vd.holdingsformat, vd.svar_email, vd.best_txt,
                           ors.shipping ors_shipping, ors.cancel ors_cancel, ors.answer ors_answer, 
                           ors.cancelreply ors_cancelreply, ors.cancel_answer_synchronic ors_cancel_answer_synchronic,
                           ors.renew ors_renew, ors.renewanswer ors_renewanswer, 
@@ -1782,7 +1782,7 @@ class openAgency extends webServiceServer {
                     vsn.leder vsn_leder, vsn.titel vsn_titel,
                     TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, vsn.oclc_symbol, vsn.sb_kopibestil,
                     vsn.cvr_nr vsn_cvr_nr, vsn.p_nr vsn_p_nr, vsn.ean_nummer vsn_ean_nummer,
-                    vd.svar_email, vd.koerselsordning, vd.mailbestil_via, 
+                    vd.svar_email, vd.koerselsordning, vd.mailbestil_via, vd.best_txt,
                     vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
                     txt.aabn_tid, txt.kvt_tekst_fjl, txt.service_tekst, 
                     eng.aabn_tid_e, eng.kvt_tekst_fjl_e, hold.holdeplads,
@@ -1879,18 +1879,24 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_u', 'U');
               $and_bib = ' AND (vip.delete_mark is null OR vip.delete_mark = :bind_u)';    // drop deleted 
               $lib_rule = is_array($param->libraryRule) ? $param->libraryRule : array($param->libraryRule);
+              $rules = $binds = array();
               foreach ($lib_rule as $idx => $rule) {
-                if ($rule->_value->string) {
-                  $str = $rule->_value->string->_value;
+                if ($value = $rule->_value->string->_value) {
                   if ($enum = $enum_map[$rule->_value->name->_value]) {
-                    $str = array_search($str, $enum);
+                    $value = array_search($value, $enum);
                   }
-                  $oci->bind('bind_val_' . $idx, $str);
                 }
                 else {
-                  $oci->bind('bind_val_' . $idx, self::xs_boolean($rule->_value->bool->_value) ? 'Y' : 'N');
+                  $value = self::xs_boolean($rule->_value->bool->_value) ? 'Y' : 'N';
                 }
-                $and_bib .= ' AND vip_library_rules.' . $rule->_value->name->_value . ' = :bind_val_' . $idx;
+                $binds['bind_' . $value] = $value;
+                $rules[$rule->_value->name->_value][] = ':bind_' . $value;
+              }
+              foreach ($binds as $bind => $value) {
+                $oci->bind($bind, $value);
+              }
+              foreach ($rules as $name => $values) {
+                $and_bib .= ' AND vip_library_rules.' . $name . ' in (' . implode(', ', $values) . ')';
               }
             }
             $this->watch->start('sql1');
@@ -2275,7 +2281,7 @@ class openAgency extends webServiceServer {
                           TO_CHAR(vsn.dato, \'YYYY-MM-DD\') vsn_dato, 
                           vsn.oclc_symbol, vsn.sb_kopibestil,
                           vsn.leder vsn_leder, vsn.titel vsn_titel, vsn.ean_nummer,
-                          vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng,
+                          vb.best_modt, vb.best_modt_luk, vb.best_modt_luk_eng, vd.best_txt,
                           vd.svar_email, vd.koerselsordning, vd.mailbestil_via, 
                           txt.aabn_tid, txt.kvt_tekst_fjl, txt.service_tekst,
                           eng.aabn_tid_e, eng.kvt_tekst_fjl_e, 
@@ -2957,7 +2963,7 @@ class openAgency extends webServiceServer {
     }
     else {
       Object::set_value($pickupAgency, 'willReceiveIll', '0');
-      Object::set_value($pickupAgency, 'willReceiveIllTxt', $row['SERVICE_TEKST'], FALSE);
+      Object::set_value($pickupAgency, 'willReceiveIllTxt', $row['BEST_TXT'], FALSE);
     }
 
     return;
