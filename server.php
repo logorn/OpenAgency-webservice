@@ -407,8 +407,8 @@ class openAgency extends webServiceServer {
                 ($vb_row['BEST_MODT'] == 'J' && ($vb_row['WR'] == 'J' || $vb_row['WR'] == 'B') ? 1 : 0));
               if ($vb_row['WR'] == 'B') {
                 $col = $assoc[$mat_type][1] . $fjernl;
-                $res->condition[] = self::value_and_language($vb_row[$col], 'dan');
-                $res->condition[] = self::value_and_language($vb_row[$col.'_E'], 'eng');
+                self::array_append_value_and_language($res->condition, $vb_row[$col], 'dan');
+                self::array_append_value_and_language($res->condition, $vb_row[$col.'_E'], 'eng');
               }
             }
           }
@@ -1446,20 +1446,12 @@ class openAgency extends webServiceServer {
                 }
               }
               if (in_array($oa_row['LD_ID'][0], array('J', 'O'))) {
-                if ($oa_row['LD_ID_TXT']) {
-                  $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT'], 'dan');
-                }
-                if ($oa_row['LD_ID_TXT_ENG']) {
-                  $usrOP->userIdTxt[] = self::value_and_language($oa_row['LD_ID_TXT_ENG'], 'eng');
-                }
+                self::array_append_value_and_language($usrOP->userIdTxt, $oa_row['LD_ID_TXT'], 'dan');
+                self::array_append_value_and_language($usrOP->userIdTxt, $oa_row['LD_ID_TXT_ENG'], 'eng');
               }
               if (in_array($oa_row['LD_TXT'][0], array('J', 'O'))) {
-                if ($oa_row['LD_TXT2']) {
-                  $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2'], 'dan');
-                }
-                if ($oa_row['LD_TXT2_ENG']) {
-                  $usrOP->customIdTxt[] = self::value_and_language($oa_row['LD_TXT2_ENG'], 'eng');
-                }
+                self::array_append_value_and_language($usrOP->customIdTxt, $oa_row['LD_TXT2'], 'dan');
+                self::array_append_value_and_language($usrOP->customIdTxt, $oa_row['LD_TXT2_ENG'], 'eng');
               }
               $per = array('PER_NR' => 'volume',
                   'PER_HEFTE' => 'issue',
@@ -1516,12 +1508,8 @@ class openAgency extends webServiceServer {
               $aP = new stdClass();
               $aP->borrowerCheckParameters = $bCP;
               Object::set_value($aP, 'acceptOrderFromUnknownUser', in_array($oa_row['BEST_UKENDT'], array('N', 'K'))? '1' : '0');
-              if ($oa_row['BEST_UKENDT_TXT']) {
-                $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT'], 'dan');
-              }
-              if ($oa_row['BEST_UKENDT_TXT_ENG']) {
-                $aP->acceptOrderFromUnknownUserText[] = self::value_and_language($oa_row['BEST_UKENDT_TXT_ENG'], 'eng');
-              }
+              self::array_append_value_and_language($aP->acceptOrderFromUnknownUserText, $oa_row['BEST_UKENDT_TXT'], 'dan');
+              self::array_append_value_and_language($aP->acceptOrderFromUnknownUserText, $oa_row['BEST_UKENDT_TXT_ENG'], 'eng');
               Object::set_value($aP, 'acceptOrderAgencyOffline', $oa_row['LAANERTJEK_NORESPONSE'] == 'N' ? '0' : '1');
               Object::set_value($aP, 'payForPostage', $oa_row['PORTO_BETALING'] == 'N' ? '0' : '1');
               Object::set_value($usrOP, 'agencyParameters', $aP);
@@ -2884,20 +2872,12 @@ class openAgency extends webServiceServer {
       Object::set_value($pickupAgency, 'branchId', self::normalize_agency($row['BIB_NR']));
       Object::set_value($pickupAgency, 'branchType', $row['TYPE']);
       if (empty($pickupAgency->branchName)) {
-        if ($row['NAVN']) {
-          $pickupAgency->branchName[] = self::value_and_language($row['NAVN'], 'dan');
-        }
-        if ($row['NAVN_E']) {
-          $pickupAgency->branchName[] = self::value_and_language($row['NAVN_E'], 'eng');
-        }
+        self::array_append_value_and_language($pickupAgency->branchName, $row['NAVN'], 'dan');
+        self::array_append_value_and_language($pickupAgency->branchName, $row['NAVN_E'], 'eng');
       }
       if (empty($pickupAgency->branchShortName)) {
-        if ($row['NAVN_K']) {
-          $pickupAgency->branchShortName[] = self::value_and_language($row['NAVN_K'], 'dan');
-        }
-        if ($row['NAVN_E_K']) {
-          $pickupAgency->branchShortName[] = self::value_and_language($row['NAVN_E_K'], 'eng');
-        }
+        self::array_append_value_and_language($pickupAgency->branchShortName, $row['NAVN_K'], 'dan');
+        self::array_append_value_and_language($pickupAgency->branchShortName, $row['NAVN_E_K'], 'eng');
       }
       Object::set_value($pickupAgency, 'branchPhone', $row['TLF_NR']);
       Object::set_value($pickupAgency, 'branchEmail', $row['EMAIL']);
@@ -2923,31 +2903,19 @@ class openAgency extends webServiceServer {
     }
     Object::set_value($pickupAgency, 'agencySubdivision', $row['HOLDEPLADS'], FALSE);
     if (empty($pickupAgency->openingHours) && ($row['AABN_TID'] || $row['AABN_TID_E'])) {
-      if ($row['AABN_TID']) {
-        $pickupAgency->openingHours[] = self::value_and_language($row['AABN_TID'], 'dan');
-      }
-      if ($row['AABN_TID_E']) {
-        $pickupAgency->openingHours[] = self::value_and_language($row['AABN_TID_E'], 'eng');
-      }
+      self::array_append_value_and_language($pickupAgency->openingHours, $row['AABN_TID'], 'dan');
+      self::array_append_value_and_language($pickupAgency->openingHours, $row['AABN_TID_E'], 'eng');
     }
     Object::set_value($pickupAgency, 'temporarilyClosed', ($row['BEST_MODT'] == 'J' ? 0 : 1));
     if ($row['BEST_MODT'] == 'L'
         && empty($pickupAgency->temporarilyClosedReason)
         && ($row['BEST_MODT_LUK'] || $row['BEST_MODT_LUK_ENG'])) {
-      if ($row['BEST_MODT_LUK']) {
-        $pickupAgency->temporarilyClosedReason[] = self::value_and_language($row['BEST_MODT_LUK'], 'dan');
-      }
-      if ($row['BEST_MODT_LUK_ENG']) {
-        $pickupAgency->temporarilyClosedReason[] = self::value_and_language($row['BEST_MODT_LUK_ENG'], 'eng');
-      }
+      self::array_append_value_and_language($pickupAgency->temporarilyClosedReason, $row['BEST_MODT_LUK'], 'dan');
+      self::array_append_value_and_language($pickupAgency->temporarilyClosedReason, $row['BEST_MODT_LUK_ENG'], 'eng');
     }
     if (empty($pickupAgency->illOrderReceiptText)) {
-      if ($row['KVT_TEKST_FJL']) {
-        $pickupAgency->illOrderReceiptText[] = self::value_and_language($row['KVT_TEKST_FJL'], 'dan');
-      }
-      if ($row['KVT_TEKST_FJL_E']) {
-        $pickupAgency->illOrderReceiptText[] = self::value_and_language($row['KVT_TEKST_FJL_E'], 'eng');
-      }
+      self::array_append_value_and_language($pickupAgency->illOrderReceiptText, $row['KVT_TEKST_FJL'], 'dan');
+      self::array_append_value_and_language($pickupAgency->illOrderReceiptText, $row['KVT_TEKST_FJL_E'], 'eng');
     }
     Object::set_value($pickupAgency, 'pickupAllowed', ($row['BEST_MODT'] == 'J' ? '1' : '0'));
     Object::set_value($pickupAgency, 'branchStatus', $row['DELETE_MARK'], FALSE);
@@ -3028,6 +2996,19 @@ class openAgency extends webServiceServer {
     $fors = new aaa($this->config->get_section('aaa'));
     $fors->init_rights($auth->userIdAut->_value, $auth->groupIdAut->_value, $auth->passwordAut->_value, $ip);
     return $fors->has_right('netpunkt.dk', 552);
+  }
+
+  /** \brief Append a object to array for non empty values
+   * @param arr (array) 
+   * @param val (string) - value of the object
+   * @param lang (string) - language for the attribute
+   * @return (object) - with element _value and language attribute
+   *
+   */
+  private function array_append_value_and_language(&$arr, $val, $lang) {
+    if ($val) {
+      $arr[] = self::value_and_language($val, $lang);
+    }
   }
 
   /** \brief set a node and its language attribute
