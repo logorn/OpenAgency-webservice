@@ -1882,7 +1882,7 @@ class openAgency extends webServiceServer {
         }
         else {
           try {
-            $enum_map['cataloging_template_set'] = array(' ' => '', 'F' => 'fbs', 'P' => 'ph');
+            $enum_map['cataloging_template_set'] = array(' ' => '', 'F' => 'fbs', 'P' => 'ph', 'D' => 'dbc');
             if ($agency) {
               $oci->bind('bind_bib_nr', $agency);
               $and_bib = ' AND vip_library_rules.bib_nr = :bind_bib_nr';
