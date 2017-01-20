@@ -1903,7 +1903,8 @@ class openAgency extends webServiceServer {
             $oci->set_query('SELECT vip_vsn.bib_type, vip_library_rules.* 
                                FROM vip_library_rules, vip_vsn, vip
                               WHERE vip.kmd_nr = vip_vsn.bib_nr (+)
-                                AND vip.bib_nr = vip_library_rules.bib_nr ' . $and_bib . ' ORDER BY vip_library_rules.bib_nr ASC');
+                                AND vip.bib_nr = vip_library_rules.bib_nr ' . $and_bib . ' 
+                              ORDER BY vip_library_rules.bib_nr ASC');
             $this->watch->stop('sql1');
             //$mem = memory_get_usage();
             while ($row = $oci->fetch_into_assoc()) {
@@ -2688,6 +2689,7 @@ class openAgency extends webServiceServer {
         verbose::log(STAT, 'Cache hit');
         return $ret;
       }
+      $this->watch->start('entry');
       $res = self::get_prioritized_agency_list($agency, 'visprioritet');
       if ($res->error->_value == 'no_agencies_found') {
         $res = self::get_prioritized_agency_list('870970', 'visprioritet');
@@ -2985,11 +2987,11 @@ class openAgency extends webServiceServer {
 
   /** \brief return an xs:boolean 
    *
-   * @param ip (char) - character to test
-   * @return (integer) - 1 for true and 0 for false
+   * @param ch (char) - character to test
+   * @return (char) - 1 for true and 0 for false
    */
   private function J_is_true($ch) {
-    return ($ch === 'J' ? 1 : 0);
+    return ($ch === 'J' ? '1' : '0');
   }
 
   /** \brief Check if a given requester (auth and ip) is a trusted server/client
