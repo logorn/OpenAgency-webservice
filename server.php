@@ -81,7 +81,9 @@ class openAgency extends webServiceServer {
                                  FROM vip_fjernlaan
                                 WHERE laantager = :bind_laantager
                                   AND materiale_id = :bind_materiale_id');
+              $this->watch->start('fetch');
               $vf_row = $oci->fetch_into_assoc();
+              $this->watch->stop('fetch');
             }
             catch (ociException $e) {
               verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -101,11 +103,13 @@ class openAgency extends webServiceServer {
                   $this->watch->stop('sql2');
                   $ap = &$res->autPotential->_value;
                   Object::set_value($ap, 'materialType', $param->materialType->_value);
+                  $this->watch->start('fetch');
                   while ($vf_row = $oci->fetch_into_assoc()) {
                     if ($vf_row['LAANGIVER']) {
                       Object::set_array_value($ap, 'responder', $vf_row['LAANGIVER']);
                     }
                   }
+                  $this->watch->stop('fetch');
                 }
                 catch (ociException $e) {
                   $this->watch->stop('sql2');
@@ -122,8 +126,10 @@ class openAgency extends webServiceServer {
                                     WHERE fjernlaan_id = :bind_fjernlaan_id');
                   $ap = &$res->autPotential->_value;
                   Object::set_value($ap, 'materialType', $param->materialType->_value);
+                  $this->watch->start('fetch');
                   while ($vfb_row = $oci->fetch_into_assoc())
                     Object::set_array_value($ap, 'responder', self::normalize_agency($vfb_row['BIB_NR']));
+                  $this->watch->stop('fetch');
                 }
                 catch (ociException $e) {
                   verbose::log(FATAL, 'OpenAgency('.__LINE__.'):: OCI select error: ' . $oci->get_error_string());
@@ -149,6 +155,7 @@ class openAgency extends webServiceServer {
               $ar = &$res->autRequester->_value;
               Object::set_value($ar, 'requester', $agency);
               Object::set_value($ar, 'materialType', $param->materialType->_value);
+              $this->watch->start('fetch');
               if ($vf_row = $oci->fetch_into_assoc()) {
                 Object::set_value($ar, 'willSend', self::parse_will_send($vf_row['STATUS']));
                 Object::set_value($ar, 'willSendOwn', self::parse_will_send($vf_row['STATUS_EGET']));
@@ -167,6 +174,7 @@ class openAgency extends webServiceServer {
                 Object::set_value($ar, 'willSend', 'NO');
                 Object::set_value($ar, 'willSendOwn', 'NO');
               }
+              $this->watch->stop('fetch');
             }
             catch (ociException $e) {
               $this->watch->stop('sql4');
@@ -187,6 +195,7 @@ class openAgency extends webServiceServer {
               $ap = &$res->autProvider->_value;
               Object::set_value($ap, 'provider', $agency);
               Object::set_value($ap, 'materialType', $param->materialType->_value);
+              $this->watch->start('fetch');
               if ($vf_row = $oci->fetch_into_assoc()) {
                 Object::set_value($ap, 'willReceive',  ($vf_row['STATUS'] == 'J' ? 'YES' : 'NO'));
                 Object::set_value($ap, 'autPeriod',  $vf_row['PERIODE']);
@@ -194,6 +203,7 @@ class openAgency extends webServiceServer {
               }
               else
                 Object::set_value($ap, 'willSend', 'NO');
+              $this->watch->stop('fetch');
             }
             catch (ociException $e) {
               $this->watch->stop('sql5');
@@ -262,12 +272,14 @@ class openAgency extends webServiceServer {
                               AND ' . $add_sql . '
                             ORDER BY vv.navn');
           $this->watch->stop('sql1');
+          $this->watch->start('fetch');
           while ($vk_row = $oci->fetch_into_assoc()) {
             Object::set_value($b, 'agencyName', $vk_row['NAVN']);
             Object::set_value($b, 'isil', 'DK-' . $vk_row['BIB_NR']);
             Object::set_array_value($res, 'borrowerCheckLibrary', $b);
             unset($b);
           }
+          $this->watch->stop('fetch');
         }
         catch (ociException $e) {
           $this->watch->stop('sql1');
@@ -319,6 +331,7 @@ class openAgency extends webServiceServer {
           $this->watch->start('sql1');
           $oci->set_query('SELECT * FROM vip_krypt WHERE email = :bind_email');
           $this->watch->stop('sql1');
+          $this->watch->start('fetch');
           while ($vk_row = $oci->fetch_into_assoc()) {
             Object::set_value($o, 'encrypt', 'YES');
             Object::set_value($o, 'email', $param->email->_value);
@@ -329,6 +342,7 @@ class openAgency extends webServiceServer {
             Object::set_array_value($res, 'encryption', $o);
             unset($o);
           }
+          $this->watch->stop('fetch');
           if (empty($res)) {
             Object::set_value($o, 'encrypt', 'NO');
             Object::set_array_value($res, 'encryption', $o);
@@ -402,6 +416,7 @@ class openAgency extends webServiceServer {
                                 AND vb.bib_nr = vt.bib_nr (+)
                                 AND vb.bib_nr = vte.bib_nr (+)');
             $this->watch->stop('sql1');
+            $this->watch->start('fetch');
             if ($vb_row = $oci->fetch_into_assoc()) {
               Object::set_value($res, 'willReceive',
                 ($vb_row['BEST_MODT'] == 'J' && ($vb_row['WR'] == 'J' || $vb_row['WR'] == 'B') ? 1 : 0));
@@ -411,6 +426,7 @@ class openAgency extends webServiceServer {
                 self::array_append_value_and_language($res->condition, $vb_row[$col.'_E'], 'eng');
               }
             }
+            $this->watch->stop('fetch');
           }
           catch (ociException $e) {
             $this->watch->stop('sql1');
@@ -471,6 +487,7 @@ class openAgency extends webServiceServer {
                             WHERE bib_nr = :bind_agency 
                               AND profilename = :bind_profile_name');
           $this->watch->stop('sql1');
+          $this->watch->start('fetch');
           while ($cp_row = $oci->fetch_into_assoc()) {
             Object::set_value($cp, 'agencyId', self::normalize_agency($cp_row['BIB_NR']));
             Object::set_value($cp, 'profileName', $cp_row['PROFILENAME']);
@@ -502,6 +519,7 @@ class openAgency extends webServiceServer {
             Object::set_array_value($res, 'culrProfile', $cp);
             unset($cp);
           }
+          $this->watch->stop('fetch');
           if (empty($res)) {
             Object::set_value($res, 'error', 'profile_not_found');
           }
@@ -644,6 +662,7 @@ class openAgency extends webServiceServer {
             $this->watch->start('sql1');
             $oci->set_query($sql);
             $this->watch->stop('sql1');
+            $this->watch->start('fetch');
             while ($row = $oci->fetch_into_assoc()) {
               if (empty($curr_bib)) {
                 $curr_bib = $row['BIB_NR'];
@@ -672,6 +691,7 @@ class openAgency extends webServiceServer {
                 }
               }
             }
+            $this->watch->stop('fetch');
             if ($registryInfo) {
               Object::set_array_value($res, 'registryInfo', $registryInfo);
             }
@@ -729,6 +749,7 @@ class openAgency extends webServiceServer {
                             ORDER BY bib_nr');
           $this->watch->stop('sql1');
           $last_bib = '';
+          $this->watch->start('fetch');
           while ($sl_row = $oci->fetch_into_assoc()) {
             if ($last_lib != $sl_row['BIB_NR']) {
               if ($last_lib) {
@@ -743,6 +764,7 @@ class openAgency extends webServiceServer {
             }
             Object::set_array_value($sl, 'ipAddress', $sl_row['DOMAIN']);
           }
+          $this->watch->stop('fetch');
           if ($sl) {
             Object::set_array_value($res, 'saouLicenseInfo', $sl);
           }
@@ -943,7 +965,9 @@ class openAgency extends webServiceServer {
                               AND v.bib_nr = vbst.bib_nr (+)
                               AND v.bib_nr = oao.bib_nr (+)
                               AND v.bib_nr = :bind_bib_nr');
+          $this->watch->start('fetch1');
           $oa_row = $oci->fetch_into_assoc();
+          $this->watch->stop('fetch1');
           $this->watch->stop('sql1');
           self::sanitize_array($oa_row);
           if ($param->service->_value == 'information') {
@@ -959,9 +983,11 @@ class openAgency extends webServiceServer {
             $oci->set_query('SELECT *
                                FROM vip_viderestil
                               WHERE bib_nr = :bind_bib_nr');
+            $this->watch->start('fetch2');
             while ($row = $oci->fetch_into_assoc()) {
               $vv_row[$row['BIB_NR_VIDERESTIL']] = $row;
             }
+            $this->watch->stop('fetch2');
             $this->watch->stop('sql2');
             if ($vv_row) {
               $oci->bind('bind_bib_nr', $help);
@@ -971,11 +997,13 @@ class openAgency extends webServiceServer {
                                 WHERE (vip.kmd_nr = bibliotek OR vip.bib_nr = bibliotek)
                                   AND vip.bib_nr = :bind_bib_nr
                                 ORDER BY prionr DESC');
+              $this->watch->start('fetch3');
               while ($lv_row = $oci->fetch_into_assoc()) {
                 if ($p = $vv_row[$lv_row['VILSE']]) {
                   $consortia[] = $p;
                 }
               }
+              $this->watch->start('fetch3');
               $this->watch->stop('sql3');
               if (count($vv_row) <> count($consortia)) {
                 verbose::log(ERROR, 'OpenAgency('.__LINE__.'):: agency ' . $agency . 
@@ -1809,6 +1837,7 @@ class openAgency extends webServiceServer {
         $this->watch->start('sql1');
         $oci->set_query($sql);
         $this->watch->stop('sql1');
+        $this->watch->start('fetch');
         while ($row = $oci->fetch_into_assoc()) {
           if (empty($curr_bib)) {
             $curr_bib = $row['BIB_NR'];
@@ -1824,6 +1853,7 @@ class openAgency extends webServiceServer {
             self::fill_pickupAgency($pickupAgency, $row);
           }
         }
+        $this->watch->stop('fetch');
         if ($pickupAgency)
           Object::set_array_value($res, 'pickupAgency', $pickupAgency);
       }
@@ -1907,6 +1937,7 @@ class openAgency extends webServiceServer {
                               ORDER BY vip_library_rules.bib_nr ASC');
             $this->watch->stop('sql1');
             //$mem = memory_get_usage();
+            $this->watch->start('fetch');
             while ($row = $oci->fetch_into_assoc()) {
               Object::set_value($o, 'agencyId', self::normalize_agency($row['BIB_NR']));
               Object::set_value($o, 'agencyType', $row['BIB_TYPE']);
@@ -1926,6 +1957,7 @@ class openAgency extends webServiceServer {
               Object::set_array_value($res, 'libraryRules', $o);
               unset($o);
             }
+            $this->watch->stop('fetch');
             //$this->watch->sums['mem'] = memory_get_usage() - $mem;
           }
           catch (ociException $e) {
@@ -1978,6 +2010,7 @@ class openAgency extends webServiceServer {
                             ORDER BY bib_nr');
           $this->watch->stop('sql1');
 //$mem = memory_get_usage();
+          $this->watch->start('fetch');
           while ($row = $oci->fetch_into_assoc()) {
             Object::set_value($o, 'agencyId', self::normalize_agency($row['VSN_BIB_NR']));
             Object::set_value($o, 'agencyType', $row['BIB_TYPE']);
@@ -1986,6 +2019,7 @@ class openAgency extends webServiceServer {
             Object::set_array_value($res, 'libraryTypeInfo', $o);
             unset($o);
           }
+          $this->watch->stop('fetch');
 //$this->watch->sums['mem'] = memory_get_usage() - $mem;
         }
         catch (ociException $e) {
@@ -2230,19 +2264,23 @@ class openAgency extends webServiceServer {
                      ORDER BY vsn.bib_nr';
             $this->watch->start('sql1');
             $oci->set_query($sql);
+            $this->watch->stop('sql1');
+            $this->watch->start('fetch1');
             while ($row = $oci->fetch_into_assoc()) {
               $bib_nr = &$row['BIB_NR'];
               $vsn[$bib_nr] = $row;
             }
-            $this->watch->stop('sql1');
+            $this->watch->stop('fetch1');
 
             $sql = 'SELECT unique bib_nr, domain FROM user_domains WHERE DELETE_DATE IS NULL';
             $this->watch->start('sql2');
             $oci->set_query($sql);
+            $this->watch->stop('sql2');
+            $this->watch->start('fetch2');
             while ($row = $oci->fetch_into_assoc()) {
               $ip_list[$row['BIB_NR']][] = $row['DOMAIN'];
             }
-            $this->watch->stop('sql2');
+            $this->watch->stop('fetch2');
 
             if ($ora_par['agencyId']) {
               foreach ($ora_par['agencyId'] as $agency) {
@@ -2310,6 +2348,7 @@ class openAgency extends webServiceServer {
             $this->watch->start('sql3');
             $oci->set_query($sql);
             $this->watch->stop('sql3');
+            $this->watch->start('fetch3');
             while ($row = $oci->fetch_into_assoc()) {
               if ($ora_par['agencyId']) {
                 $a_key = array_search($row['BIB_NR'], $ora_par['agencyId']);
@@ -2343,6 +2382,7 @@ class openAgency extends webServiceServer {
               $row['SB_KOPIBESTIL'] = $vsn[$this_vsn]['SB_KOPIBESTIL'];
               self::fill_pickupAgency($pickupAgency, $row, $ip_list[$row['BIB_NR']]);
             }
+            $this->watch->stop('fetch3');
             if ($pickupAgency) {
               Object::set_array_value($library, 'pickupAgency', $pickupAgency);
             }
@@ -2510,6 +2550,7 @@ class openAgency extends webServiceServer {
                                 AND broendprofil_kilder.profil_id = broendprofiler.id_nr
                                 AND broendprofiler.bib_nr = :bind_agency' . $sql_add);
             $this->watch->stop('sql4');
+            $this->watch->start('fetch4');
             while ($s_row = $oci->fetch_into_assoc()) {
               Object::set_value($s, 'sourceName', $s_row['NAME']);
               Object::set_value($s, 'sourceOwner', (strtolower($s_row['SUBMITTER']) == 'agency' ? $agency : $s_row['SUBMITTER']));
@@ -2518,6 +2559,7 @@ class openAgency extends webServiceServer {
               Object::set_array_value($res->profile[$s_row['BP_NAME']]->_value, 'source', $s);
               unset($s);
             }
+            $this->watch->stop('fetch4');
           }
           catch (ociException $e) {
             $this->watch->stop('sql1');
@@ -2756,9 +2798,11 @@ class openAgency extends webServiceServer {
                           ORDER BY prionr DESC');
         $this->watch->stop('sql1');
         $prio = array();
+        $this->watch->start('fetch');
         while ($s_row = $oci->fetch_into_assoc()) {
           Object::set_array_value($res, 'agencyId', $s_row['VILSE']);
         }
+        $this->watch->stop('fetch');
         if (empty($res->agencyId)) {
           Object::set_value($res, 'error', 'no_agencies_found');
         }
