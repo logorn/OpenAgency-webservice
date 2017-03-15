@@ -1912,7 +1912,7 @@ class openAgency extends webServiceServer {
               $rules = $binds = array();
               foreach ($lib_rule as $idx => $rule) {
                 if ($value = $rule->_value->string->_value) {
-                  if ($enum = $enum_map[$rule->_value->name->_value]) {
+                  if ($enum = $enum_map[strtolower($rule->_value->name->_value)]) {
                     $value = array_search($value, $enum);
                   }
                 }
