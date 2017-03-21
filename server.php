@@ -600,13 +600,15 @@ class openAgency extends webServiceServer {
             if ($val = $param->libraryType->_value
               && ($param->libraryType->_value == 'Folkebibliotek'
                 || $param->libraryType->_value == 'Forskningsbibliotek'
-                || $param->libraryType->_value == 'Skolebibliotek')) {
+                || $param->libraryType->_value == 'Skolebibliotek'
+                || $param->libraryType->_value == 'Other')) {
               $sqls[] = 'vsn.bib_type = :bind_bib_type';
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
             else {    // Alle or NULL
-              $sqls[] = 'vsn.bib_type != :bind_bib_type';
-              $oci->bind('bind_bib_type', 'Skolebibliotek');
+              $sqls[] = '(vsn.bib_type = :bind_bib_folk OR vsn.bib_type = :bind_bib_forsk)';
+              $oci->bind('bind_bib_folk', 'Folkebibliotek');
+              $oci->bind('bind_bib_forsk', 'Forskningsbibliotek');
               //$sqls[] = '(vsn.bib_type = :bind_bib_type_1 OR vsn.bib_type = :bind_bib_type_2)';
               //$oci->bind('bind_bib_type_1', 'Folkebibliotek');
               //$oci->bind('bind_bib_type_2', 'Forskningsbibliotek');
@@ -1728,7 +1730,8 @@ class openAgency extends webServiceServer {
       if ($val = $param->libraryType->_value
           && ($param->libraryType->_value == 'Folkebibliotek'
             || $param->libraryType->_value == 'Forskningsbibliotek'
-            || $param->libraryType->_value == 'Skolebibliotek')) {
+            || $param->libraryType->_value == 'Skolebibliotek'
+            || $param->libraryType->_value == 'Other')) {
         $sqls[] = 'vsn.bib_type = :bind_bib_type';
         $oci->bind('bind_bib_type', $param->libraryType->_value);
       }
@@ -2063,7 +2066,8 @@ class openAgency extends webServiceServer {
         if ($param->libraryType->_value == 'Alle' ||
             $param->libraryType->_value == 'Folkebibliotek' ||
             $param->libraryType->_value == 'Forskningsbibliotek' ||
-            $param->libraryType->_value == 'Skolebibliotek') {
+            $param->libraryType->_value == 'Skolebibliotek' ||
+            $param->libraryType->_value == 'Other') {
           try {
             if ($param->libraryType->_value <> 'Alle') {
               $filter_bib_type = 'AND vsn.bib_type = :bind_bib_type';
@@ -2197,7 +2201,8 @@ class openAgency extends webServiceServer {
             $param->libraryType->_value == 'Alle' ||
             $param->libraryType->_value == 'Folkebibliotek' ||
             $param->libraryType->_value == 'Forskningsbibliotek' ||
-            $param->libraryType->_value == 'Skolebibliotek') {
+            $param->libraryType->_value == 'Skolebibliotek' ||
+            $param->libraryType->_value == 'Other') {
           try {
             if ($ora_par) {
               foreach ($ora_par as $key => $val) {
@@ -2239,8 +2244,9 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
             else {
-              $filter_bib_type[] = ' vsn.bib_type != :bind_bib_type';
-              $oci->bind('bind_bib_type', 'Skolebibliotek');
+              $filter_bib_type[] = '(vsn.bib_type = :bind_bib_folk OR vsn.bib_type = :bind_bib_forsk)';
+              $oci->bind('bind_bib_folk', 'Folkebibliotek');
+              $oci->bind('bind_bib_forsk', 'Forskningsbibliotek');
             }
             // 2do vip_beh.best_modt = $param->pickupAllowed->_value
             if ($param->libraryStatus->_value == 'alle') {
@@ -2291,7 +2297,8 @@ class openAgency extends webServiceServer {
               $oci->bind('bind_bib_type', $param->libraryType->_value);
             }
             else {
-              $oci->bind('bind_bib_type', 'Skolebibliotek');
+              $oci->bind('bind_bib_folk', 'Folkebibliotek');
+              $oci->bind('bind_bib_forsk', 'Forskningsbibliotek');
             }
             if (isset($param->pickupAllowed->_value)) {
               $oci->bind('bind_j', 'J');
@@ -2912,7 +2919,6 @@ class openAgency extends webServiceServer {
   private function fill_pickupAgency(&$pickupAgency, $row, $ip_list = array()) {
     if (empty($pickupAgency)) {
       Object::set_value($pickupAgency, 'agencyName', $row['VSN_NAVN'], FALSE);
-      Object::set_value($pickupAgency, 'agencyId', $row['VSN_BIB_NR'], FALSE);
       Object::set_value($pickupAgency, 'agencyId', self::normalize_agency($row['VSN_BIB_NR']), FALSE);
       Object::set_value($pickupAgency, 'agencyType', self::set_agency_type($row['VSN_BIB_NR'], $row['VSN_BIB_TYPE']), FALSE);
       Object::set_value($pickupAgency, 'agencyEmail', $row['VSN_EMAIL'], FALSE);

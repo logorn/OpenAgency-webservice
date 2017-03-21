@@ -1276,6 +1276,7 @@ You should have received a copy of the GNU Affero General Public License along w
       <xs:enumeration value="Folkebibliotek"/>
       <xs:enumeration value="Forskningsbibliotek"/>
       <xs:enumeration value="Skolebibliotek"/>
+      <xs:enumeration value="Other"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="orderMaterialTypeType">
