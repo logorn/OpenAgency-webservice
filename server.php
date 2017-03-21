@@ -1221,7 +1221,8 @@ class openAgency extends webServiceServer {
             case 'orsRecall':
               $orsR = &$res->orsRecall->_value;
               Object::set_value($orsR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+              if (($oa_row['MAILBESTIL_VIA'] == 'E') || 
+                 (($oa_row['MAILBESTIL_VIA'] == 'D') && $oa_row['ISO18626_ADDRESS'])) {
                 self::fill_iso18626_protocol($orsR, $oa_row);
               }
               else {
@@ -1274,7 +1275,8 @@ class openAgency extends webServiceServer {
             case 'orsRenew':
               $orsR = &$res->orsRenew->_value;
               Object::set_value($orsR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+              if (($oa_row['MAILBESTIL_VIA'] == 'E') || 
+                 (($oa_row['MAILBESTIL_VIA'] == 'D') && $oa_row['ISO18626_ADDRESS'])) {
                 self::fill_iso18626_protocol($orsR, $oa_row);
               }
               else {
@@ -1326,7 +1328,8 @@ class openAgency extends webServiceServer {
             case 'orsCancel':
               $orsC = &$res->orsCancel->_value;
               Object::set_value($orsC, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+              if (($oa_row['MAILBESTIL_VIA'] == 'E') || 
+                 (($oa_row['MAILBESTIL_VIA'] == 'D') && $oa_row['ISO18626_ADDRESS'])) {
                 self::fill_iso18626_protocol($orsC, $oa_row);
               }
               else {
@@ -1405,7 +1408,8 @@ class openAgency extends webServiceServer {
               $orsSR = &$res->orsStatusRequest->_value;
               Object::set_value($orsSR, 'responder', self::normalize_agency($oa_row['OAO.BIB_NR']));
               Object::set_value($orsSR, 'willReceive', '');
-              if ($oa_row['MAILBESTIL_VIA'] == 'E') {
+              if (($oa_row['MAILBESTIL_VIA'] == 'E') || 
+                 (($oa_row['MAILBESTIL_VIA'] == 'D') && $oa_row['ISO18626_ADDRESS'])) {
                 self::fill_iso18626_protocol($orsSR, $oa_row);
               }
               break;
