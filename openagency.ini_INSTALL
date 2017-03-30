@@ -267,12 +267,12 @@ action[libraryRules][authentication][] = groupIdAut
 action[libraryRules][authentication][] = passwordAut
 action[libraryRules][authentication][] = userIdAut
 action[libraryRules][] = agencyId
-action[libraryRules][] = callback
-action[libraryRules][] = outputType
-action[libraryRules][] = trackingId
 action[libraryRules][libraryRule][] = name
 action[libraryRules][libraryRule][] = bool
 action[libraryRules][libraryRule][] = string
+action[libraryRules][] = callback
+action[libraryRules][] = outputType
+action[libraryRules][] = trackingId
 
 action[libraryTypeList][authentication][] = groupIdAut
 action[libraryTypeList][authentication][] = passwordAut
