@@ -270,6 +270,9 @@ action[libraryRules][] = agencyId
 action[libraryRules][] = callback
 action[libraryRules][] = outputType
 action[libraryRules][] = trackingId
+action[libraryRules][libraryRule][] = name
+action[libraryRules][libraryRule][] = bool
+action[libraryRules][libraryRule][] = string
 
 action[libraryTypeList][authentication][] = groupIdAut
 action[libraryTypeList][authentication][] = passwordAut
