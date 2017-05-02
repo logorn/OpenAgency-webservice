@@ -9,7 +9,6 @@
             <open:userIdAut>?</open:userIdAut>
          </open:authentication>
          <open:agencyId>?</open:agencyId>
-         <open:profileName>?</open:profileName>
          <!--Optional:-->
          <open:requesterIp>?</open:requesterIp>
          <!--Optional:-->

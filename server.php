@@ -456,7 +456,6 @@ class openAgency extends webServiceServer {
    *
    * Request:
    * - agencyId
-   * - profileName
    * - requesterIp
    * Response:
    * - culrProfile (see xsd for parameters)
@@ -468,9 +467,8 @@ class openAgency extends webServiceServer {
       Object::set_value($res, 'error', 'authentication_error');
     else {
       $agency = self::strip_agency($param->agencyId->_value);
-      $profile_name = $param->profileName->_value;
       $trusted_ip = self::trusted_culr_ip($param->authentication->_value, $param->requesterIp->_value);
-      $cache_key = 'OA_getCP' . $this->config->get_inifile_hash() . $agency . $profile_name;
+      $cache_key = 'OA_getCP' . $this->config->get_inifile_hash() . $agency;
       self::set_cache_expire($this->cache_expire[__FUNCTION__]);
       if ($ret = $this->cache->get($cache_key)) {
         verbose::log(STAT, 'Cache hit');
@@ -481,41 +479,22 @@ class openAgency extends webServiceServer {
       if (empty($res->error)) {
         try {
           $oci->bind('bind_agency', $agency);
-          $oci->bind('bind_profile_name', $profile_name);
           $this->watch->start('sql1');
           $oci->set_query('SELECT * FROM vip_culr_profile 
-                            WHERE bib_nr = :bind_agency 
-                              AND profilename = :bind_profile_name');
+                            WHERE bib_nr = :bind_agency');
           $this->watch->stop('sql1');
           $this->watch->start('fetch');
-          while ($cp_row = $oci->fetch_into_assoc()) {
+          if ($cp_row = $oci->fetch_into_assoc()) {
+            $client_type = $cp_row['TYPEOFCLIENT'];
             Object::set_value($cp, 'agencyId', self::normalize_agency($cp_row['BIB_NR']));
-            Object::set_value($cp, 'profileName', $cp_row['PROFILENAME']);
-            Object::set_value($cp, 'typeOfClient', $cp_row['TYPEOFCLIENT']);
+            Object::set_value($cp, 'typeOfClient', $client_type);
             Object::set_value($cp, 'contactTechName', $cp_row['CONTACT_TECH_NAME']);
             Object::set_value($cp, 'contactTechMail', $cp_row['CONTACT_TECH_EMAIL']);
             Object::set_value($cp, 'contactTechPhone', $cp_row['CONTACT_TECH_PHONE']);
             Object::set_value($cp, 'contactAdmName', $cp_row['CONTACT_ADM_NAME']);
             Object::set_value($cp, 'contactAdmMail', $cp_row['CONTACT_ADM_EMAIL']);
             Object::set_value($cp, 'contactAdmPhone', $cp_row['CONTACT_ADM_PHONE']);
-            Object::set_value($cp, 'CreateAccountId', self::J_is_true($cp_row['CREATEACCOUNTID']));
-            Object::set_value($cp, 'CreatePatronId', self::J_is_true($cp_row['CREATEPATRONID']));
-            Object::set_value($cp, 'CreateProviderId', $trusted_ip ? self::J_is_true($cp_row['CREATEPROVIDERID']) : '0');
-            Object::set_value($cp, 'DeleteAccountId', self::J_is_true($cp_row['DELETEACCOUNTID']));
-            Object::set_value($cp, 'DeletePatronId', self::J_is_true($cp_row['DELETEPATRONID']));
-            Object::set_value($cp, 'DeleteProviderId', $trusted_ip ? self::J_is_true($cp_row['DELETEPROVIDERID']) : '0');
-            Object::set_value($cp, 'GetAccountIdsByAccountId', self::J_is_true($cp_row['GETACCOUNTIDSBYACCOUNTID']));
-            Object::set_value($cp, 'GetAccountIdsByPatronId', self::J_is_true($cp_row['GETACCOUNTIDSBYPATRONID']));
-            Object::set_value($cp, 'GetAccountIdsByProviderId', self::J_is_true($cp_row['GETACCOUNTIDSBYPROVIDERID']));
-            Object::set_value($cp, 'GetMunicipalityNoByAccountId', self::J_is_true($cp_row['GETMUNICIPALITYNOBYACCOUNTID']));
-            Object::set_value($cp, 'GetMunicipalityNoByPatronId', self::J_is_true($cp_row['GETMUNICIPALITYNOBYPATRONID']));
-            Object::set_value($cp, 'GetPatronIdsByAccountId', self::J_is_true($cp_row['GETPATRONIDSBYACCOUNTID']));
-            Object::set_value($cp, 'GetPatronIdsByProviderId', self::J_is_true($cp_row['GETPATRONIDSBYPROVIDERID']));
-            Object::set_value($cp, 'GetProviderIdsByAccountId', self::J_is_true($cp_row['GETPROVIDERIDSBYACCOUNTID']));
-            Object::set_value($cp, 'GetProviderIdsByPatronId', self::J_is_true($cp_row['GETPROVIDERIDSBYPATRONID']));
-            Object::set_value($cp, 'MergePatronIds', self::J_is_true($cp_row['MERGEPATRONIDS']));
-            Object::set_value($cp, 'UnrelatePatronIdAndAccountId', self::J_is_true($cp_row['UNRELATEPATRONIDANDACCOUNTID']));
-            Object::set_value($cp, 'UpdateAccountId', self::J_is_true($cp_row['UPDATEACCOUNTID']));
+
             Object::set_array_value($res, 'culrProfile', $cp);
             unset($cp);
           }

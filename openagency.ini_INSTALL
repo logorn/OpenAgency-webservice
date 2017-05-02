@@ -9,7 +9,7 @@
 
 ; --------------
 ;version
-version = 2.31
+version = 2.32
 
 ; --------------
 ; set only_https to accept https call only
@@ -136,12 +136,9 @@ dbc_target[iso18626][password] = dbc_iso18626_password
 ; Rights for service operations:
 ; remoteAccess: 550:
 ; getCulrProfile: 551
-; getCulrProfile: 552: requesterIp in request is checked against ip_list below. If rights 552 is found,
-;                      settings for CreateProviderId and DeleteProviderId is fetched from the culr profile
-;                      (Only trusted clients are allowed to use the two operations)
 ; all other: 500
 aaa_ip_rights[dbc][ip_list] = 172.16.0.0-172.31.255.255;193.111.162.0-193.111.162.255
-aaa_ip_rights[dbc][ressource]['netpunkt.dk'] = 500,550,551,552
+aaa_ip_rights[dbc][ressource]['netpunkt.dk'] = 500,550,551
 ;
 ; if not found in aaa_ip_rights the authentication object is created from the FORS
 ; either by using the WS specified by aaa_fors_rights or by OCI specified by aaa_credentials
@@ -237,8 +234,6 @@ action[getCulrProfile][authentication][] = groupIdAut
 action[getCulrProfile][authentication][] = passwordAut
 action[getCulrProfile][authentication][] = userIdAut
 action[getCulrProfile][] = agencyId
-action[getCulrProfile][] = profileName
-action[getCulrProfile][] = requesterIp
 action[getCulrProfile][] = callback
 action[getCulrProfile][] = outputType
 action[getCulrProfile][] = trackingId
