@@ -78,9 +78,9 @@ class TestOfAgency extends WebTestCase {
   // getCulrProfile
     $this->test_cases[] = 
       array('action' => array('post' => 'getCulrProfileRequest', 'get' => 'getCulrProfile'),
-            'pars' => array('agencyId' => 'DK-010100', 'profileName' => 'DBCtest-provider'),
+            'pars' => array('agencyId' => 'DK-010100'),
             'text' => array('Anders'),
-            'pattern' => array('/culrProfile.*profileName.*CreateAccountId.*UpdateAccountId.*getCulrProfileResponse/'));
+            'pattern' => array('/culrProfile.*agencyId.*typeOfClient.*getCulrProfileResponse/'));
   // getRegistryInfo
     $this->test_cases[] = 
       array('action' => array('post' => 'getRegistryInfoRequest', 'get' => 'getRegistryInfo'),
